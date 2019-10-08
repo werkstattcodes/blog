@@ -28,3 +28,16 @@ code {
   -webkit-font-smoothings: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+h1  {
+  color: #4682b4/* change color for headers */
+}
+
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #00CED1; /* change color for headers */
+}
