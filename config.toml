@@ -1,10 +1,10 @@
-baseURL = "https://www.example.com/"
+baseURL = "https://werkstattcodes.netlify.com/"
 title = "werk.statt.codes"
 theme ="hugo-theme-basic"
 languageCode = "en-us"
 googleAnalytics = "UA-XXXXXXXXX-X"
 enableEmoji = true 
-copyright = "© 2016-19 <a href='https://github.com/siegerts/hugo-theme-basic'>Hugo Theme Basic</a>. Made by <a href='https://twitter.com/siegerts'>@siegerts</a>."
+copyright = "© Roland Schmidt <a href='https://twitter.com/siegerts'>@zoowalk</a>."
 description = "Basic personal site theme styled with minimal tachyons, syntax highlighting, and blog series configuration."
 
 [taxonomies]
@@ -13,9 +13,7 @@ description = "Basic personal site theme styled with minimal tachyons, syntax hi
   tag = "tags"
 
 [params]
-  titleEmoji = ":tada:"
-  # change this!
-  twitter = "siegerts"
+  twitter = "zoowalk"
 
 [Permalinks]
   post = "post/:slug"
@@ -25,10 +23,9 @@ description = "Basic personal site theme styled with minimal tachyons, syntax hi
   url = "post/"
 
 [[params.menu]]
-  name = "post series"
-  url = "series/"
+  name = "tags"
+  url = "tags/"
   
-
 [[params.menu]]
   name = "about"
   url = "about/"
