@@ -6,7 +6,7 @@
     <description>Recent content in Posts on werk.statt.codes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <copyright>© 2016-19 &lt;a href=&#39;https://github.com/siegerts/hugo-theme-basic&#39;&gt;Hugo Theme Basic&lt;/a&gt;. Made by &lt;a href=&#39;https://twitter.com/siegerts&#39;&gt;@siegerts&lt;/a&gt;.</copyright>
+    <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/siegerts&#39;&gt;@zoowalk&lt;/a&gt;.</copyright>
     <lastBuildDate>Tue, 08 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
@@ -18,7 +18,13 @@
       <pubDate>Tue, 08 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/this-is-my-first-poste/</guid>
-      <description>let&amp;rsquo;s see whether this works.</description>
+      <description>let&amp;rsquo;s see whether this works.
+heading 1 above is heading one followed by some general text.
+another heading 1 text
+a heading 2 text
+a heading 3 text
+a heading 1 text
+a heading 2 text</description>
     </item>
     
     <item>
