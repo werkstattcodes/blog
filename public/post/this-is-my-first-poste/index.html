@@ -21,7 +21,7 @@ R Markdown,
 
 <meta property="og:type" content="article" />
 <meta property="og:description" content="" />
-<meta property="og:title" content="this is my first poste" />
+<meta property="og:title" content="Mail votes at the Austrian General Elections in 2019" />
 <meta property="og:site_name" content="werk.statt.codes" />
 <meta property="og:image" content="" />
 <meta property="og:image:type" content="image/jpeg" />
@@ -45,24 +45,19 @@ R Markdown,
 <meta name="twitter:creator" content="@zoowalk" />
 <meta
   name="twitter:title"
-  content="this is my first poste | werk.statt.codes"
+  content="Mail votes at the Austrian General Elections in 2019 | werk.statt.codes"
 />
 <meta
   name="twitter:description"
-  content="let&rsquo;s see whether this works.
-heading 1 above is heading one followed by some general text.
-another heading 1 text
-a heading 2 text
-a heading 3 text
-a heading 1 text
-a heading 2 text|"
+  content="Context Here&rsquo;s another quick post on the results of the recent general elections in Austria. It goes without saying that there has been already a flurry of analyses, visualisations etc on it and there is hardly much new to add. Nevertheless, below a few
+library(tidyverse)  nrw19_imp &lt;- readr::read_csv2(file = file, locale=locale(encoding=&quot;latin1&quot;)) %&gt;% janitor::remove_empty(., which=c(&quot;cols&quot;)) %&gt;% janitor::clean_names() %&gt;% rename(gkz=x1) nrw19 &lt;- nrw19_imp %&gt;% filter(str_detect(gkz, &quot;00$|99$&quot;)) %&gt;% filter(!str_detect(gkz, &quot;.{2}[A-Z].*&quot;)) %&gt;% #remove aggregates of regional electoral districts filter(!|"
 />
 <meta name="twitter:image:src" content="" />
 <meta name="twitter:domain" content="/post/this-is-my-first-poste/" />
 
 
 
-    <title>this is my first poste</title>
+    <title>Mail votes at the Austrian General Elections in 2019</title>
     <link rel="canonical" href="/post/this-is-my-first-poste/" />
 
 
@@ -75,7 +70,7 @@ a heading 2 text|"
 
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/styles/github-gist.css"
+  href="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/styles/vs.css"
 />
 
 
@@ -119,21 +114,40 @@ if (!doNotTrack) {
   <a href="/post" class="b bb bw1 pb1 no-underline black">blog</a>
 
   <section id="main" class="mt5">
-    <h1 itemprop="name" id="title">this is my first poste</h1>
+    <h1 itemprop="name" id="title">Mail votes at the Austrian General Elections in 2019</h1>
     <span class="f6 gray">October 8, 2019</span>
 
       <article itemprop="articleBody" id="content" class="w-90 lh-copy">
         
 
-<p>let&rsquo;s see whether this works.</p>
+<h2 id="context">Context</h2>
 
-<h1 id="heading-1">heading 1</h1>
+<p>Here&rsquo;s another quick post on the results of the recent general elections in Austria. It goes without saying that there has been already a flurry of analyses, visualisations etc on it and there is hardly much new to add. Nevertheless, below a few</p>
 
-<p>above is heading one followed by some general text.</p>
+<pre><code class="language-r">
+library(tidyverse)
+
+</code></pre>
+
+<pre><code class="language-r">nrw19_imp &lt;- readr::read_csv2(file = file,
+                              locale=locale(encoding=&quot;latin1&quot;)) %&gt;% 
+  janitor::remove_empty(., which=c(&quot;cols&quot;)) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  rename(gkz=x1)
+
+nrw19 &lt;- nrw19_imp %&gt;%
+  filter(str_detect(gkz, &quot;00$|99$&quot;)) %&gt;% 
+  filter(!str_detect(gkz, &quot;.{2}[A-Z].*&quot;)) %&gt;%  #remove aggregates of regional electoral districts
+  filter(!str_detect(gkz, &quot;0000$&quot;)) %&gt;%  #remove state level electoral districts
+  filter(!str_detect(gkz, &quot;.{2}0099&quot;)) %&gt;%    #remove state level electoral districts
+  mutate(district_id=stringr::str_sub(gkz, start=1, end=4))
+</code></pre>
 
 <h1 id="another-heading-1">another heading 1</h1>
 
 <p>text</p>
+
+<p><img src="/post/2019-10-08-this-is-my-first-poste_files/res_wahlkarten_vs_res_ballot.png" alt="" width="100%" height="20%"/></p>
 
 <h2 id="a-heading-2">a heading 2</h2>
 

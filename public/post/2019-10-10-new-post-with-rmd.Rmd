@@ -1,17 +1,14 @@
 ---
-title: Mail votes at the Austrian General Elections in 2019
+title: new post with rmd
 author: rs
-date: '2019-10-08'
-slug: this-is-my-first-poste
+date: '2019-10-10'
+slug: new-post-with-rmd
 categories:
-  - R
-tags:
-  - plot
-  - R Markdown
+  - rmd
+tags: []
 description: ''
-output: 
-  html_document 
 ---
+hello
 
 ## Context
 Here's another quick post on the results of the recent general elections in Austria. It goes without saying that there has been already a flurry of analyses, visualisations etc on it and there is hardly much new to add. Nevertheless, below a few 
@@ -24,7 +21,7 @@ library(tidyverse)
 ```
 
 
-```{r remedy001}
+```{r, eval=F}
 nrw19_imp <- readr::read_csv2(file = file,
                               locale=locale(encoding="latin1")) %>% 
   janitor::remove_empty(., which=c("cols")) %>% 
@@ -41,9 +38,6 @@ nrw19 <- nrw19_imp %>%
 
 # another heading 1
 text
-
-
-<img src="/post/2019-10-08-this-is-my-first-poste_files/res_wahlkarten_vs_res_ballot.png" alt="" width="100%" height="20%"/>
 
 ## a heading 2
 text
