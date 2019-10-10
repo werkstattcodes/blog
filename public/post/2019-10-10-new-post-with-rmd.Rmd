@@ -8,11 +8,9 @@ categories:
 tags: []
 description: ''
 ---
-hello
 
-## Context
+# Context
 Here's another quick post on the results of the recent general elections in Austria. It goes without saying that there has been already a flurry of analyses, visualisations etc on it and there is hardly much new to add. Nevertheless, below a few 
-
 
 ```{r remedy001}
 
@@ -41,9 +39,12 @@ text
 
 ## a heading 2
 text
+
 ### a heading 3
 text
+
 # a heading 1
 text
+
 ## a heading 2
 text

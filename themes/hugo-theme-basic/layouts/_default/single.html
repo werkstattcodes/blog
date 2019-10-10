@@ -3,39 +3,20 @@
   lang="{{ .Site.LanguageCode }}"
   class="sans-serif w-90 w-60-ns center center-ns mv2 mv5-ns"
   itemscope
-  itemtype="http://schema.org/Article"
->
+  itemtype="http://schema.org/Article">
+
   {{ $baseurl := .Site.BaseURL }}
   <span class="b">/ </span>
-  <a
-    href="{{ .Site.BaseURL  }}"
-    class="b bb bw1 pb1 no-underline black"
-    >{{ .Site.Title }}</a
-  >
+  <a href="{{ .Site.BaseURL  }}"
+    class="b bb bw1 pb1 no-underline orange">
+   {{ .Site.Title }}</a>
 
   <section id="main" class="mt5">
     <h1 itemprop="name" id="title">{{ .Title }}</h1>
-
     <article itemprop="articleBody" id="content" class="w-90 lh-copy">
       {{ .Content }}
     </article>
-  </section>
+    </section>
 
   {{ partial "footer.html" . }}
   </body>
-
-
-
-{{ partial "smart_toc.html" . }}
-
-  <div id=links>
-    {{ if .PrevInSection }}
-      <a class="basic-alignment left" href="{{.PrevInSection.Permalink}}">&laquo; {{.PrevInSection.Title}}</a>
-    {{ end }}
-    {{ if .NextInSection }}
-      <a class="basic-alignment left" href="{{.NextInSection.Permalink}}">{{.NextInSection.Title}} &raquo;</a>
-    {{ end }}
-  </div>
-</section>
-
-</html>

@@ -1,17 +1,16 @@
 {{ partial "header.html" . }}
 <body
   lang="{{ .Site.LanguageCode }}"
-  class="sans-serif w-90 w-60-ns center center-ns mv2 mv5-ns"
->
+  class="sans-serif w-90 w-60-ns center center-ns mv2 mv5-ns">
+
   <span class="b">/ </span>
   <a
     href="{{ .Site.BaseURL  }}"
-    class="b bw1 bb pb1 no-underline black"
-    >{{ .Site.Title }}</a
-  >
-  <span class="b"> / </span>
+    class="b bw1 bb pb1 no-underline pink"
+    >{{ .Site.Title }}</a>
+  <span class="b"> -- </span>
   <!-- prettier-ignore -->
-  <span class="b pb1 no-underline black">{{ lower .Title }}</span>
+  <span class="b pb1 no-underline white bg-blue">{{ lower .Title }}</span>
 
   <section id="main" class="mt5">
     <div>
