@@ -23,16 +23,6 @@ library(tidyverse)## -- Attaching packages ------------------------------------
     </item>
     
     <item>
-      <title>Mail votes at the Austrian General Elections in 2019</title>
-      <link>/post/this-is-my-first-poste/</link>
-      <pubDate>Tue, 08 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/post/this-is-my-first-poste/</guid>
-      <description>Context Here&amp;rsquo;s another quick post on the results of the recent general elections in Austria. It goes without saying that there has been already a flurry of analyses, visualisations etc on it and there is hardly much new to add. Nevertheless, below a few
-library(tidyverse)  nrw19_imp &amp;lt;- readr::read_csv2(file = file, locale=locale(encoding=&amp;quot;latin1&amp;quot;)) %&amp;gt;% janitor::remove_empty(., which=c(&amp;quot;cols&amp;quot;)) %&amp;gt;% janitor::clean_names() %&amp;gt;% rename(gkz=x1) nrw19 &amp;lt;- nrw19_imp %&amp;gt;% filter(str_detect(gkz, &amp;quot;00$|99$&amp;quot;)) %&amp;gt;% filter(!str_detect(gkz, &amp;quot;.{2}[A-Z].*&amp;quot;)) %&amp;gt;% #remove aggregates of regional electoral districts filter(!</description>
-    </item>
-    
-    <item>
       <title>Hello R Markdown</title>
       <link>/post/hello-r-markdown/</link>
       <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
