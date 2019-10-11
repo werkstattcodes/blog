@@ -18,8 +18,24 @@
 
       <article itemprop="articleBody" id="content" class="w-90 lh-copy">
         {{ .Content }}
-        {{ .TableOfContents }}
-  
+
+
+
+
+
+{{ partial "smart_toc.html" . }}
+
+  <div id=links>
+    {{ if .PrevInSection }}
+      <a class="basic-alignment left" href="{{.PrevInSection.Permalink}}">&laquo; {{.PrevInSection.Title}}</a>
+    {{ end }}
+    {{ if .NextInSection }}
+      <a class="basic-alignment left" href="{{.NextInSection.Permalink}}">{{.NextInSection.Title}} &raquo;</a>
+    {{ end }}
+  </div>
+      
+
+
 
       <!-- last modified note -->
       <span class="f6 gray mv3" title="Lastmod: {{ .Lastmod.Format "January 2, 2006" }}. Published at: {{ .PublishDate.Format "2006-01-02" }}.">
