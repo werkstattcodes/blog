@@ -4,13 +4,12 @@ theme ="hugo-theme-basic"
 languageCode = "en-us"
 googleAnalytics = "UA-XXXXXXXXX-X"
 enableEmoji = true 
-copyright = "© Roland Schmidt <a href='https://twitter.com/siegerts'>@zoowalk</a>."
-description = "Basic personal site theme styled with minimal tachyons, syntax highlighting, and blog series configuration."
+copyright = "© Roland Schmidt <a href='https://twitter.com/zoowalk'>@zoowalk</a>."
+description = "Playground with R"
 
 [taxonomies]
-  category = "categories"
-  series = "series"
   tag = "tags"
+  about = "about"
 
 [params]
   twitter = "zoowalk"

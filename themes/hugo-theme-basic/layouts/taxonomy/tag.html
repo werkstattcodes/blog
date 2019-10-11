@@ -3,17 +3,17 @@
   lang="{{ .Site.LanguageCode }}"
   class="sans-serif w-90 w-60-ns center center-ns mv2 mv5-ns"
 >
-  <span class="b">/ </span>
+  <span class="b gray">/ </span>
   <a
     href="{{ .Site.BaseURL  }}"
-    class="b bw1 bb pb1 no-underline black"
+    class="b bw1 pb1 no-underline gray"
     >{{ .Site.Title  }}</a
   >
-  <span class="b"> / </span>
-  <a href="/tags" class="b bw1 bb pb1 no-underline black">tags</a>
-  <span class="b"> / </span>
+  <span class="b gray"> / </span>
+  <a href="/tags" class="b bw1 pb1 no-underline gray">tags</a>
+  <span class="b gray"> / </span>
   <!-- prettier-ignore -->
-  <span class="b pb1 no-underline black">{{ .Title | lower }}</span>
+  <span class="b pb1 bb no-underline black">{{ .Title | lower }}</span>
 
   <section id="main" class="mt5">
     <div>
@@ -22,12 +22,12 @@
         {{ range .Data.Pages.ByDate.Reverse }}
         <li class="list pl0 lh-copy">
           <a
-            class="f3 b dib black no-underline"
+            class="f5 black no-underline"
             href="{{ .Permalink}}"
             >{{ .Title }}</a
           >
           <span
-            class="f6 gray db dib-ns"
+            class="f7 gray db dib-ns"
             >{{ .Date.Format "January 2, 2006" }}</span
           >
         </li>

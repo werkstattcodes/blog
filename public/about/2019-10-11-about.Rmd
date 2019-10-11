@@ -1,0 +1,15 @@
+---
+title: About
+author: rs
+date: '2019-10-11'
+slug: about
+categories:
+  - R
+tags:
+  - plot
+description: ''
+---
+Not that the world would have been waiting for another blog… but there you go. Here I collect my ramblings and ‘notes to my self’ in R. Posts either have a substantive focus or simply seek to highlight some R feature. No pretension to have the final word let alone sole truth on anything put out here.
+
+Codes are collected at www.github.com/zoowalk
+Tweets are at @zoowalk
