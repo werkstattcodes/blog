@@ -1,0 +1,24 @@
+---
+title: testing the new theme
+author: res
+date: '2019-10-11'
+slug: testing-the-new-theme
+categories:
+  - rmd
+tags:
+  - theme
+description: ''
+---
+This is to test the new theme and see whether plots are properly rendered.
+
+
+```{r remedy001}
+library(tidyverse, quietly = T)
+
+mtcars %>% 
+  ggplot()+
+  geom_boxplot(aes(x=as.factor(cyl),
+                   y=mpg))+
+  hrbrthemes::theme_ft_rc()
+  
+```
