@@ -18,15 +18,15 @@ description = "Playground with R"
   post = "post/:slug"
 
 [[params.menu]]
-  name = "blog"
+  name = "/blog"
   url = "post/"
 
 [[params.menu]]
-  name = "tags"
+  name = "/tags"
   url = "tags/"
   
 [[params.menu]]
-  name = "about"
+  name = "/about"
   url = "about/"
   
 

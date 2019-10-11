@@ -20,7 +20,7 @@ pre {
   line-height: 1.4;
   word-break: break-all;
   word-wrap: break-word;
-  border: 1px solid #ccc;
+  border: 1px solid #ccc; /* border for code snippets  */
   /* border-radius: 4px; */
 }
 
@@ -35,6 +35,7 @@ h1  {
   color: black; /* change color for headers */
   font-style: bold;
   font-size: 100%;
+  margin: 5px 0 0px;
 }
 
 
@@ -42,6 +43,7 @@ h2 {
   color: gray;/* change color for headers */
   font-style: italic;
   font-size: 100%;
+  margin-bottom:-20px;
 }
 
 h4,
@@ -58,29 +60,30 @@ h6 {
 #sidebar {
     position: fixed;
     top:130px;
-    right:250px;
+    right:150px;
 }
 
 .nav-stacked>li>a {
-    /*list-style-type: none;*/
+    list-style-type: none;
+    text-decoration:none;
     padding: 5px;
-    color:gray;
+    color:black;
     text-align: left;
 }
 
 .toc-h1 {
 	font-size: 100%;
-	font-color:gray;
-	font-
+	font-color:orange;
+	text-decoration:none;
 }
 
 .toc-h2 {
-  font-size: 80%;
+  font-size: 90%;
   padding-left: 20px;
 }
 
 .toc-h3 {
-  font-size: 80%;
+  font-size: 90%;
   padding-left: 40px;
 }
 
@@ -90,44 +93,46 @@ a.icon:hover {
 
 a:hover {
     color: var(--accent) !important;
-    font-style:bold;
+    font-style: bold;
 
 }
 
-/* Static header placement on mobile devices */
-  
-@media (max-height: 740px) {
-  navbar-fixed-top {
-      position: absolute;
-  }
-  contents h1, .contents h2, .contents h3, .contents h4 {
-      padding-top: 0px;
-      margin-top: 0px;
-  }
-}
+/*navigation bar*/
 
- /* Colour of navigation bar */
+  /* Colour of navigation bar */
 navbar-default {
-    background-color: #efffff;
+    background-color: red;
 }
 
   /* Colour of button at small pages */
-navbar-default .navbar-toggle {
+.navbar-default .navbar-toggle {
     background-color: #e7ffff;
 }
 
   /* Colour of button with focus */
-navbar-default .navbar-toggle:hover,
-navbar-default .navbar-toggle:focus {
+.navbar-default .navbar-toggle:hover,
+.navbar-default .navbar-toggle:focus {
     background-color: #d7ffff;
 }
 
-navbar-brand,
-navbar-nav {
+.navbar-brand,
+.navbar-nav {
     font-size: 125%;
 }
 
-navbar-icon {
+.navbar-icon {
     display: inline-block !important;
 }
 
+
+/* Static header placement on mobile devices */
+  
+@media (max-height: 740px) {
+  .navbar-fixed-top {
+      position: absolute;
+  }
+  .contents h1, .contents h2, .contents h3, .contents h4 {
+      padding-top: 0px;
+      margin-top: 0px;
+  }
+}
