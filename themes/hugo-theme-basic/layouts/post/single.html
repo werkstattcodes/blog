@@ -1,4 +1,5 @@
 {{ partial "header.html" . }}
+
 <body
   lang="{{ .Site.LanguageCode }}"
   class="sans-serif w-90 w-80-m w-60-ns center mv2 mv5-ns"
@@ -20,22 +21,15 @@
         {{ .Content }}
 
 
-
-
-
-{{ partial "smart_toc.html" . }}
-
   <div id=links>
     {{ if .PrevInSection }}
-      <a class="basic-alignment left" href="{{.PrevInSection.Permalink}}">&laquo; {{.PrevInSection.Title}}</a>
+      <a class="basic-alignment left gray no-underline f6" href="{{.PrevInSection.Permalink}}">&laquo; {{.PrevInSection.Title}}</a>
     {{ end }}
     {{ if .NextInSection }}
-      <a class="basic-alignment left" href="{{.NextInSection.Permalink}}">{{.NextInSection.Title}} &raquo;</a>
+      <span class="">--</span>
+      <a class="basic-alignment right f6 gray no-underline" href="{{.NextInSection.Permalink}}">{{.NextInSection.Title}} &raquo;</a>
     {{ end }}
   </div>
-      
-
-
 
       <!-- last modified note -->
       <span class="f6 gray mv3" title="Lastmod: {{ .Lastmod.Format "January 2, 2006" }}. Published at: {{ .PublishDate.Format "2006-01-02" }}.">
@@ -74,6 +68,8 @@
       {{ end }}
 
   </section>
+
+{{ partial "table-of-contents" .}}
 
   {{ partial "footer.html" . }}
   </body>

@@ -50,4 +50,21 @@ h6 {
   color: #00CED1; /* change color for headers */
 }
 
+/* Contents sidebar */
+#sidebar-wrapper {
+    max-width: 250px;
+}
+
+#sidebar {
+    position: fixed;
+    top: 130px;
+    right: 80px;
+}
+
+.nav-stacked>li>a {
+    padding: 5px;
+    color:gray;
+    border:gray;
+    text-align: left;
+}
 
