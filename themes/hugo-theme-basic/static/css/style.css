@@ -57,14 +57,77 @@ h6 {
 
 #sidebar {
     position: fixed;
-    top: 130px;
-    right: 80px;
+    top:130px;
+    right:250px;
 }
 
 .nav-stacked>li>a {
+    /*list-style-type: none;*/
     padding: 5px;
     color:gray;
-    border:gray;
     text-align: left;
+}
+
+.toc-h1 {
+	font-size: 100%;
+	font-color:gray;
+	font-
+}
+
+.toc-h2 {
+  font-size: 80%;
+  padding-left: 20px;
+}
+
+.toc-h3 {
+  font-size: 80%;
+  padding-left: 40px;
+}
+
+a.icon:hover {
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--accent) !important;
+    font-style:bold;
+
+}
+
+/* Static header placement on mobile devices */
+  
+@media (max-height: 740px) {
+  navbar-fixed-top {
+      position: absolute;
+  }
+  contents h1, .contents h2, .contents h3, .contents h4 {
+      padding-top: 0px;
+      margin-top: 0px;
+  }
+}
+
+ /* Colour of navigation bar */
+navbar-default {
+    background-color: #efffff;
+}
+
+  /* Colour of button at small pages */
+navbar-default .navbar-toggle {
+    background-color: #e7ffff;
+}
+
+  /* Colour of button with focus */
+navbar-default .navbar-toggle:hover,
+navbar-default .navbar-toggle:focus {
+    background-color: #d7ffff;
+}
+
+navbar-brand,
+navbar-nav {
+    font-size: 125%;
+}
+
+navbar-icon {
+    display: inline-block !important;
 }
 
