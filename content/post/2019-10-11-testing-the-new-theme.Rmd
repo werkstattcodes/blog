@@ -19,6 +19,6 @@ mtcars %>%
   ggplot()+
   geom_boxplot(aes(x=as.factor(cyl),
                    y=mpg))+
-  hrbrthemes::theme_ft_rc()
+  theme_minimal()
   
 ```
