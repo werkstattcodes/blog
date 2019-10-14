@@ -64,18 +64,20 @@ h6 {
 /* Contents sidebar */
 
 #sidebar-wrapper {
-    max-width: 20px;
+    max-width: 240px;
 }
 
 #sidebar {
     position: fixed; 
     top: 140px;
-    /*background-color:gray;*/
 }
 
-@media (--breakpoint-not-small) {
-  fr-ns {float: right; _display: inline; }
+@media screen and (max-width: 600px) {
+  #sidebar {
+    display: none;
+  }
 }
+
 
 #sidebar > ul {
   	margin: 0px 0px 0px 0px;
