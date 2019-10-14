@@ -51,7 +51,6 @@ h6 {
   color: #00CED1; /* change color for headers */
 }
 
-
 .content-wrapper {
     display: flex;
     justify-content: center;
@@ -60,6 +59,7 @@ h6 {
 
 
 /* Contents sidebar */
+
 #sidebar-wrapper {
     max-width: 10px;
 }
@@ -68,7 +68,6 @@ h6 {
     position:fixed;
     top:130px;
     /*background-color:gray;*/
-    /*left:1400px;*/
 }
 
 .nav-stacked>li>a {
@@ -96,12 +95,20 @@ h6 {
 }
 
 
+/*define appearance of links*/
+
 a.icon:hover {
     text-decoration: none;
 }
 
+a:link {
+    text-decoration:none;
+    color:black
+}
+
 a:hover {
     color: var(--accent) !important;
+    background-color: orange;
     font-style: bold;
 
 }

@@ -1,0 +1,12 @@
+---
+title: test2
+author: ''
+date: '2019-10-14'
+slug: test
+categories:
+  - R
+tags:
+  - plot
+description: ''
+---
+test

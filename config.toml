@@ -2,9 +2,9 @@ baseURL = "https://werkstattcodes.netlify.com/"
 title = "werk.statt.codes"
 theme ="hugo-theme-basic"
 languageCode = "en-us"
-googleAnalytics = "UA-XXXXXXXXX-X"
+googleAnalytics = "UA-149910232-1"
 enableEmoji = true 
-copyright = "© Roland Schmidt <a href='https://twitter.com/zoowalk'>@zoowalk</a>."
+copyright = "©Roland Schmidt <a href='https://twitter.com/zoowalk'>@zoowalk</a>"
 description = "Playground with R"
 
 [taxonomies]
