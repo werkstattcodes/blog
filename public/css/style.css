@@ -61,14 +61,14 @@ h6 {
 
 /* Contents sidebar */
 #sidebar-wrapper {
-    max-width: 50px;
+    max-width: 10px;
 }
 
 #sidebar {
     position:fixed;
     top:130px;
     /*background-color:gray;*/
-    left:1400px;
+    /*left:1400px;*/
 }
 
 .nav-stacked>li>a {
@@ -106,42 +106,3 @@ a:hover {
 
 }
 
-/*navigation bar*/
-
-  /* Colour of navigation bar */
-navbar-default {
-    background-color: red;
-}
-
-  /* Colour of button at small pages */
-.navbar-default .navbar-toggle {
-    background-color: #e7ffff;
-}
-
-  /* Colour of button with focus */
-.navbar-default .navbar-toggle:hover,
-.navbar-default .navbar-toggle:focus {
-    background-color: #d7ffff;
-}
-
-.navbar-brand,
-.navbar-nav {
-    font-size: 125%;
-}
-
-.navbar-icon {
-    display: inline-block !important;
-}
-
-
-/* Static header placement on mobile devices */
-  
-@media (max-height: 740px) {
-  .navbar-fixed-top {
-      position: absolute;
-  }
-  .contents h1, .contents h2, .contents h3, .contents h4 {
-      padding-top: 0px;
-      margin-top: 0px;
-  }
-}
