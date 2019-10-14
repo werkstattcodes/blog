@@ -5,6 +5,9 @@ body {
   /* background-color: #e7e7e7; */
 }
 
+p {text-align: justify;
+}
+
 code {
   padding: 2px 4px;
   font-size: 90%;
@@ -61,22 +64,33 @@ h6 {
 /* Contents sidebar */
 
 #sidebar-wrapper {
-    max-width: 10px;
+    max-width: 20px;
 }
 
 #sidebar {
-    position:fixed;
-    top:130px;
+    position: fixed; 
+    top: 140px;
     /*background-color:gray;*/
+}
+
+@media (--breakpoint-not-small) {
+  fr-ns {float: right; _display: inline; }
+}
+
+#sidebar > ul {
+  	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
 }
 
 .nav-stacked>li>a {
     list-style-type:none;
     text-decoration:none;
-    /*padding: 5px;*/
+    margin: 0px;
     color:black;
     text-align:left;
 }
+
+
 
 .toc-h1 {
 	font-size: 100%;

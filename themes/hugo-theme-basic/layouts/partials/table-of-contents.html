@@ -1,7 +1,7 @@
 {{ if .Params.toc | default true}}
-  <div class="fr-ns" id="sidebar-wrapper">
+  <div class="fr-ns fr-nm" id="sidebar-wrapper">
     <div id="sidebar">      
-      <ul class="nav nav-pills nav-stacked ba" style="list-style:none;">
+      <ul class="nav nav-pills nav-stacked fr-ns fr-nm" style="list-style:none;">
          <!-- ignore empty links with + -->
         {{ $headers := findRE "<h[1-3].*?>(.|\n])+?</h[1-3]>" .Content }}
         <!-- at least one header to link to -->
