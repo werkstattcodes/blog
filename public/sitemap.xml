@@ -3,7 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/post/another-post/</loc>
+    <lastmod>2019-10-15T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/tags/austria/</loc>
+    <lastmod>2019-10-15T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/just-testing/</loc>
+    <lastmod>2019-10-15T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/plot/</loc>
     <lastmod>2019-10-15T00:00:00+00:00</lastmod>
   </url>
   
@@ -25,11 +40,6 @@
   <url>
     <loc>/</loc>
     <lastmod>2019-10-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/plot/</loc>
-    <lastmod>2019-10-14T00:00:00+00:00</lastmod>
   </url>
   
   <url>

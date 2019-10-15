@@ -1,5 +1,4 @@
 {{ partial "header.html" . }}
-
 <body
   lang="{{ .Site.LanguageCode }}"
   class="sans-serif w-90 w-60-ns center center-ns mv2 mv5-ns"
@@ -20,7 +19,6 @@
    </section>
 
 </body>
-
 <div id=links>
     {{ if .PrevInSection }}
       <a class="basic-alignment left" href="{{.PrevInSection.Permalink}}">&laquo; {{.PrevInSection.Title}}</a>
@@ -29,6 +27,4 @@
       <a class="basic-alignment left" href="{{.NextInSection.Permalink}}">{{.NextInSection.Title}} &raquo;</a>
     {{ end }}
  </div>
- 
-
-  {{ partial "footer.html" . }}
+   {{ partial "footer.html" . }}
