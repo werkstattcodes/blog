@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>about on werk.statt.codes</title>
+    <link>/tags/about/</link>
+    <description>Recent content in about on werk.statt.codes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
+    
+	<atom:link href="/tags/about/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>About</title>
+      <link>/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/about/</guid>
+      <description>About Not that the world would have been waiting for another blog&amp;hellip; but there you go. This blog is a collection of my &amp;lsquo;thoughts in R&amp;rsquo; with varying degrees of seriousness. Posts will mostly relate to my substantive interests (comparative political science, human rights) or are simply notes to myself on a specific R function. Aiming at but not claiming any final truth.
+Codes are collected at www.github.com/zoowalk
+Tweets are at @zoowalk.</description>
+    </item>
+    
+  </channel>
+</rss>

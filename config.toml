@@ -4,7 +4,7 @@ theme ="hugo-theme-basic"
 languageCode = "en-us"
 googleAnalytics = "UA-149910232-1"
 enableEmoji = true 
-copyright = "©Roland Schmidt <a href='https://twitter.com/zoowalk'>@zoowalk</a>"
+copyright = "© Roland Schmidt <a href='https://twitter.com/zoowalk' style='color:gray'>@zoowalk</a>"
 description = "Playground with R"
 
 [taxonomies]
@@ -19,7 +19,7 @@ description = "Playground with R"
 
 [[params.menu]]
   name = "/blog"
-  url = "post/"
+  url = "/post/"
 
 [[params.menu]]
   name = "/tags"
@@ -27,7 +27,7 @@ description = "Playground with R"
   
 [[params.menu]]
   name = "/about"
-  url = "about/"
+  url = "/about/"
   
 
 [privacy]

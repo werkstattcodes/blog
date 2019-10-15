@@ -1,10 +1,20 @@
 ---
-date: "2016-05-05T21:48:51-07:00"
 title: About
+type: about
+tags:
+ - about
 ---
 
-Not that the world would have been waiting for another blog... but there you go. Here I collect my ramblings and 'notes to my self' in R. Posts either have a substantive focus or simply seek to highlight some R feature. No pretension to have the final word let alone sole truth on anything put out here.
+# About
 
-Codes are collected at www.github.com/zoowalk <br>
-Tweets are at @zoowalk
+Not that the world would have been waiting for another blog... but there you go. This blog is a collection of my 'thoughts in R' with varying degrees of seriousness. Posts will mostly relate to my substantive interests (comparative political science, human rights) or are simply notes to myself on a specific R function.
+Aiming at but not claiming any final truth.
 
+Codes are collected at [www.github.com/zoowalk](www.github.com/zoowalk)<br>
+Tweets are at [@zoowalk](https://twitter.com/zoowalk?lang=en).
+
+## Site
+The site is run with [blogdown](https://bookdown.org/yihui/blogdown/) and [hugo](https://gohugo.io/) and deployed on netlify.com. The theme is based on [Stephen Siegers](https://www.xiegerts.com/) (@siegerts) elegant [Theme Basic](https://github.com/siegerts/hugo-theme-basic). 
+
+## Data protection
+Note that since I like to click on my own site and see how the the hit statistic increases, the site runs a google analytics script and tracks visitors.

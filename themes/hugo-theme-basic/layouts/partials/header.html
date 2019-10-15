@@ -6,11 +6,10 @@
 >
   <head>
     <meta charset="utf-8" />
-
     {{ partial "meta.html" . }}
-
     <title>{{ .Title }}</title>
     <link rel="canonical" href="{{ .Permalink }}" />
+
 {{ $title := .Title }}
 {{ with .OutputFormats.Get "RSS" }}
     <link
@@ -24,3 +23,7 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
+
+<body data-spy="scroll" data-target="#sidebar" data-offset="50">
+
+        
