@@ -8,11 +8,13 @@
 
   <a href="{{ .Site.BaseURL  }}" class="b bw1 pb1 no-underline gray">{{ .Site.Title }}</a>
   <span class="b gray"> / </span>
-  <a href="/about" class="b pb1 bw1 no-underline black">about</a>
+  <a href="/about" class="b pb1 bw1 no-underline red">about</a>
+
 	<div>
 		<br>
 		{{ .Content }}
 	</div>
-  {{ partial "footer.html" . }}
   </body>
+
+  {{ partial "footer.html" . }}
 </html>
