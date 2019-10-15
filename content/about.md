@@ -14,7 +14,7 @@ Codes are collected at [www.github.com/zoowalk](www.github.com/zoowalk)<br>
 Tweets are at [@zoowalk](https://twitter.com/zoowalk?lang=en).
 
 ## Site
-The site is run with [blogdown](https://bookdown.org/yihui/blogdown/) and [hugo](https://gohugo.io/) and deployed on netlify.com. The theme is based on [Stephen Siegers](https://www.xiegerts.com/) (@siegerts) elegant [Theme Basic](https://github.com/siegerts/hugo-theme-basic). 
+The site is run with [blogdown](https://bookdown.org/yihui/blogdown/) and [hugo](https://gohugo.io/). The theme is based on [Stephen Siegers](https://www.xiegerts.com/) (@siegerts) elegant [Theme Basic](https://github.com/siegerts/hugo-theme-basic). 
 
 ## Data protection
 Note that since I like to click on my own site and see how the the hit statistic increases, the site runs a google analytics script and tracks visitors.
