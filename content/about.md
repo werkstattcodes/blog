@@ -1,8 +1,10 @@
 ---
 title: About
-type: about
+author: rs
+date: '2019-10-20'
 tags:
- - about
+  - about
+type: about
 ---
 
 # About
