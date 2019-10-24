@@ -7,7 +7,7 @@ type: post
 
 # About
 
-Not that the world would have been waiting for another blog... but there you go. This blog is a collection of my 'thoughts in R' with varying degrees of seriousness. Posts will mostly relate to my substantive interests (comparative political science, human rights) or are simply notes to myself on a specific R function. Not claiming any final truth. One step at a time.
+Not that the world would have been waiting for another blog... but there you go. This (work in progress?) blog is a collection of my 'thoughts in R' with varying degrees of seriousness. Posts will mostly relate to my substantive interests (comparative political science, human rights) or are simply notes to myself on a specific R function. Not claiming any final truth. One step at a time. 
 
 Codes are collected at [www.github.com/zoowalk](https://www.github.com/zoowalk)<br>
 Tweets are at [@zoowalk](https://twitter.com/zoowalk?lang=en).
