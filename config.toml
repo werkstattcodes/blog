@@ -1,4 +1,4 @@
-baseURL = "https://werkstattcodes.netlify.com/"
+baseURL = "https://werk.statt.codes/"
 title = "werk.statt.codes"
 theme ="hugo-theme-basic"
 languageCode = "en-us"
