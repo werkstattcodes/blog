@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html
+  class=""
+  lang="en-us"
+  prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="description" content="" />
+<meta name="HandheldFriendly" content="True" />
+<meta name="MobileOptimized" content="320" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+<meta name="keywords" content="Austria,
+elections,
+ggplot,
+ggrepel,
+">
+
+
+<meta property="og:type" content="article" />
+<meta property="og:description" content="" />
+<meta property="og:title" content="Women in parliament" />
+<meta property="og:site_name" content="werk.statt.codes" />
+<meta property="og:image" content="" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="" />
+<meta property="og:image:height" content="" />
+<meta property="og:url" content="/post/women-in-parliament/" />
+<meta property="og:locale" content="en-us" />
+<meta property="article:published_time" content="2019-10-24
+" /> <meta property="article:modified_time" content="2019-10-24
+" />
+
+
+<meta property="article:tag" content="Austria" />
+<meta property="article:tag" content="elections" />
+<meta property="article:tag" content="ggplot" />
+<meta property="article:tag" content="ggrepel" />
+
+
+
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@zoowalk" />
+<meta name="twitter:creator" content="@zoowalk" />
+<meta
+  name="twitter:title"
+  content="Women in parliament | werk.statt.codes"
+/>
+<meta
+  name="twitter:description"
+  content="ContextSo, Austria has a new parliament. Following the elections in September, the new lower house got constituted yesterday and as a few noted it is more diverse than previous ones. Here’s a nice visualization if you want to get a quick overview. Among others, it was the share of women in parliament which was particularly often noted. None of Austria’s previous lower houses had an as high share of women at the start of a new legislative period.|"
+/>
+<meta name="twitter:image:src" content="" />
+<meta name="twitter:domain" content="/post/women-in-parliament/" />
+
+
+    <title>Women in parliament</title>
+    <link rel="canonical" href="/post/women-in-parliament/" />
+
+
+
+    <link
+  rel="stylesheet"
+  href="https://unpkg.com/tachyons@4.11.1/css/tachyons.min.css"
+/>
+
+<link rel="stylesheet" href="/css/style.css" />
+
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/styles/vs.css"
+/>
+
+
+<script type="application/javascript">
+var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+var doNotTrack = (dnt == "1" || dnt == "yes");
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	if (window.sessionStorage) {
+		var GA_SESSION_STORAGE_KEY = 'ga:clientId';
+		ga('create', 'UA-149910232-1', {
+	    'storage': 'none',
+	    'clientId': sessionStorage.getItem(GA_SESSION_STORAGE_KEY)
+	   });
+	   ga(function(tracker) {
+	    sessionStorage.setItem(GA_SESSION_STORAGE_KEY, tracker.get('clientId'));
+	   });
+   }
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  </head>
+        
+
+<body
+  lang="en-us"
+  class="sans-serif w-90 w-80-m w-60-ns center mv2 mv5-ns"
+  itemscope
+  itemtype="http://schema.org/Article">
+
+  <a href="/" class="b bw1 pb1 no-underline gray">werk.statt.codes</a>
+  <span class="b gray"> / </span>
+  <a href="/post" class="b pb1 bw1 no-underline gray">blog</a>
+  <span class="b gray"> / </span>
+  <a class="b bb bw1 pb1 no-underline black">Women in parliament</a>
+
+  <section id="main" class="mt5">
+    <a class="b bw1 pb1 no-underline black ttu">Women in parliament</a><br>
+    <span class="f6 gray">October 24, 2019</span>
+
+      <article itemprop="articleBody" id="content" class="w-90 lh-copy">
+        
+
+
+<div id="context" class="section level1">
+<h1>Context</h1>
+<p>So, Austria has a new parliament. Following the elections in September, the new lower house got constituted yesterday and as a few noted it is more diverse than previous ones. Here’s a nice visualization if you want to get a quick overview. Among others, it was the share of women in parliament which was particularly often noted. None of Austria’s previous lower houses had an as high share of women at the start of a new legislative period. This made me a bit curious how Austria’s lower house actually compares to other countries. First I’ll show the results, then how to get there in R. The entire code is available at my github <a href="https://github.com/zoowalk">account</a>.</p>
+</div>
+<div id="result" class="section level1">
+<h1>Result</h1>
+<p><img src="/post/2019-10-24-women-in-parliament_files/2019-10-24Women_in_Parliament_combined.png" />
+So, how is Austria doing? Well, not bad if compared with most other countries. However, given that there are only four (!) countries in which women are at least represented on par with men (min 50 %) it’s overall quite a sobering affair. Don’t get me started on Papua New Guinea…</p>
+</div>
+<div id="how-to-get-there" class="section level1">
+<h1>How to get there</h1>
+<div id="getting-the-data" class="section level2">
+<h2>Getting the data</h2>
+<p>Data comes from the Inter-Parliamentary Union, based in Geneva, which seeks to strengthen international cooperation between parliaments and support their work.</p>
+<pre class="r"><code>df &lt;- readr::read_csv(
+  file = &quot;https://data.ipu.org/api/women-ranking.csv?load-entity-refs=taxonomy_term%2Cfield_collection_item&amp;max-depth=2&amp;langcode=en&amp;month=9&amp;year=2019&quot;,
+  skip = 5
+)
+
+names(df) &lt;- c(
+  &quot;rank&quot;, &quot;country&quot;,
+  &quot;lower_elections&quot;, &quot;lower_seats&quot;, &quot;lower_women_abs&quot;, &quot;lower_women_rel&quot;,
+  &quot;upper_elections&quot;, &quot;upper_seats&quot;, &quot;upper_women_abs&quot;, &quot;upper_women_rel&quot;
+)
+
+df &lt;- df %&gt;%
+  mutate_at(vars(contains(&quot;lower&quot;), contains(&quot;upper&quot;)), .funs = list(num = ~ as.numeric(.))) %&gt;%
+  mutate(country = stringr::str_remove_all(country, regex(&quot;\\(.*\\)&quot;) %&gt;% str_trim()))</code></pre>
+</div>
+<div id="dotplot-connecting-dots-with-labels" class="section level2">
+<h2>Dotplot: Connecting dots with labels</h2>
+<p>As for the dotplot, when it comes to annotating data <code>ggrepel</code> is your friend.</p>
+<p>Creating the dot plot essentially entailed two critical points. First, the plotting of the dots. To avoid over-plotting, the position argument of <code>geom_point</code> introduces a random variation. Note that the seed of the <code>position</code> argument is set in advance with the <code>position_jitter</code> command. This is critical since the same seed has to be used when subsequently placing the labels and connecting lines. If you don’t use the same seeds, dots and labels would be positioned with different random values and consequently not match.</p>
+<p>The second part, which took me a while to figure out, is the creation of an additional variable/label (<code>label2</code>). This label is empty for those countries which we do not want to label. While ‘normally’ one could use a different dataframe for the annotation, this avenue seems not to be possible since the dependency on the same (random) position would get messed up. Hence, this approach does not create filtered additional dataset, but uses the entire set but only provides labels for those countries which we want to highlight.</p>
+<p>More details can be found in the <code>ggrepel</code> vignette and at this pertaining <a href="https://github.com/slowkow/ggrepel/issues/123">issue</a> filed on github.</p>
+<pre class="r"><code>pos &lt;- position_jitter(width = 0.2, seed = 1) #define seed for positioning
+
+df %&gt;%
+  mutate(label2 = paste(country, scales::percent(lower_women_rel_num / 100,
+    accuracy = .1
+  ))) %&gt;%
+  mutate(label2 = case_when(     #create label only for thos countries you want to highlight
+    indicator == &quot;other&quot; ~ &quot;&quot;,
+    TRUE ~ as.character(label2)
+  )) %&gt;%
+  ggplot(., aes(
+    x = .5,
+    y = lower_women_rel_num,
+    color = indicator,
+    label = label2,
+    group = country
+  )) +
+  geom_point(
+    position = pos  #same pos
+  ) +
+  geom_rect(
+    xmin = 0.75,
+    xmax = Inf,
+    ymin = -Inf,
+    ymax = Inf,
+    color = &quot;white&quot;,
+    fill = &quot;white&quot;
+  ) +
+  geom_text_repel(
+    xlim = c(.75, 1.2),
+    position = pos,  #same pos
+    fontface = &quot;italic&quot;,
+    color = &quot;grey30&quot;,
+    segment.color = &quot;grey30&quot;,
+    hjust = 0
+  ) +
+  labs(
+    title = &quot;Women in Parliaments&quot;,
+    subtitle = &quot;Share of women in lower houses; top and bottom 3 \ncountries plus Austria, Bosnia, and USA.&quot;,
+    caption = c(&quot;Data: Inter-Parliamentary Union (data.ipu.org) as of end of 2018, Austria as of &lt;br&gt;23 Oct 2019.&quot;, &quot;&lt;br&gt;&lt;br&gt;&lt;br&gt;Roland Schmidt | @zoowalk | &lt;span style=&#39;color:black&#39;&gt;**werk.statt.codes**&lt;/span&gt;&quot;)
+  ) +
+  scale_y_continuous(
+    limits = c(-5, 100),
+    breaks = seq(0, 100, 25),
+    minor_breaks = NULL,
+    expand = expansion(mult = c(0.1, 0)),
+    labels = scales::percent_format(scale = 1, accuracy = 1)
+  ) +
+  scale_x_continuous(
+    expand = expansion(mult = 0),
+    limits = c(0.15, 1.2)
+  ) +
+  scale_color_manual(values = c(
+    &quot;Austria&quot; = &quot;red&quot;,
+    &quot;other&quot; = &quot;grey30&quot;,
+    &quot;top&quot; = &quot;green&quot;,
+    &quot;bottom&quot; = &quot;steelblue&quot;,
+    &quot;select&quot; = &quot;orange&quot;
+  )) +
+  hrbrthemes::theme_ipsum_rc() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    plot.subtitle = element_text(color = &quot;grey30&quot;),
+    legend.position = &quot;none&quot;,
+    plot.title.position = &quot;plot&quot;,
+    plot.caption.position = &quot;plot&quot;,
+    plot.caption = element_markdown(color = &quot;grey30&quot;, hjust = c(0, 1)),
+    axis.title = element_blank(),
+    axis.text.x = element_blank()</code></pre>
+</div>
+<div id="barplot" class="section level2">
+<h2>Barplot</h2>
+<p>As for the barplot, I’ll only light to highlight the <code>cut</code> function. It’s simple as powerful when it comes to cutting continuous variables into factors. Note the<code>right=F</code> argument to open intervals on the left side.</p>
+<pre class="r"><code>df_interval &lt;- df %&gt;% 
+  mutate(women_interval=cut(x=lower_women_rel_num, 
+                            breaks=seq(0,100,10),
+                            right=F)) %&gt;% 
+  mutate(women_interval=forcats::fct_explicit_na(women_interval, na_level=&quot;&gt;70&quot;)) %&gt;% 
+  mutate(indicator = case_when(
+    str_detect(country, &quot;Austria&quot;) ~ &quot;Austria&quot;,
+    TRUE ~ &quot;other&quot;
+  ))
+
+plot_distribution &lt;- df_interval %&gt;% 
+  ggplot()+
+  geom_bar(aes(x=women_interval,
+               fill=indicator),
+           stat=&quot;count&quot;) +
+  geom_text(aes(x=women_interval, 
+                label=..count..),   
+            stat=&quot;count&quot;,
+            nudge_y=5)+
+  labs(title=&quot;Number of parliaments per share of female MPs&quot;,
+       subtitle=paste(&quot;Only lower houses.&quot;,&quot;Position of &lt;span style=&#39;color:red&#39;&gt;Austria&lt;/span&gt; indicated in red.&quot;),
+       caption = c(&quot;Data: Inter-Parliamentary Union (data.ipu.org) as of end of 2018, Austria as of &lt;br&gt;23 Oct 2019.&quot;, &quot;&lt;br&gt;&lt;br&gt;&lt;br&gt;Roland Schmidt | @zoowalk | &lt;span style=&#39;color:black&#39;&gt;**werk.statt.codes**&lt;/span&gt;&quot;),
+       x=&quot;% of female MPs&quot;,
+       y=&quot;Number of lower houses&quot;)+
+  scale_y_continuous(expand=expansion(mult=c(0.01,0.1)))+
+  scale_fill_manual(values=c(&quot;Austria&quot;=&quot;red&quot;, &quot;other&quot;=&quot;steelblue&quot;))+
+  hrbrthemes::theme_ipsum_rc()+
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = &quot;none&quot;,
+        plot.title.position = &quot;plot&quot;,
+        plot.caption.position = &quot;plot&quot;,
+        plot.subtitle = element_markdown(color= &quot;grey30&quot;),
+        plot.caption = element_markdown(color = &quot;grey30&quot;, hjust = c(0, 1)),
+        )</code></pre>
+</div>
+</div>
+
+
+
+  <div id=links>
+    
+      <a class="basic-alignment left gray no-underline f6" href="/post/vorzugsstimmen/">&laquo; Austrian General Elections 2019: Preference votes</a>
+    
+    
+  </div>
+
+      
+      <span class="f6 gray mv3" title="Lastmod: October 24, 2019. Published at: 2019-10-24.">
+        
+      </span>
+
+      
+
+  </section>
+
+
+  <div class="fr-ns fr-nm" id="sidebar-wrapper">
+    <div id="sidebar">      
+      <ul class="nav nav-pills nav-stacked fr-ns fr-nm" style="list-style:none;">
+         
+        
+        
+        
+        
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h1 no-underline"><a href="#context">
+                    Context
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h1 no-underline"><a href="#result">
+                    Result
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h1 no-underline"><a href="#how-to-get-there">
+                    How to get there
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#getting-the-data">
+                    Getting the data
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#dotplot-connecting-dots-with-labels">
+                    Dotplot: Connecting dots with labels
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#barplot">
+                    Barplot
+                </a></li>
+              
+            
+          
+        
+      </ul>
+    </div>
+  </div>
+
+
+  <footer>
+    <div>
+      <p class="f6 gray mt6 lh-copy">
+        © Roland Schmidt <a href='https://twitter.com/zoowalk' style='color:gray'>@zoowalk</a>
+      </p>
+    </div>
+  </footer>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.2/highlight.min.js"></script>
+
+<script>
+  hljs.initHighlightingOnLoad();
+</script>
+
+
+
+  </body>
+</html>

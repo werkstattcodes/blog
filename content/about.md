@@ -2,9 +2,7 @@
 title: About
 author: rs
 date: '2019-10-20'
-tags:
-  - about
-type: about
+type: post
 ---
 
 # About

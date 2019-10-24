@@ -1,25 +1,16 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Austria on werk.statt.codes</title>
-    <link>/tags/austria/</link>
-    <description>Recent content in Austria on werk.statt.codes</description>
+    <title>stringr on werk.statt.codes</title>
+    <link>/tags/stringr/</link>
+    <description>Recent content in stringr on werk.statt.codes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Thu, 24 Oct 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 15 Oct 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/austria/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/stringr/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Women in parliament</title>
-      <link>/post/women-in-parliament/</link>
-      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/post/women-in-parliament/</guid>
-      <description>ContextSo, Austria has a new parliament. Following the elections in September, the new lower house got constituted yesterday and as a few noted it is more diverse than previous ones. Here’s a nice visualization if you want to get a quick overview. Among others, it was the share of women in parliament which was particularly often noted. None of Austria’s previous lower houses had an as high share of women at the start of a new legislative period.</description>
-    </item>
     
     <item>
       <title>Austrian General Elections 2019: Preference votes</title>

@@ -7,6 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
+    <lastBuildDate>Sun, 20 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/about/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +15,7 @@
     <item>
       <title>About</title>
       <link>/about/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 20 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>/about/</guid>
       <description>About Not that the world would have been waiting for another blog&amp;hellip; but there you go. This blog is a collection of my &amp;lsquo;thoughts in R&amp;rsquo; with varying degrees of seriousness. Posts will mostly relate to my substantive interests (comparative political science, human rights) or are simply notes to myself on a specific R function. Aiming at but not claiming any final truth.

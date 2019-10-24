@@ -1,11 +1,88 @@
 ---
-title: Vorzugsstimmen
+title: "Austrian General Elections 2019: Preference votes"
 author: rs
 date: '2019-10-15'
 slug: vorzugsstimmen
 categories: []
+draft: true
 tags:
+  - elections
+  - stringr
+  - tidyr::pivot
   - Austria
 description: ''
+output: 
+  html_document: 
+    fig_caption: yes
+    fig_height: 3
+    fig_width: 5
 ---
-dfadf
+
+# Context
+Last month, on 29 September, Austria held its general elections to the national assembly (*Nationalrat*). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (the government formation train is only slowly getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria's electorate. So this post is essentially my first 'exploratory' go at preference votes. No specific question, just poking. I'll first present the results, then detail the steps implemented in R to obtain, analyze and visualize the relevant data.
+
+Preference vote means that voters have the option to indicate their support/preference for specific candidates running for the party of their choice. Since candidates of a party can run either on a nation wide federal constituency list (*Bundeswahlkreis*), one of nine state constituency lists (*Landeswahlkreis*), or one of 39 regional constituency lists (*Regionalwahlkreis*), voters can in total submit three preference votes. Eventually, a candidate's total number of preference votes can be consequential when it comes to translating a party's overall votes into seats. While seats are filled in sequence of candidate's appearance of the ballot list, preference votes can alter this ranking. Candidates which were initially placed far from the top by their may move forward due to their preference votes and win a seat. For details see [here](https://www.oesterreich.gv.at/themen/leben_in_oesterreich/wahlen/1/Seite.320260.html). 
+
+# Results
+
+## Total of preference votes by constituency list
+
+Overall, there were 1,8 million preference votes casted. The largest part (more than 60 %) were casted for candidates running on regional constituencies. This could be read as voters been particularly keen to support 'their' local/regional candidates to make it into the new parliament. Ties between voters and regional candidates are likely to be different than those between voters and candidates running on the more 'removed' federal or state constituency list.
+
+![Total preference votes by electoral list](/post/2019-10-15-vorzugsstimmen_files/2019-10-20Total_preferences_per_district.png){width=50% height=50%}
+
+If we further disaggregate these numbers and differentiate between parties, we see that preference votes obtained on the regional level accounted for the majority of preference votes cased for all parties. However, there is a noticable difference between the comparble low 55.9 % of the Freedom Party (FPÖ) and e.g. the 65.7 % of the Social Democrats (SPÖ) and the 64.1 % of the NEOS. Or put differently, with 34.1 % the share of preference votes obtained on the federal level, the Freedom Party stands out. As for the reasons why this is, I can only speculate.
+
+![Total preference votes by electoral list per party](/post/2019-10-15-vorzugsstimmen_files/2019-10-21Total_preferences_per_district_per_party.png){width=80% height=80%}
+
+
+## Top 10 candidates
+
+![](/post/2019-10-15-vorzugsstimmen_files/2019-10-23top_10_candidates.png){width=80% height=80%}
+
+The graph above clearly demonstrates the predominate role of former chancellor Sebastian Kurz when it comes to preference votes. With more than 150,000 votes his result clearly outpaces those of any other candidate. Wit the notable exception of the FPÖ, the leading candidates/party leaders of all parties succeeded in securing most of the preference votes. In the case of the FPÖ, former Minister of Interior Herbert Kickl overtook his party's leader, Norbert Hofer. What is also noticable is that party leaders almost exclusively secured their preference votes from the federal constituency list, while their colleagues largely relied on votes from the regional constituency list. 
+
+Looking at the rankings within parties, I have to admit that I was a bit surprised by the strong performance of a some candidates which I at least have never heard of. The result of T. Mete for the SPÖ, and J Hechenberger for the ÖVP were partiuclarly surprising to me.
+
+## Intra-party dynamics
+Preference votes are first and foremost interesting from an intra-party perspective. With sufficient votes, candidates which embarked on the electoral campaign from a lower ranked position can move up the intra-party ladder and secure a seat. 
+
+A first take on this issue is to compare a candidate's position on the electoral list and her eventual position when ranking a party's candidates according to their number of preference votes. 
+
+
+
+
+
+
+# Steps in R
+## Getting the data
+Data on the preference votes is available at the homepage of MoI. Two files are provided. One for the federal level list and one for the state and regional electoral lists. The somewhat trickier part was to combine the different files and arrange the data in a tidy way so that any subsequent analysis can be efficient and easily reproducible.
+
+
+## Names
+One Austrian peculartiy (although Austria is certainly not unique in this regard), is the verbose use of various titles in the name. When displaying individual results this can be sometimes a bit of a noucance since titles consume precious space and, let's be frank, are completely irrelevant for the focus of most analyses. To remedy this issue, below a short function which I came up with for this analysis. Stringr and regex are our friends here and with lookaheads and lookbehind allow us to extract those characters which are before th first comma (family name) and behind the last comma (first name). The first name is further initialised. Note, to avoid any mix-up of candiates when aggregating over candidates, the analysis remains based ont he full names, but labels eventually display only the shortened version.
+
+```{r remedy001}
+fn_remove_titles <- function(x) {
+  
+titles <- c("Mag", "MMag", "Prof", "Dr", "O\\.Univ\\.Prof", "Dipl-Ing", "Dipl.-Ing.", "Dipl.-Rev.", "Ing", "Dipl", "jun","sen", "Ba", "\\(FH\\)", "MSc", "med", "univ", "Bsc", "phil", "iur", "DDr", "BEd", "DI", "Mba", "Mas", "MA", "MIM","vet", "M.A.", "PMM", "MTD", "Päd", "Bakk") %>%
+    map(., paste0, c("\\.", "\\s", "\\,")) %>% unlist()
+
+  name_wo_titles <- stringr::str_remove_all(x, regex("[[:alpha:]\\-]+\\.")) %>% 
+    str_remove_all(., regex("\\([:alpha:]+\\)")) %>% 
+    str_remove_all(., regex(paste0(titles, collapse="|"), ignore_case = T)) %>% 
+    str_squish()
+}
+
+```
+
+Note that while the function makes you life somewhat easier, it obviously doesn't take care of any inconsistencies of names already contained in the original source. Suprisingly, there were quite some discrepancies in the data file provided by the Austrian MoI (which is in charge of running the elections).
+  
+  
+  
+
+
+
+
+
+

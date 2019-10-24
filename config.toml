@@ -4,6 +4,7 @@ theme ="hugo-theme-basic"
 languageCode = "en-us"
 googleAnalytics = "UA-149910232-1"
 enableEmoji = true 
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 copyright = "© Roland Schmidt <a href='https://twitter.com/zoowalk' style='color:gray'>@zoowalk</a>"
 description = "Playground with R"
 
@@ -23,7 +24,7 @@ description = "Playground with R"
 
 [[params.menu]]
   name = "/tags"
-  url = "tags/"
+  url = "/tags/"
   
 [[params.menu]]
   name = "/about"
