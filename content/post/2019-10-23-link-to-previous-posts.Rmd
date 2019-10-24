@@ -1,0 +1,10 @@
+---
+title: Link to previous posts
+author: ro
+date: '2019-10-23'
+slug: link-to-previous-posts
+categories: []
+tags: []
+description: ''
+---
+Earlier ramblings were collected on my RPubs file. I'll gradually move theme to this site, but till then they remain available at [<u>here<\u>](http://rpubs.com/zoowalk).
