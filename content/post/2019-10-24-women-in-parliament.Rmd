@@ -12,7 +12,7 @@ tags:
 description: ''
 ---
 # Context
-So, Austria has a new parliament. Following the elections in September, the new lower house got constituted yesterday and as a few noted it is more diverse than previous ones. Here's a nice visualization if you want to get a quick overview. Among others, it was the share of women in parliament which was particularly often noted. None of Austria's previous lower houses had an as high share of women at the start of a new legislative period. This made me a bit curious how Austria's lower house actually compares to other countries. First I'll show the results, then how to get there in R. The entire code is available at my github [account](https://github.com/zoowalk).
+So, Austria has a new parliament. Following the elections in September, the new lower house got constituted yesterday and as a few noted it is more diverse than previous ones. [<u>Here</u>](https://www.derstandard.at/story/2000110261600/fuehlen-sie-sich-im-parlament-vertreten?ref=rec)'s a nice visualization if you want to get a quick overview. Among others, it was the share of women in parliament which was particularly often noted. None of Austria's previous lower houses had an as high share of women at the start of a new legislative period. This made me a bit curious how Austria's lower house actually compares to other countries. First I'll show the results, then how to get there in R. The entire code is available at my github [account](https://github.com/zoowalk).
 
 # Result
 

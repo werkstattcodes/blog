@@ -10,7 +10,7 @@ description = "Playground with R"
 
 [taxonomies]
   tag = "tags"
-  about = "about"
+  #about = "about"
 
 [params]
   twitter = "zoowalk"
