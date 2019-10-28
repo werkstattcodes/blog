@@ -7,4 +7,4 @@ categories: []
 tags: []
 description: ''
 ---
-Earlier ramblings were collected on my RPubs file. I'll gradually move theme to this site, but till then they remain available at [<u>here<\u>](http://rpubs.com/zoowalk).
+Earlier ramblings were collected on my RPubs file. I'll gradually move theme to this site, but till then they remain available at [<u>here</u>](http://rpubs.com/zoowalk).

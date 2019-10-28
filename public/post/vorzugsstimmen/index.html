@@ -125,19 +125,19 @@ if (!doNotTrack) {
 
 <div id="context" class="section level1">
 <h1>Context</h1>
-<p>Last month, on 29 September, Austria held its general elections to the national assembly (<em>Nationalrat</em>). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (the government formation train is only slowly getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate. So this post is essentially my first ‘exploratory’ go at preference votes. No specific question, just poking. I’ll first present the results, then detail the steps implemented in R to obtain, analyze and visualize the relevant data.</p>
-<p>Preference vote means that voters have the option to indicate their support/preference for specific candidates running for the party of their choice. Since candidates of a party can run either on a nation wide federal constituency list (<em>Bundeswahlkreis</em>), one of nine state constituency lists (<em>Landeswahlkreis</em>), or one of 39 regional constituency lists (<em>Regionalwahlkreis</em>), voters can in total submit three preference votes. Eventually, a candidate’s total number of preference votes can be consequential when it comes to translating a party’s overall votes into seats. While seats are filled in sequence of candidate’s appearance of the ballot list, preference votes can alter this ranking. Candidates which were initially placed far from the top by their may move forward due to their preference votes and win a seat. For details see <a href="https://www.oesterreich.gv.at/themen/leben_in_oesterreich/wahlen/1/Seite.320260.html">here</a>.</p>
+<p>Last month, on 29 September, Austria held its general elections to the national assembly (<em>Nationalrat</em>). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (the government formation train is only slowly getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate. So this post is essentially my first ‘exploratory’ go at preference votes. No specific question, just poking. I’ll first present the results, then detail the steps implemented in R to obtain, analyze and visualize the relevant data. The entire code for the analysis is available on my github <a href="https://github.com/zoowalk/NRW19_preference_votes"><u>account</u></a>.</p>
+<p>Preference vote means that voters have the option to indicate their support/preference for specific candidates running for the party of their choice. Since candidates of a party can run on a nation wide federal constituency list (<em>Bundeswahlkreis</em>), one of nine state constituency lists (<em>Landeswahlkreis</em>), or/and one of 39 regional constituency lists (<em>Regionalwahlkreis</em>), voters can in total submit three preference votes <a href="https://www.help.gv.at/Portal.Node/hlpd/public/resources/documents/NRW2017_Vorzugsstimmen.jpg">(<u>here</u></a> a sample ballot slip). Eventually, a candidate’s total number of preference votes can be consequential when it comes to translating a party’s overall votes into seats. While seats are filled in sequence of candidate’s appearance of the ballot list, preference votes can alter this ranking. Candidates which were initially placed far from the top may move forward due to their preference votes and win a seat. For details see <a href="https://www.oesterreich.gv.at/themen/leben_in_oesterreich/wahlen/1/Seite.320260.html"><u>here</u></a>.</p>
 </div>
 <div id="results" class="section level1">
 <h1>Results</h1>
 <div id="total-of-preference-votes-by-constituency-list" class="section level2">
 <h2>Total of preference votes by constituency list</h2>
-<p>Overall, there were 1,8 million preference votes casted. The largest part (more than 60 %) were casted for candidates running on regional constituencies. This could be read as voters been particularly keen to support ‘their’ local/regional candidates to make it into the new parliament. Ties between voters and regional candidates are likely to be different than those between voters and candidates running on the more ‘removed’ federal or state constituency list.</p>
+<p>Overall, there were 1,8 million preference votes cast. The largest part (more than 60 %) were cast for candidates running on regional constituencies. This could be read as voters been particularly keen to support ‘their’ local/regional candidates to make it into the new parliament. Ties between voters and regional candidates are likely to be different than those between voters and candidates running on the more ‘removed’ federal or state constituency list.</p>
 <div class="figure">
 <img src="/post/2019-10-15-vorzugsstimmen_files/2019-10-20Total_preferences_per_district.png" alt="Total preference votes by electoral list" style="width:50.0%;height:50.0%" />
 <p class="caption">Total preference votes by electoral list</p>
 </div>
-<p>If we further disaggregate these numbers and differentiate between parties, we see that preference votes obtained on the regional level accounted for the majority of preference votes cased for all parties. However, there is a noticable difference between the comparble low 55.9 % of the Freedom Party (FPÖ) and e.g. the 65.7 % of the Social Democrats (SPÖ) and the 64.1 % of the NEOS. Or put differently, with 34.1 % the share of preference votes obtained on the federal level, the Freedom Party stands out. As for the reasons why this is, I can only speculate.</p>
+<p>If we further disaggregate these numbers and differentiate between parties, we see that preference votes obtained on the regional level accounted for the majority of preference votes cased for all parties. However, there is a noticeable difference between the comparable low 55.9 % of the Freedom Party (FPÖ) and e.g. the 65.7 % of the Social Democrats (SPÖ) and the 64.1 % of the NEOS. Or put differently, with 34.1 % the share of preference votes obtained on the federal level, the Freedom Party stands out. As for the reasons why this is, I can only speculate.</p>
 <div class="figure">
 <img src="/post/2019-10-15-vorzugsstimmen_files/2019-10-21Total_preferences_per_district_per_party.png" alt="Total preference votes by electoral list per party" style="width:80.0%;height:80.0%" />
 <p class="caption">Total preference votes by electoral list per party</p>
@@ -146,13 +146,20 @@ if (!doNotTrack) {
 <div id="top-10-candidates" class="section level2">
 <h2>Top 10 candidates</h2>
 <p><img src="/post/2019-10-15-vorzugsstimmen_files/2019-10-23top_10_candidates.png" style="width:80.0%;height:80.0%" /></p>
-<p>The graph above clearly demonstrates the predominate role of former chancellor Sebastian Kurz when it comes to preference votes. With more than 150,000 votes his result clearly outpaces those of any other candidate. Wit the notable exception of the FPÖ, the leading candidates/party leaders of all parties succeeded in securing most of the preference votes. In the case of the FPÖ, former Minister of Interior Herbert Kickl overtook his party’s leader, Norbert Hofer. What is also noticable is that party leaders almost exclusively secured their preference votes from the federal constituency list, while their colleagues largely relied on votes from the regional constituency list.</p>
-<p>Looking at the rankings within parties, I have to admit that I was a bit surprised by the strong performance of a some candidates which I at least have never heard of. The result of T. Mete for the SPÖ, and J Hechenberger for the ÖVP were partiuclarly surprising to me.</p>
+<p>The graph above clearly demonstrates the predominate role of former chancellor Sebastian Kurz when it comes to preference votes. With more than 150,000 votes his result clearly outpaces those of any other candidate. With the notable exception of the FPÖ, the leading candidates/party leaders of all parties succeeded in securing most of the preference votes. In the case of the FPÖ, former Minister of Interior Herbert Kickl overtook his party’s leader, Norbert Hofer. What is also noticeable is that party leaders almost exclusively secured their preference votes from the federal constituency list, while their colleagues largely relied on votes from the regional constituency list. Hofer’s ‘defeat’ to Kickl might be due to an administrative issue though. There was another FPÖ candidate with the familyname Hofer running on the federal constituency list. When voters put only the candidate’s family name on the ballot to indicate their preference, it was not clear which Hofer was actually meant. As a consequence, these preference votes were reportedly ruled as invalid.</p>
+<p>Looking at the rankings within parties, I have to admit that I was a bit surprised by the strong performance of a some candidates which I at least have never heard of. The result of T. Mete for the SPÖ, and J Hechenberger for the ÖVP were particularly surprising to me.</p>
 </div>
 <div id="intra-party-dynamics" class="section level2">
 <h2>Intra-party dynamics</h2>
 <p>Preference votes are first and foremost interesting from an intra-party perspective. With sufficient votes, candidates which embarked on the electoral campaign from a lower ranked position can move up the intra-party ladder and secure a seat.</p>
-<p>A first take on this issue is to compare a candidate’s position on the electoral list and her eventual position when ranking a party’s candidates according to their number of preference votes.</p>
+<p>So when do candidate’s move up the ballot list?</p>
+<ul>
+<li>On the federal constituency list: when a candidate got a preference votes of at least 7 % of those who voted for her party.</li>
+<li>On the state level constituency list: when a candidate got preference votes of of at least 10 % of those who voted for her party, <em>or</em> at least as many preference votes as the ‘electoral number’ (Wahlzahl)<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</li>
+<li>On the reginoal level: when a candidate got preference votes by at least 14 % of those who voted for her party.</li>
+</ul>
+<p>Did this happen often? Were the constituencies where intra-party movements were particularly strong?</p>
+<p><img src="/post/2019-10-15-vorzugsstimmen_files/2019-10-27Preference_votes_vs_party_votes.png" /></p>
 </div>
 </div>
 <div id="steps-in-r" class="section level1">
@@ -163,7 +170,7 @@ if (!doNotTrack) {
 </div>
 <div id="names" class="section level2">
 <h2>Names</h2>
-<p>One Austrian peculartiy (although Austria is certainly not unique in this regard), is the verbose use of various titles in the name. When displaying individual results this can be sometimes a bit of a noucance since titles consume precious space and, let’s be frank, are completely irrelevant for the focus of most analyses. To remedy this issue, below a short function which I came up with for this analysis. Stringr and regex are our friends here and with lookaheads and lookbehind allow us to extract those characters which are before th first comma (family name) and behind the last comma (first name). The first name is further initialised. Note, to avoid any mix-up of candiates when aggregating over candidates, the analysis remains based ont he full names, but labels eventually display only the shortened version.</p>
+<p>One Austrian peculiarity (although Austria is certainly not unique in this regard), is the verbose use of various titles in the name. When displaying individual results this can be sometimes a bit of a nuisance since titles consume precious space and, let’s be frank, are completely irrelevant for the focus of most analyses. To remedy this issue, below a short function which I came up with for this analysis. Stringr and regex are our friends here and with lookaheads and lookbehind allow us to extract those characters which are before the first comma (family name) and behind the last comma (first name). The first name is further initialized. Note, to avoid any mix-up of candidates when aggregating over candidates, the analysis remains based on the full names, but labels eventually display only the shortened version.</p>
 <pre class="r"><code>fn_remove_titles &lt;- function(x) {
   
 titles &lt;- c(&quot;Mag&quot;, &quot;MMag&quot;, &quot;Prof&quot;, &quot;Dr&quot;, &quot;O\\.Univ\\.Prof&quot;, &quot;Dipl-Ing&quot;, &quot;Dipl.-Ing.&quot;, &quot;Dipl.-Rev.&quot;, &quot;Ing&quot;, &quot;Dipl&quot;, &quot;jun&quot;,&quot;sen&quot;, &quot;Ba&quot;, &quot;\\(FH\\)&quot;, &quot;MSc&quot;, &quot;med&quot;, &quot;univ&quot;, &quot;Bsc&quot;, &quot;phil&quot;, &quot;iur&quot;, &quot;DDr&quot;, &quot;BEd&quot;, &quot;DI&quot;, &quot;Mba&quot;, &quot;Mas&quot;, &quot;MA&quot;, &quot;MIM&quot;,&quot;vet&quot;, &quot;M.A.&quot;, &quot;PMM&quot;, &quot;MTD&quot;, &quot;Päd&quot;, &quot;Bakk&quot;) %&gt;%
@@ -176,6 +183,16 @@ titles &lt;- c(&quot;Mag&quot;, &quot;MMag&quot;, &quot;Prof&quot;, &quot;Dr&quo
 }</code></pre>
 <p>Note that while the function makes you life somewhat easier, it obviously doesn’t take care of any inconsistencies of names already contained in the original source. Suprisingly, there were quite some discrepancies in the data file provided by the Austrian MoI (which is in charge of running the elections).</p>
 </div>
+<div id="intra-party-dynamics-1" class="section level2">
+<h2>Intra-party dynamics</h2>
+<p>This part got lengthier than initially expected. What it essentially entails is getting the results of the elections and merge the outcome for each constituency level with the candidates running on the corresponding constituency level. Only in this way we can identify those candidates which have crossed the above mentioned threshold and advance on the electoral list. Below the code, one chunk at a time.</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>By dividng the number of valid votes in a state level constituency by the number of the constituency’s available mandates one gets the ‘electoral number’<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
 </div>
 
 
@@ -299,6 +316,18 @@ titles &lt;- c(&quot;Mag&quot;, &quot;MMag&quot;, &quot;Prof&quot;, &quot;Dr&quo
                 
                 <li class="toc-h2 no-underline"><a href="#names">
                     Names
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#intra-party-dynamics">
+                    Intra-party dynamics
                 </a></li>
               
             
