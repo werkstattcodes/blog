@@ -5,12 +5,12 @@ date: '2019-11-12'
 slug: size-interactive-plots
 categories: []
 tags:
-  - ggraph
+  - ggiraph
 description: ''
 output: 
   html_document: 
     fig_caption: yes
-    fig_height: 35
+    fig_height: 10
     fig_width: 10
 ---
 
@@ -34,10 +34,10 @@ my_plot <- mtcars %>%
 
 
 my_plot <- girafe(code = print(my_plot), 
-                  width_svg=7,
+                  width_svg=10,
                   height_svg= 7,
                   options = list(opts_toolbar(saveaspng = FALSE),
-                                 opts_sizing(rescale=T),
+                                 opts_sizing(rescale=F),
                                  opts_tooltip(css="background-color:lightgray;")))
 
 my_plot <- girafe_options(x = my_plot,
@@ -54,7 +54,7 @@ Now, let's save this interactive plot with the `saveWidget` function from the `h
 
 
 ```{r, eval=F}
-saveWidget(my_plot, file="widget_saved_wo_padding.html",
+saveWidget(my_plot, file="widget_saved_wo_padding_no_rescaling.html",
             background = "red")
 
 ```
@@ -110,6 +110,23 @@ The plot is now well visible, without any scrollbars. The padding at the bottom 
 When moving the browser window from my main screen to the laptop screen, the padding grows and becomes distorting (I assume others can replicate this). The reason is likely that the laptop screen has fewer pixles and the 'fix' definition of the vertical size (1100 px) appears proportionally larger. How to solve this?
 
 ![](/post/2019-11-12-size-issue-ggraph_files/screen_shot_laptop.PNG)
+
+
+## rescale=F
+
+```{r, eval=F}
+
+my_plot <- girafe(code = print(my_plot), 
+                  width_svg=10,
+                  height_svg= 7,
+                  options = list(opts_toolbar(saveaspng = FALSE),
+                                 opts_sizing(rescale=F),
+                                 opts_tooltip(css="background-color:lightgray;")))
+
+```
+
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding_no_rescaling.html){width=100% height=100%}
+
 
 <!-- ## Use widget frame page -->
 

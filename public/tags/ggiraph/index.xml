@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ggiraph on werk.statt.codes</title>
+    <link>/tags/ggiraph/</link>
+    <description>Recent content in ggiraph on werk.statt.codes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
+    <lastBuildDate>Tue, 12 Nov 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/ggiraph/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Potential sizing issue when importing interactive plots (ggraph; htmlWidget)</title>
+      <link>/post/size-interactive-plots/</link>
+      <pubDate>Tue, 12 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/size-interactive-plots/</guid>
+      <description>This post documents a potential issue when it comes to sizing interactive images/htmlwidgets produced with the ggiraph and htmlwidgets packages. The goal is to import interactive graphs produced in other R(Studio) Projects into a blogdown post. I assume/hope there there is a relatively easy solution to it, but I haven’t yet figured it out.
+Create interactive plotFirst, let’s create an interactive plot. Here it has the dimensions 7 by 7 inches and is meant to have no padding.</description>
+    </item>
+    
+  </channel>
+</rss>
