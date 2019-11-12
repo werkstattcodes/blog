@@ -1,0 +1,114 @@
+---
+title: Potential sizing issue when importing interactive plots (ggraph; htmlWidget)
+author: rs
+date: '2019-11-12'
+slug: size-interactive-plots
+categories: []
+tags:
+  - ggraph
+description: ''
+output: 
+  html_document: 
+    fig_caption: yes
+    fig_height: 35
+    fig_width: 10
+---
+
+This post documents a potential issue when it comes to sizing interactive images/htmlwidgets produced with the `ggiraph` and `htmlwidgets` packages.
+The goal is to import interactive graphs produced in other R(Studio) Projects into a `blogdown` post.
+
+
+# Create interactive plot
+First, let's create an interactive plot. Here it has the dimensions 7 by 7 inches and is meant to have **no padding**. The result is as expected.
+
+```{r remedy001}
+library(tidyverse)
+library(htmlwidgets)
+library(ggiraph)
+
+my_plot <- mtcars %>% 
+  rownames_to_column(., var="car_name") %>% 
+  ggplot()+
+  geom_point_interactive(aes(x=mpg,
+                             y=drat,
+                             tooltip=car_name))
+
+
+my_plot <- girafe(code = print(my_plot), 
+                  width_svg=7,
+                  height_svg= 7,
+                  options = list(opts_toolbar(saveaspng = FALSE),
+                                 opts_sizing(rescale=T),
+                                 opts_tooltip(css="background-color:lightgray;")))
+
+my_plot <- girafe_options(x = my_plot,
+                    sizingPolicy(padding = "0px"))
+
+my_plot
+
+```
+
+
+# Export plot as htmlwidget
+
+Now, let's save this interactive plot with the `saveWidget` function from the `htmlwidgets` package. The purpose is to import the interactive plot into a `blogdown` post (as below). To highlight/make visible the remaining padding, I set the background to red.
+
+```
+
+```{r, eval=F}
+saveWidget(my_plot, file="widget_saved_wo_padding.html",
+            background = "red")
+```
+
+# Import widget and adjust sizing
+
+Now let's import the widget into the a `blogdown` blogpost (via the insert image function of the blogdown add-in). Several seizing versions are demonstrated below:
+
+## without size options  
+Without any sizing options the plot is small and embedded with a vertical scrollbar. Note that there is a small 
+padding at the bottom (in red).
+
+```{r, eval=F}
+![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html)
+
+```
+
+![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html)
+
+## width=100% height=100%  
+The plot as an intended size, but the height is still too small (despite height=100%).
+
+```{r, eval=F}
+![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=100%}
+
+```
+
+![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=100%}
+
+## width=100% height=672px
+The vertical size of the plot changes but remains too small; vertical scrollbars remain
+
+```{r, eval=F}
+![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=672px}
+
+```
+
+![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=672px}
+
+
+## width=100% height=1100px 
+The plot is now well visible, without any scrollbars. The padding at the bottom grew somewhat but is sitll ok.
+
+```{r, eval=F}
+
+![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=1100px}
+
+
+```
+
+![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=1100px}
+
+## PROBLEM: Laptopscreen; padding becomes too large
+When moving the browser window from my main screen to the laptop screen, the padding grows and becomes distorting (I assume others can replicate this). The reason is likely that the laptop screen has fewer pixles and the 'fix' definition of the vertical size (1100 px) appears proportionally larger. How to solve this?
+
+![](/post/2019-11-12-testing-new-post_files/screen_shot_laptop.PNG)

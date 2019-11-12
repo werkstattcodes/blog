@@ -19,35 +19,57 @@ output:
 ---
 
 # Context
-Last month, on 29 September, Austria held its general elections to the national assembly (*Nationalrat*). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (the government formation train is only slowly getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria's electorate. So this post is essentially my first 'exploratory' go at preference votes. No specific question, just poking. I'll first present the results, then detail the steps implemented in R to obtain, analyze and visualize the relevant data. The entire code for the analysis is available on my github [<u>account</u>](https://github.com/zoowalk/NRW19_preference_votes).
+On 29 September, Austria held its general elections to the national assembly (*Nationalrat*). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (and [<u>government formation</u>](https://www.nytimes.com/reuters/2019/11/10/world/europe/10reuters-austria-politics.html){target="_blank"} train  finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria's electorate. So this post is essentially my first 'exploratory' go at preference votes. So no specific question, no specific theoretical framework in mind, just poking. I'll first present the results, then detail the steps implemented in R to obtain, analyze and visualize the relevant data. The entire code for the analysis is available on my github [<u>account</u>](https://github.com/zoowalk/NRW19_preference_votes/){target="_blank"}. As always, if you spot any glaring error etc, don't hesitate and let me know.
 
-Preference vote means that voters have the option to indicate their support/preference for specific candidates running for the party of their choice. Since candidates of a party can run on a nation wide federal constituency list (*Bundeswahlkreis*), one of nine state constituency lists (*Landeswahlkreis*), or/and one of 39 regional constituency lists (*Regionalwahlkreis*), voters can in total submit three preference votes [(<u>here</u>](https://www.help.gv.at/Portal.Node/hlpd/public/resources/documents/NRW2017_Vorzugsstimmen.jpg) a sample ballot slip). Eventually, a candidate's total number of preference votes can be consequential when it comes to translating a party's overall votes into seats. While seats are filled in sequence of candidate's appearance of the ballot list, preference votes can alter this ranking. Candidates which were initially placed far from the top may move forward due to their preference votes and win a seat. For details see [<u>here</u>](https://www.oesterreich.gv.at/themen/leben_in_oesterreich/wahlen/1/Seite.320260.html). 
+Preference vote (*Vorzugsstimme*) refer to voters' option (but not obligation) to indicate their support/preference for specific candidates running for the party of their choice. Since Austrian candidates run on a nation wide federal district list (*Bundeswahlkreis*), one of nine state district lists (*Landeswahlkreis*), or/and one of 39 regional district lists (*Regionalwahlkreis*), voters can cast up to three preference votes [(<u>here</u>](https://www.help.gv.at/Portal.Node/hlpd/public/resources/documents/NRW2017_Vorzugsstimmen.jpg){target="_blank"} a sample ballot slip). Eventually, a candidate's number of preference votes can be consequential when it comes to distributing the seats which a party won to the individual candidates. Without preference votes, seats are distributed in accordance to their position on he elecotral list. The lower a candidate is on a list, the lower the liklihood that she can actually get a seat. However, with a sufficient large number of preference votes, the pre-election order on the electoral list can change and initially lower ranked candidates can move further up and eventually gain a seat. For details see [<u>here</u>](https://www.oesterreich.gv.at/themen/leben_in_oesterreich/wahlen/1/Seite.320260.html){target="_blank"}. But more on that later. First some general results.
 
 # Results
 
-## Total of preference votes by constituency list
+## by district list
 
-Overall, there were 1,8 million preference votes cast. The largest part (more than 60 %) were cast for candidates running on regional constituencies. This could be read as voters been particularly keen to support 'their' local/regional candidates to make it into the new parliament. Ties between voters and regional candidates are likely to be different than those between voters and candidates running on the more 'removed' federal or state constituency list.
+Overall, there were 1,8 million preference votes cast. The largest part (more than 60 %) were cast for candidates running on regional district lists. Probably this could be read as voters been particularly keen to support 'their' local/regional candidates to make it into the new parliament. Ties between voters and regional candidates are likely to be different than those between voters and candidates running on the more 'removed' federal or state constituency list.
 
-![Total preference votes by electoral list](/post/2019-10-15-vorzugsstimmen_files/2019-10-20Total_preferences_per_district.png){width=50% height=50%}
+![](/post/2019-10-15-vorzugsstimmen_files/2019-11-11Total_preferences_per_district.png)
 
-If we further disaggregate these numbers and differentiate between parties, we see that preference votes obtained on the regional level accounted for the majority of preference votes cased for all parties. However, there is a noticeable difference between the comparable low 55.9 % of the Freedom Party (FPÖ) and e.g. the 65.7 % of the Social Democrats (SPÖ) and the 64.1 % of the NEOS. Or put differently, with 34.1 % the share of preference votes obtained on the federal level, the Freedom Party stands out. As for the reasons why this is, I can only speculate.
+## by constituency list and party
 
-![Total preference votes by electoral list per party](/post/2019-10-15-vorzugsstimmen_files/2019-10-21Total_preferences_per_district_per_party.png){width=80% height=80%}
+If we further disaggregate these numbers and differentiate between parties, we see that preference votes obtained on the regional level accounted for the majority of preference votes for all parties. However, there is a noticeable difference between the comparable low 55.9 % of the Freedom Party (FPÖ) and e.g. the 65.7 % of the Social Democrats (SPÖ) or the 64.1 % of the NEOS. Or put differently, with 34.1 % the share of preference votes obtained on the federal level, the Freedom Party stands out. As for the underlying reasons, I can only speculate. One reading could be that voters of the FPÖ have weaker ties to their candidates on the regional or state level and hence felt less inclined to cast a preference vote for them. Another one could be that the relation among FPÖ's candidates on the federal list were particularly competitive and hence a disproportionate high number of voters casted preference votes on the federal list. Considering the exit of former party leader HC Strache ([<u>Ibiza</u>](https://www.theguardian.com/world/2019/may/20/austria-ibiza-scandal-sting-operation-what-happened-why-does-it-matter){target="_blank"}...) and the subsequent (not yet consolidated?) change in the leadership, this seems plausible (see below). It however does not explain why FPÖ voters did not cast preference votes for candiates on state or regional lists.
 
 
-## Top 10 candidates
+![](/post/2019-10-15-vorzugsstimmen_files/2019-11-11Total_preferences_per_district_per_party.png)
 
-![](/post/2019-10-15-vorzugsstimmen_files/2019-10-23top_10_candidates.png){width=80% height=80%}
+## Top 5 candidates
+If we are intersted in candidates, which candidates were particularly successful in securing preference votes?
 
-The graph above clearly demonstrates the predominate role of former chancellor Sebastian Kurz when it comes to preference votes. With more than 150,000 votes his result clearly outpaces those of any other candidate. With the notable exception of the FPÖ, the leading candidates/party leaders of all parties succeeded in securing most of the preference votes. In the case of the FPÖ, former Minister of Interior Herbert Kickl overtook his party's leader, Norbert Hofer. What is also noticeable is that party leaders almost exclusively secured their preference votes from the federal constituency list, while their colleagues largely relied on votes from the regional constituency list. Hofer's 'defeat' to Kickl might be due to an administrative issue though. There was another FPÖ candidate with the familyname Hofer running on the federal constituency list. When voters put only the candidate's family name on the ballot to indicate their preference, it was not clear which Hofer was actually meant. As a consequence, these preference votes were reportedly ruled as invalid.
+![](/post/2019-10-15-vorzugsstimmen_files/2019-11-11Top_candidates.png)
 
-Looking at the rankings within parties, I have to admit that I was a bit surprised by the strong performance of a some candidates which I at least have never heard of. The result of T. Mete for the SPÖ, and J Hechenberger for the ÖVP were particularly surprising to me.
+The graph above clearly demonstrates the predominate role of former chancellor Sebastian Kurz when it comes to preference votes. With more than 150,000 votes his result clearly outclasses those of any other candidate. With the notable exception of the FPÖ, the leading candidates/party leaders of all parties succeeded in securing most of the preference votes. In the case of the FPÖ, former Minister of Interior Herbert Kickl overtook his party's leader, Norbert Hofer. What is also noticeable is that party leaders almost exclusively secured their preference votes from the federal constituency list, while their colleagues largely relied on votes from the regional constituency list. Reportedly, Hofer's 'defeat' to Kickl might be due to an administrative issue though. There was another FPÖ candidate with the familyname Hofer running on the federal constituency list. When voters put only the candidate's family name on the ballot to indicate their preference, it was not clear which Hofer was actually meant. As a consequence, these preference votes were reportedly ruled as invalid.
+
+Looking at the rankings within parties, I have to admit that I was a bit surprised by the strong performance of a some candidates which I at least had never heard of. The result of T. Mete for the SPÖ, and J Hechenberger for the ÖVP were particularly surprising to me.
+
+## Regional dimension
+
+### by district magnitude
+
+The plot below displays a party's total number of preference votes as percentage of a party's total vote in each regional electoral constituencies (let's call this *parties' preference vote share*), grouped by constituencies' magnitude (number of mandates). The motivation behind is the assumption that the fewer mandates are available the higher will be also intra-party competition. With a smaller cake to distribute (fewer mandates), candidates will try particularly hard to win preference votes and move up the electoral list. Here the analysis is limited to the 39 regional electoral lists. Hover 
+
+The plot seems to provide at least some backing to this proposition. The constituency with only 1 mandate to compete for (Osttirol), features the highest median of parties' preference vote share. While the picture is not entirely clear cut, there seems to be indeed a decreasing median share as constituencies' magnitude increases from to two to seven mandates. The constituencies with eight and nine mandates (Graz-Umgebung, Hausruckviertel, OberStmk), however, do aberate. over the indiviudal dots to get details.
+
+Note that a random vertical variation is introduced to avoid indiviudal dots overlapping.
+
+![](/post/2019-10-15-vorzugsstimmen_files/plot_interactive_n_mandates.html){width=100% height=504px}
+
+
+### by state
+
+If we are interested in whether there are any regional differences when it comes to the share of preference votes, grouping parties' preference vote share by states can be of some help. As the boxplots below show, on average parties' preference vote share was the largest in Burgenland followed by Vorarlberg. These two states are the two smallest in the country. On the other end, Niederösterreich (Lower Austria), Steiermark (Styria), and Vienna featured on average clearly lower preference vote shares. These three states are Austria's  largest in terms of population. This difference would be in line with the proposition that candidates in smaller states are better in mobilising personal support, i.e. preference votes. Closer candidate-voter relations due to smaller population size sounds rather probable to me. 
+
+![](/post/2019-10-15-vorzugsstimmen_files/party_prefence_share_by_state.html){width=100% height=625px}
 
 ## Intra-party dynamics
-Preference votes are first and foremost interesting from an intra-party perspective. With sufficient votes, candidates which embarked on the electoral campaign from a lower ranked position can move up the intra-party ladder and secure a seat. 
+As already outlined above, preference votes are first and foremost interesting from an intra-party perspective. With sufficient votes, candidates which embarked on the electoral campaign from a lower ranked position can move up the intra-party ladder and secure a seat. 
 
-So when do candidate's move up the ballot list? 
+So when do candidate's move up the ballot list?^[See [<u>here</u>](https://www.oesterreich.gv.at/themen/leben_in_oesterreich/wahlen/1/Seite.320260.html){target="_blank"} for details] 
 
 + On the federal constituency list: when a candidate got a preference votes of at least 7 % of those who voted for her party.
 + On the state level constituency list: when a candidate got preference votes of of at least 10 % of those who voted for her party, *or* at least as many preference votes as the 'electoral number' (Wahlzahl)^[By dividng the number of valid votes in a state level constituency by the number of the constituency's available mandates one gets the 'electoral number'].
@@ -55,11 +77,37 @@ So when do candidate's move up the ballot list?
 
 Did this happen often? Were the constituencies where intra-party movements were particularly strong?
 
+### Candidates' preference votes as % share of total votes
 
-![](/post/2019-10-15-vorzugsstimmen_files/2019-10-27Preference_votes_vs_party_votes.png)
+The graph below presents the number of preference votes of each candidate as percentage of his or her party's total votes in the respective constituency (let's call this here a *candidate's preference vote share*). The vertical orange lines indicate the thresholds which candidates have to pass in order to move up on the party's electoral list. Hover over the individual points to get the data pertaining to each candidate. Note that the x axis is log-transformed to ensure candidates with low share of preference votes remain (somewhat) visible. Note also that only those candidates are included which actually obtained at least one preference vote. 
+
+![](/post/2019-10-15-vorzugsstimmen_files/candidate_vote_share_by_list.html){width=100% height=1550px}
+
+At least to me, there were quite a few suprises which I either had missed in the news or maybe were to specific to be taken up. E.g. Josef Cap, a dinsosaurus or the Mike Jagger of the SPÖ (well, the dinos eventually made space for a newer breed), was rather successful in his efforts to secure preference votes (Wien Nord West, 40 %).
+
+Aside from candidate's preference vote share, there is one further avenue to be promoted. See point two of the list above. As for the state constituency level, candidates can move up the ladder not only if they crossed the 10 % threshold, but also if they would have reached more votes than the electoral number (see above). The graph below presents the pertaining figures. In short, none of the candidates succeeded in doing so this elections.
+
+![](/post/2019-10-15-vorzugsstimmen_files/state_electoral_number_plot.html){width=100% height=650px}
+
+So, to sum up, how often did candidates succeed to change the pre-election order of the ballot list? The graph below gives the answer:  
+
+![](/post/2019-10-15-vorzugsstimmen_files/2019-11-09n_candidates_crossing_threshold.png)
+
+A few things are notable. First, most changes happened at the regional constituency lists. There are hardly no changes on the federal wide list (those candidates which managed to cross the threshold were the leading candidates). Second, there is relatively little difference between the parties. At least from this perspective, intra-party competiton by means of preference votes seems to be similar among all parties. This is some sort of a surprise to me.
 
 
+### Difference Leader and Runners-up
 
+Another angle to look at preference votes could be to examine the difference between the two candidates leading in terms of number of preference votes. This gives us some idea on how dominant a candidate has been, i.e. whether the intra-party contestation at the top was particularly high. The graph above seeks to display the difference in candidates preference vote share per party and electoral district. The higher the difference, the lower the competition for the top spot.  
+
+![](/post/2019-10-15-vorzugsstimmen_files/candidate_vote_share_difference.html){width=100% height=625px}
+
+### Concentration of preference votes
+
+Last but not least, let's see how different parties are when it comes to the concentration of preference votes. Are a party's preference votes going almost exclusively to one or a few few candidates (high concentration)? Or, are preference votes relatively evenly shared among different candidates (low concentration)? A measure of concentration (Gini coefficient) can provide us with another angle on intra-party dynamics. Below the results:  
+
+![](/post/2019-10-15-vorzugsstimmen_files/concentration_preference_votes.html){width=100% height=625px}
+  
 # Steps in R
 ## Getting the data
 Data on the preference votes is available at the homepage of MoI. Two files are provided. One for the federal level list and one for the state and regional electoral lists. The somewhat trickier part was to combine the different files and arrange the data in a tidy way so that any subsequent analysis can be efficient and easily reproducible.

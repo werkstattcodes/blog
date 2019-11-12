@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html
+  class=""
+  lang="en-us"
+  prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="description" content="" />
+<meta name="HandheldFriendly" content="True" />
+<meta name="MobileOptimized" content="320" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+<meta name="keywords" content="ggraph,
+">
+
+
+<meta property="og:type" content="article" />
+<meta property="og:description" content="" />
+<meta property="og:title" content="Potential sizing issue when importing interactive plots (ggraph; htmlWidget)" />
+<meta property="og:site_name" content="werk.statt.codes" />
+<meta property="og:image" content="" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="" />
+<meta property="og:image:height" content="" />
+<meta property="og:url" content="/post/size-interactive-plots/" />
+<meta property="og:locale" content="en-us" />
+<meta property="article:published_time" content="2019-11-12
+" /> <meta property="article:modified_time" content="2019-11-12
+" />
+
+
+<meta property="article:tag" content="ggraph" />
+
+
+
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@zoowalk" />
+<meta name="twitter:creator" content="@zoowalk" />
+<meta
+  name="twitter:title"
+  content="Potential sizing issue when importing interactive plots (ggraph; htmlWidget) | werk.statt.codes"
+/>
+<meta
+  name="twitter:description"
+  content="This post documents a potential issue when it comes to sizing interactive images/htmlwidgets produced with the ggiraph and htmlwidgets packages.The goal is to import interactive graphs produced in other R(Studio) Projects into a blogdown post.
+Create interactive plotFirst, let’s create an interactive plot. Here it has the dimensions 7 by 7 inches and is meant to have no padding. The result is as expected.|"
+/>
+<meta name="twitter:image:src" content="" />
+<meta name="twitter:domain" content="/post/size-interactive-plots/" />
+
+
+    <title>Potential sizing issue when importing interactive plots (ggraph; htmlWidget)</title>
+    <link rel="canonical" href="/post/size-interactive-plots/" />
+
+
+
+    <link
+  rel="stylesheet"
+  href="https://unpkg.com/tachyons@4.11.1/css/tachyons.min.css"
+/>
+
+<link rel="stylesheet" href="/css/style.css" />
+
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/styles/vs.css"
+/>
+
+
+<script type="application/javascript">
+var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+var doNotTrack = (dnt == "1" || dnt == "yes");
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	if (window.sessionStorage) {
+		var GA_SESSION_STORAGE_KEY = 'ga:clientId';
+		ga('create', 'UA-149910232-1', {
+	    'storage': 'none',
+	    'clientId': sessionStorage.getItem(GA_SESSION_STORAGE_KEY)
+	   });
+	   ga(function(tracker) {
+	    sessionStorage.setItem(GA_SESSION_STORAGE_KEY, tracker.get('clientId'));
+	   });
+   }
+	ga('set', 'anonymizeIp', true);
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  </head>
+        
+
+<body
+  lang="en-us"
+  class="sans-serif w-90 w-80-m w-60-ns center mv2 mv5-ns"
+  itemscope
+  itemtype="http://schema.org/Article">
+
+  <a href="/" class="b bw1 pb1 no-underline gray">werk.statt.codes</a>
+  <span class="b gray"> / </span>
+  <a href="/post" class="b pb1 bw1 no-underline gray">blog</a>
+  <span class="b gray"> / </span>
+  <a class="b bb bw1 pb1 no-underline black">Potential sizing issue when importing interactive plots (ggraph; htmlWidget)</a>
+
+  <section id="main" class="mt5">
+    <a class="b bw1 pb1 no-underline black ttu">Potential sizing issue when importing interactive plots (ggraph; htmlWidget)</a><br>
+    <span class="f6 gray">November 12, 2019</span>
+
+      <article itemprop="articleBody" id="content" class="w-90 lh-copy">
+        
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/d3/d3.min.js"></script>
+<script src="/rmarkdown-libs/d3-lasso/d3-lasso.min.js"></script>
+<link href="/rmarkdown-libs/ggiraphjs/styles.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/ggiraphjs/ggiraphjs.min.js"></script>
+<script src="/rmarkdown-libs/girafe-binding/girafe.js"></script>
+
+
+<p>This post documents a potential issue when it comes to sizing interactive images/htmlwidgets produced with the <code>ggiraph</code> and <code>htmlwidgets</code> packages.
+The goal is to import interactive graphs produced in other R(Studio) Projects into a <code>blogdown</code> post.</p>
+<div id="create-interactive-plot" class="section level1">
+<h1>Create interactive plot</h1>
+<p>First, let’s create an interactive plot. Here it has the dimensions 7 by 7 inches and is meant to have <strong>no padding</strong>. The result is as expected.</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## -- Attaching packages ---------------------------------------------------------------------------------------------------------------- tidyverse 1.2.1 --</code></pre>
+<pre><code>## v ggplot2 3.2.1.9000     v purrr   0.3.3     
+## v tibble  2.1.3          v dplyr   0.8.3     
+## v tidyr   1.0.0          v stringr 1.4.0     
+## v readr   1.3.1          v forcats 0.4.0</code></pre>
+<pre><code>## -- Conflicts ------------------------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(htmlwidgets)
+library(ggiraph)
+
+my_plot &lt;- mtcars %&gt;% 
+  rownames_to_column(., var=&quot;car_name&quot;) %&gt;% 
+  ggplot()+
+  geom_point_interactive(aes(x=mpg,
+                             y=drat,
+                             tooltip=car_name))
+
+
+my_plot &lt;- girafe(code = print(my_plot), 
+                  width_svg=7,
+                  height_svg= 7,
+                  options = list(opts_toolbar(saveaspng = FALSE),
+                                 opts_sizing(rescale=T),
+                                 opts_tooltip(css=&quot;background-color:lightgray;&quot;)))
+
+my_plot &lt;- girafe_options(x = my_plot,
+                    sizingPolicy(padding = &quot;0px&quot;))
+
+my_plot</code></pre>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="girafe html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"html":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd\" viewBox=\"0 0 504.00 504.00\">\n  <g>\n    <defs>\n      <clipPath id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_1\">\n        <rect x=\"0.00\" y=\"0.00\" width=\"504.00\" height=\"504.00\"/>\n      <\/clipPath>\n    <\/defs>\n    <rect x=\"0.00\" y=\"0.00\" width=\"504.00\" height=\"504.00\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_1\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_1)\" fill=\"#FFFFFF\" fill-opacity=\"1\" stroke-width=\"0.75\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/>\n    <defs>\n      <clipPath id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_2\">\n        <rect x=\"0.00\" y=\"0.00\" width=\"504.00\" height=\"504.00\"/>\n      <\/clipPath>\n    <\/defs>\n    <rect x=\"0.00\" y=\"0.00\" width=\"504.00\" height=\"504.00\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_2\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_2)\" fill=\"#FFFFFF\" fill-opacity=\"1\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/>\n    <defs>\n      <clipPath id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3\">\n        <rect x=\"35.57\" y=\"5.48\" width=\"462.95\" height=\"467.03\"/>\n      <\/clipPath>\n    <\/defs>\n    <rect x=\"35.57\" y=\"5.48\" width=\"462.95\" height=\"467.03\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_3\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#EBEBEB\" fill-opacity=\"1\" stroke=\"none\"/>\n    <polyline points=\"35.57,453.24 498.52,453.24\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_4\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"0.533489\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"35.57,355.41 498.52,355.41\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_5\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"0.533489\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"35.57,257.58 498.52,257.58\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_6\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"0.533489\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"35.57,159.75 498.52,159.75\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_7\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"0.533489\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"35.57,61.93 498.52,61.93\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_8\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"0.533489\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"94.22,472.51 94.22,5.48\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_9\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"0.533489\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"183.77,472.51 183.77,5.48\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_10\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"0.533489\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"273.31,472.51 273.31,5.48\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_11\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"0.533489\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"362.86,472.51 362.86,5.48\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_12\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"0.533489\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"452.40,472.51 452.40,5.48\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_13\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"0.533489\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"35.57,404.32 498.52,404.32\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_14\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"35.57,306.50 498.52,306.50\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_15\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"35.57,208.67 498.52,208.67\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_16\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"35.57,110.84 498.52,110.84\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_17\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"35.57,13.01 498.52,13.01\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_18\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"49.45,472.51 49.45,5.48\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_19\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"139.00,472.51 139.00,5.48\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_20\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"228.54,472.51 228.54,5.48\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_21\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"318.09,472.51 318.09,5.48\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_22\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"407.63,472.51 407.63,5.48\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_23\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"497.18,472.51 497.18,5.48\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_24\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#FFFFFF\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <circle cx=\"246.45\" cy=\"228.23\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_25\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Mazda RX4\"/>\n    <circle cx=\"246.45\" cy=\"228.23\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_26\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Mazda RX4 Wag\"/>\n    <circle cx=\"278.69\" cy=\"238.02\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_27\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Datsun 710\"/>\n    <circle cx=\"253.61\" cy=\"388.67\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_28\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Hornet 4 Drive\"/>\n    <circle cx=\"205.26\" cy=\"374.97\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_29\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Hornet Sportabout\"/>\n    <circle cx=\"194.52\" cy=\"451.28\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_30\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Valiant\"/>\n    <circle cx=\"126.46\" cy=\"363.24\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_31\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Duster 360\"/>\n    <circle cx=\"307.34\" cy=\"269.32\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_32\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Merc 240D\"/>\n    <circle cx=\"278.69\" cy=\"224.32\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_33\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Merc 230\"/>\n    <circle cx=\"214.22\" cy=\"224.32\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_34\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Merc 280\"/>\n    <circle cx=\"189.14\" cy=\"224.32\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_35\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Merc 280C\"/>\n    <circle cx=\"164.07\" cy=\"390.63\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_36\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Merc 450SE\"/>\n    <circle cx=\"180.19\" cy=\"390.63\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_37\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Merc 450SL\"/>\n    <circle cx=\"142.58\" cy=\"390.63\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_38\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Merc 450SLC\"/>\n    <circle cx=\"56.62\" cy=\"418.02\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_39\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Cadillac Fleetwood\"/>\n    <circle cx=\"56.62\" cy=\"404.32\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_40\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Lincoln Continental\"/>\n    <circle cx=\"133.62\" cy=\"359.32\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_41\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Chrysler Imperial\"/>\n    <circle cx=\"450.61\" cy=\"193.02\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_42\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Fiat 128\"/>\n    <circle cx=\"414.80\" cy=\"26.71\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_43\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Honda Civic\"/>\n    <circle cx=\"477.48\" cy=\"165.62\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_44\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Toyota Corolla\"/>\n    <circle cx=\"255.41\" cy=\"267.36\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_45\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Toyota Corona\"/>\n    <circle cx=\"147.95\" cy=\"451.28\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_46\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Dodge Challenger\"/>\n    <circle cx=\"142.58\" cy=\"374.97\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_47\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"AMC Javelin\"/>\n    <circle cx=\"108.55\" cy=\"261.49\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_48\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Camaro Z28\"/>\n    <circle cx=\"214.22\" cy=\"388.67\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_49\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Pontiac Firebird\"/>\n    <circle cx=\"359.28\" cy=\"193.02\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_50\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Fiat X1-9\"/>\n    <circle cx=\"336.00\" cy=\"124.54\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_51\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Porsche 914-2\"/>\n    <circle cx=\"414.80\" cy=\"253.67\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_52\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Lotus Europa\"/>\n    <circle cx=\"153.32\" cy=\"165.62\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_53\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Ford Pantera L\"/>\n    <circle cx=\"223.17\" cy=\"283.02\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_54\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Ferrari Dino\"/>\n    <circle cx=\"139.00\" cy=\"298.67\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_55\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Maserati Bora\"/>\n    <circle cx=\"253.61\" cy=\"187.15\" r=\"1.47pt\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_56\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_3)\" fill=\"#000000\" fill-opacity=\"1\" stroke-width=\"0.708661\" stroke=\"#000000\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"round\" title=\"Volvo 142E\"/>\n    <defs>\n      <clipPath id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4\">\n        <rect x=\"0.00\" y=\"0.00\" width=\"504.00\" height=\"504.00\"/>\n      <\/clipPath>\n    <\/defs>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"18.41\" y=\"407.47\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_57\" font-size=\"6.60pt\" fill=\"#4D4D4D\" fill-opacity=\"1\" font-family=\"Arial\">3.0<\/text>\n    <\/g>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"18.41\" y=\"309.65\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_58\" font-size=\"6.60pt\" fill=\"#4D4D4D\" fill-opacity=\"1\" font-family=\"Arial\">3.5<\/text>\n    <\/g>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"18.41\" y=\"211.82\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_59\" font-size=\"6.60pt\" fill=\"#4D4D4D\" fill-opacity=\"1\" font-family=\"Arial\">4.0<\/text>\n    <\/g>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"18.41\" y=\"113.99\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_60\" font-size=\"6.60pt\" fill=\"#4D4D4D\" fill-opacity=\"1\" font-family=\"Arial\">4.5<\/text>\n    <\/g>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"18.41\" y=\"16.16\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_61\" font-size=\"6.60pt\" fill=\"#4D4D4D\" fill-opacity=\"1\" font-family=\"Arial\">5.0<\/text>\n    <\/g>\n    <polyline points=\"32.83,404.32 35.57,404.32\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_62\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#333333\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"32.83,306.50 35.57,306.50\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_63\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#333333\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"32.83,208.67 35.57,208.67\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_64\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#333333\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"32.83,110.84 35.57,110.84\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_65\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#333333\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"32.83,13.01 35.57,13.01\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_66\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#333333\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"49.45,475.25 49.45,472.51\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_67\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#333333\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"139.00,475.25 139.00,472.51\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_68\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#333333\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"228.54,475.25 228.54,472.51\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_69\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#333333\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"318.09,475.25 318.09,472.51\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_70\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#333333\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"407.63,475.25 407.63,472.51\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_71\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#333333\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <polyline points=\"497.18,475.25 497.18,472.51\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_72\" clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\" fill=\"none\" stroke-width=\"1.06698\" stroke=\"#333333\" stroke-opacity=\"1\" stroke-linejoin=\"round\" stroke-linecap=\"butt\"/>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"44.56\" y=\"483.74\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_73\" font-size=\"6.60pt\" fill=\"#4D4D4D\" fill-opacity=\"1\" font-family=\"Arial\">10<\/text>\n    <\/g>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"134.10\" y=\"483.74\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_74\" font-size=\"6.60pt\" fill=\"#4D4D4D\" fill-opacity=\"1\" font-family=\"Arial\">15<\/text>\n    <\/g>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"223.65\" y=\"483.74\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_75\" font-size=\"6.60pt\" fill=\"#4D4D4D\" fill-opacity=\"1\" font-family=\"Arial\">20<\/text>\n    <\/g>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"313.19\" y=\"483.74\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_76\" font-size=\"6.60pt\" fill=\"#4D4D4D\" fill-opacity=\"1\" font-family=\"Arial\">25<\/text>\n    <\/g>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"402.74\" y=\"483.74\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_77\" font-size=\"6.60pt\" fill=\"#4D4D4D\" fill-opacity=\"1\" font-family=\"Arial\">30<\/text>\n    <\/g>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"492.28\" y=\"483.74\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_78\" font-size=\"6.60pt\" fill=\"#4D4D4D\" fill-opacity=\"1\" font-family=\"Arial\">35<\/text>\n    <\/g>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text x=\"256.35\" y=\"496.21\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_79\" font-size=\"8.25pt\" font-family=\"Arial\">mpg<\/text>\n    <\/g>\n    <g clip-path=\"url(#svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_cl_4)\">\n      <text transform=\"translate(13.35,248.47) rotate(-90)\" id=\"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd_el_80\" font-size=\"8.25pt\" font-family=\"Arial\">drat<\/text>\n    <\/g>\n  <\/g>\n<\/svg>\n","js":null,"uid":"svg_d86b6f2c-052f-11ea-95bc-fb018d2e93bd","ratio":1,"settings":{"tooltip":{"css":" .tooltip_SVGID_ { background-color:lightgray; ; position:absolute;pointer-events:none;z-index:999;}\n","offx":10,"offy":0,"use_cursor_pos":true,"opacity":0.9,"usefill":false,"usestroke":false,"delay":{"over":200,"out":500}},"hover":{"css":" .hover_SVGID_ { fill:orange;stroke:gray; }\n"},"hoverkey":{"css":" .hover_key_SVGID_ { stroke:red; }\n"},"hovertheme":{"css":" .hover_theme_SVGID_ { fill:green; }\n"},"zoom":{"min":1,"max":1},"capture":{"css":" .selected_SVGID_ { fill:red;stroke:gray; }\n","type":"multiple","only_shiny":true,"selected":[]},"capturekey":{"css":" .selected_key_SVGID_ { stroke:gray; }\n","type":"single","only_shiny":true,"selected":[]},"capturetheme":{"css":" .selected_theme_SVGID_ { stroke:gray; }\n","type":"single","only_shiny":true,"selected":[]},"toolbar":{"position":"topright","saveaspng":false},"sizing":{"rescale":true,"width":1}}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="export-plot-as-htmlwidget" class="section level1">
+<h1>Export plot as htmlwidget</h1>
+<p>Now, let’s save this interactive plot with the <code>saveWidget</code> function from the <code>htmlwidgets</code> package. The purpose is to import the interactive plot into a <code>blogdown</code> post (as below). To highlight/make visible the remaining padding, I set the background to red.</p>
+<pre><code>
+
+```r
+saveWidget(my_plot, file=&quot;widget_saved_wo_padding.html&quot;,
+            background = &quot;red&quot;)</code></pre>
+</div>
+<div id="import-widget-and-adjust-sizing" class="section level1">
+<h1>Import widget and adjust sizing</h1>
+<p>Now let’s import the widget into the a <code>blogdown</code> blogpost (via the insert image function of the blogdown add-in). Several seizing versions are demonstrated below:</p>
+<div id="without-size-options" class="section level2">
+<h2>without size options</h2>
+<p>Without any sizing options the plot is small and embedded with a vertical scrollbar. Note that there is a small
+padding at the bottom (in red).</p>
+<pre class="r"><code>![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html)</code></pre>
+<p><embed src="/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html" /></p>
+</div>
+<div id="width100-height100" class="section level2">
+<h2>width=100% height=100%</h2>
+<p>The plot as an intended size, but the height is still too small (despite height=100%).</p>
+<pre class="r"><code>![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=100%}</code></pre>
+<p><embed src="/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html" style="width:100.0%;height:100.0%" /></p>
+</div>
+<div id="width100-height672px" class="section level2">
+<h2>width=100% height=672px</h2>
+<p>The vertical size of the plot changes but remains too small; vertical scrollbars remain</p>
+<pre class="r"><code>![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=672px}</code></pre>
+<p><embed src="/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html" style="width:100.0%" height="672" /></p>
+</div>
+<div id="width100-height1100px" class="section level2">
+<h2>width=100% height=1100px</h2>
+<p>The plot is now well visible, without any scrollbars. The padding at the bottom grew somewhat but is sitll ok.</p>
+<pre class="r"><code>![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=1100px}</code></pre>
+<p><embed src="/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html" style="width:100.0%" height="1100" /></p>
+</div>
+<div id="problem-laptopscreen-padding-becomes-too-large" class="section level2">
+<h2>PROBLEM: Laptopscreen; padding becomes too large</h2>
+<p>When moving the browser window from my main screen to the laptop screen, the padding grows and becomes distorting (I assume others can replicate this). The reason is likely that the laptop screen has fewer pixles and the ‘fix’ definition of the vertical size (1100 px) appears proportionally larger. How to solve this?</p>
+<p><img src="/post/2019-11-12-testing-new-post_files/screen_shot_laptop.PNG" /></p>
+</div>
+</div>
+
+
+
+  <div id=links>
+    
+      <a class="basic-alignment left gray no-underline f6" href="/post/women-in-parliament/">&laquo; Women in parliament</a>
+    
+    
+  </div>
+
+      
+      <span class="f6 gray mv3" title="Lastmod: November 12, 2019. Published at: 2019-11-12.">
+        
+      </span>
+
+      
+
+  </section>
+
+
+  <div class="fr-ns fr-nm" id="sidebar-wrapper">
+    <div id="sidebar">      
+      <ul class="nav nav-pills nav-stacked fr-ns fr-nm" style="list-style:none;">
+         
+        
+        
+        
+        
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h1 no-underline"><a href="#create-interactive-plot">
+                    Create interactive plot
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h1 no-underline"><a href="#export-plot-as-htmlwidget">
+                    Export plot as htmlwidget
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h1 no-underline"><a href="#import-widget-and-adjust-sizing">
+                    Import widget and adjust sizing
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#without-size-options">
+                    without size options
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#width100-height100">
+                    width=100% height=100%
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#width100-height672px">
+                    width=100% height=672px
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#width100-height1100px">
+                    width=100% height=1100px
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#problem-laptopscreen-padding-becomes-too-large">
+                    PROBLEM: Laptopscreen; padding becomes too large
+                </a></li>
+              
+            
+          
+        
+      </ul>
+    </div>
+  </div>
+
+
+  <footer>
+    <div>
+      <p class="f6 gray mt6 lh-copy">
+        © Roland Schmidt <a href='https://twitter.com/zoowalk' style='color:gray'>@zoowalk</a>
+      </p>
+    </div>
+  </footer>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.2/highlight.min.js"></script>
+
+<script>
+  hljs.initHighlightingOnLoad();
+</script>
+
+
+
+  </body>
+</html>
