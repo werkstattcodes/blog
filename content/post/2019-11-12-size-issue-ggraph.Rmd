@@ -14,8 +14,7 @@ output:
     fig_width: 10
 ---
 
-This post documents a potential issue when it comes to sizing interactive images/htmlwidgets produced with the `ggiraph` and `htmlwidgets` packages.
-The goal is to import interactive graphs produced in other R(Studio) Projects into a `blogdown` post.
+This post documents a potential issue when it comes to sizing interactive images/htmlwidgets produced with the `ggiraph` and `htmlwidgets` packages. The goal is to import interactive graphs produced in other R(Studio) Projects into a `blogdown` post. I assume/hope there there is a relatively easy solution to it, but I haven't yet figured it out.
 
 
 # Create interactive plot
@@ -53,11 +52,11 @@ my_plot
 
 Now, let's save this interactive plot with the `saveWidget` function from the `htmlwidgets` package. The purpose is to import the interactive plot into a `blogdown` post (as below). To highlight/make visible the remaining padding, I set the background to red.
 
-```
 
 ```{r, eval=F}
 saveWidget(my_plot, file="widget_saved_wo_padding.html",
             background = "red")
+
 ```
 
 # Import widget and adjust sizing
@@ -69,31 +68,30 @@ Without any sizing options the plot is small and embedded with a vertical scroll
 padding at the bottom (in red).
 
 ```{r, eval=F}
-![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html)
-
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding.html)
 ```
 
-![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html)
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding.html)
 
 ## width=100% height=100%  
 The plot as an intended size, but the height is still too small (despite height=100%).
 
 ```{r, eval=F}
-![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=100%}
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding.html){width=100% height=100%}
 
 ```
 
-![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=100%}
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding.html){width=100% height=100%}
 
 ## width=100% height=672px
 The vertical size of the plot changes but remains too small; vertical scrollbars remain
 
 ```{r, eval=F}
-![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=672px}
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding.html){width=100% height=672px}
 
 ```
 
-![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=672px}
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding.html){width=100% height=672px}
 
 
 ## width=100% height=1100px 
@@ -101,14 +99,27 @@ The plot is now well visible, without any scrollbars. The padding at the bottom 
 
 ```{r, eval=F}
 
-![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=1100px}
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding.html){width=100% height=1100px}
 
 
 ```
 
-![](/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html){width=100% height=1100px}
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding.html){width=100% height=1100px}
 
 ## PROBLEM: Laptopscreen; padding becomes too large
 When moving the browser window from my main screen to the laptop screen, the padding grows and becomes distorting (I assume others can replicate this). The reason is likely that the laptop screen has fewer pixles and the 'fix' definition of the vertical size (1100 px) appears proportionally larger. How to solve this?
 
-![](/post/2019-11-12-testing-new-post_files/screen_shot_laptop.PNG)
+![](/post/2019-11-12-size-issue-ggraph_files/screen_shot_laptop.PNG)
+
+<!-- ## Use widget frame page -->
+
+<!-- saveWidget(frameableWidget(my_plot), file="widget_saved_wo_padding_frameable.html", -->
+<!--             background = "red" -->
+
+<!-- ```{r remedy002} -->
+
+<!-- frameWidget(![]/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html, height = 350, width = '95%') -->
+
+
+<!-- ``` -->
+

@@ -18,8 +18,8 @@
       <pubDate>Tue, 12 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/size-interactive-plots/</guid>
-      <description>This post documents a potential issue when it comes to sizing interactive images/htmlwidgets produced with the ggiraph and htmlwidgets packages.The goal is to import interactive graphs produced in other R(Studio) Projects into a blogdown post.
-Create interactive plotFirst, let’s create an interactive plot. Here it has the dimensions 7 by 7 inches and is meant to have no padding. The result is as expected.</description>
+      <description>This post documents a potential issue when it comes to sizing interactive images/htmlwidgets produced with the ggiraph and htmlwidgets packages. The goal is to import interactive graphs produced in other R(Studio) Projects into a blogdown post. I assume/hope there there is a relatively easy solution to it, but I haven’t yet figured it out.
+Create interactive plotFirst, let’s create an interactive plot. Here it has the dimensions 7 by 7 inches and is meant to have no padding.</description>
     </item>
     
     <item>
