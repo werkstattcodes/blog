@@ -1,10 +1,10 @@
 ---
 title: "Austrian General Elections 2019: Preference votes"
 author: rs
-date: '2019-10-15'
+date: '2019-11-13'
 slug: vorzugsstimmen
 categories: []
-draft: true
+draft: false
 tags:
   - elections
   - stringr
@@ -20,6 +20,7 @@ output:
 
 
 
+<p>Work in progress…</p>
 <div id="context" class="section level1">
 <h1>Context</h1>
 <p>On 29 September, Austria held its general elections to the national assembly (<em>Nationalrat</em>). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (and <a href="https://www.nytimes.com/reuters/2019/11/10/world/europe/10reuters-austria-politics.html" target="_blank"><u>government formation</u></a> train finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate. So this post is essentially my first ‘exploratory’ go at preference votes. So no specific question, no specific theoretical framework in mind, just poking. I’ll first present the results, then detail the steps implemented in R to obtain, analyze and visualize the relevant data. The entire code for the analysis is available on my github <a href="https://github.com/zoowalk/NRW19_preference_votes/" target="_blank"><u>account</u></a>. As always, if you spot any glaring error etc, don’t hesitate and let me know.</p>
@@ -94,29 +95,7 @@ output:
 </div>
 <div id="steps-in-r" class="section level1">
 <h1>Steps in R</h1>
-<div id="getting-the-data" class="section level2">
-<h2>Getting the data</h2>
-<p>Data on the preference votes is available at the homepage of MoI. Two files are provided. One for the federal level list and one for the state and regional electoral lists. The somewhat trickier part was to combine the different files and arrange the data in a tidy way so that any subsequent analysis can be efficient and easily reproducible.</p>
-</div>
-<div id="names" class="section level2">
-<h2>Names</h2>
-<p>One Austrian peculiarity (although Austria is certainly not unique in this regard), is the verbose use of various titles in the name. When displaying individual results this can be sometimes a bit of a nuisance since titles consume precious space and, let’s be frank, are completely irrelevant for the focus of most analyses. To remedy this issue, below a short function which I came up with for this analysis. Stringr and regex are our friends here and with lookaheads and lookbehind allow us to extract those characters which are before the first comma (family name) and behind the last comma (first name). The first name is further initialized. Note, to avoid any mix-up of candidates when aggregating over candidates, the analysis remains based on the full names, but labels eventually display only the shortened version.</p>
-<pre class="r"><code>fn_remove_titles &lt;- function(x) {
-  
-titles &lt;- c(&quot;Mag&quot;, &quot;MMag&quot;, &quot;Prof&quot;, &quot;Dr&quot;, &quot;O\\.Univ\\.Prof&quot;, &quot;Dipl-Ing&quot;, &quot;Dipl.-Ing.&quot;, &quot;Dipl.-Rev.&quot;, &quot;Ing&quot;, &quot;Dipl&quot;, &quot;jun&quot;,&quot;sen&quot;, &quot;Ba&quot;, &quot;\\(FH\\)&quot;, &quot;MSc&quot;, &quot;med&quot;, &quot;univ&quot;, &quot;Bsc&quot;, &quot;phil&quot;, &quot;iur&quot;, &quot;DDr&quot;, &quot;BEd&quot;, &quot;DI&quot;, &quot;Mba&quot;, &quot;Mas&quot;, &quot;MA&quot;, &quot;MIM&quot;,&quot;vet&quot;, &quot;M.A.&quot;, &quot;PMM&quot;, &quot;MTD&quot;, &quot;Päd&quot;, &quot;Bakk&quot;) %&gt;%
-    map(., paste0, c(&quot;\\.&quot;, &quot;\\s&quot;, &quot;\\,&quot;)) %&gt;% unlist()
-
-  name_wo_titles &lt;- stringr::str_remove_all(x, regex(&quot;[[:alpha:]\\-]+\\.&quot;)) %&gt;% 
-    str_remove_all(., regex(&quot;\\([:alpha:]+\\)&quot;)) %&gt;% 
-    str_remove_all(., regex(paste0(titles, collapse=&quot;|&quot;), ignore_case = T)) %&gt;% 
-    str_squish()
-}</code></pre>
-<p>Note that while the function makes you life somewhat easier, it obviously doesn’t take care of any inconsistencies of names already contained in the original source. Suprisingly, there were quite some discrepancies in the data file provided by the Austrian MoI (which is in charge of running the elections).</p>
-</div>
-<div id="intra-party-dynamics-1" class="section level2">
-<h2>Intra-party dynamics</h2>
-<p>This part got lengthier than initially expected. What it essentially entails is getting the results of the elections and merge the outcome for each constituency level with the candidates running on the corresponding constituency level. Only in this way we can identify those candidates which have crossed the above mentioned threshold and advance on the electoral list. Below the code, one chunk at a time.</p>
-</div>
+<p>follow soon.</p>
 </div>
 <div class="footnotes">
 <hr />

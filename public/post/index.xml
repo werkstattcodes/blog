@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Tue, 12 Nov 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 13 Nov 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Austrian General Elections 2019: Preference votes</title>
+      <link>/post/vorzugsstimmen/</link>
+      <pubDate>Wed, 13 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/vorzugsstimmen/</guid>
+      <description>Work in progress…
+ContextOn 29 September, Austria held its general elections to the national assembly (Nationalrat). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (and government formation train finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate.</description>
+    </item>
     
     <item>
       <title>Potential sizing issue when importing interactive plots (ggraph; htmlWidget)</title>
@@ -38,15 +48,6 @@ Create interactive plotFirst, let’s create an interactive plot. Here it has t
       
       <guid>/post/link-to-previous-posts/</guid>
       <description>Earlier ramblings were collected on my RPubs file. I’ll gradually move theme to this site, but till then they remain available at here.</description>
-    </item>
-    
-    <item>
-      <title>Austrian General Elections 2019: Preference votes</title>
-      <link>/post/vorzugsstimmen/</link>
-      <pubDate>Tue, 15 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/post/vorzugsstimmen/</guid>
-      <description>ContextOn 29 September, Austria held its general elections to the national assembly (Nationalrat). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (and government formation train finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate.</description>
     </item>
     
   </channel>

@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Thu, 24 Oct 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 13 Nov 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/elections/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Austrian General Elections 2019: Preference votes</title>
+      <link>/post/vorzugsstimmen/</link>
+      <pubDate>Wed, 13 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/vorzugsstimmen/</guid>
+      <description>Work in progress…
+ContextOn 29 September, Austria held its general elections to the national assembly (Nationalrat). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (and government formation train finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate.</description>
+    </item>
     
     <item>
       <title>Women in parliament</title>
@@ -19,15 +29,6 @@
       
       <guid>/post/women-in-parliament/</guid>
       <description>ContextSo, Austria has a new parliament. Following the elections in September, the new lower house got constituted yesterday and as a few noted it is more diverse than previous ones. Here’s a nice visualization if you want to get a quick overview. Among others, it was the share of women in parliament which was particularly often noted. None of Austria’s previous lower houses had an as high share of women at the start of a new legislative period.</description>
-    </item>
-    
-    <item>
-      <title>Austrian General Elections 2019: Preference votes</title>
-      <link>/post/vorzugsstimmen/</link>
-      <pubDate>Tue, 15 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/post/vorzugsstimmen/</guid>
-      <description>ContextOn 29 September, Austria held its general elections to the national assembly (Nationalrat). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (and government formation train finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate.</description>
     </item>
     
   </channel>
