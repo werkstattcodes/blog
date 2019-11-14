@@ -4,21 +4,18 @@ author: rs
 date: '2019-11-12'
 slug: size-interactive-plots
 categories: []
+draft: true
 tags:
   - ggiraph
 description: ''
-output: 
-  html_document: 
-    fig_caption: yes
-    fig_height: 10
-    fig_width: 10
+output: html_document
 ---
 
 This post documents a potential issue when it comes to sizing interactive images/htmlwidgets produced with the `ggiraph` and `htmlwidgets` packages. The goal is to import interactive graphs produced in other R(Studio) Projects into a `blogdown` post. I assume/hope there there is a relatively easy solution to it, but I haven't yet figured it out.
 
 
 # Create interactive plot
-First, let's create an interactive plot. Here it has the dimensions 7 by 7 inches and is meant to have **no padding**. The result is as expected.
+First, let's create an interactive plot. Here it has the dimensions 10 by 5 inches and is meant to have no padding. The result is as expected. The goal is to have a similar appearance/behavior after importing this graph into a blogdown post in a different R project. The vertical and horizontal page re-size nicely, text flow remains in order.
 
 ```{r remedy001}
 library(tidyverse)
@@ -30,18 +27,19 @@ my_plot <- mtcars %>%
   ggplot()+
   geom_point_interactive(aes(x=mpg,
                              y=drat,
-                             tooltip=car_name))
+                             tooltip=car_name,
+                             data_id=car_name))
+  
 
 
 my_plot <- girafe(code = print(my_plot), 
                   width_svg=10,
-                  height_svg= 7,
+                  height_svg= 5,
                   options = list(opts_toolbar(saveaspng = FALSE),
-                                 opts_sizing(rescale=F),
-                                 opts_tooltip(css="background-color:lightgray;")))
-
-my_plot <- girafe_options(x = my_plot,
-                    sizingPolicy(padding = "0px"))
+                                 opts_sizing(rescale=T),
+                                 opts_tooltip(css="background-color:lightgray;"))) %>%
+  girafe_options(.,
+                 sizingPolicy(padding = "0px"))
 
 my_plot
 
@@ -54,12 +52,138 @@ Now, let's save this interactive plot with the `saveWidget` function from the `h
 
 
 ```{r, eval=F}
-saveWidget(my_plot, file="widget_saved_wo_padding_no_rescaling.html",
+saveWidget(my_plot, file="widget_saved_wo_padding_with_rescaling.html",
             background = "red")
 
 ```
+# Import widget as an iframe
 
-# Import widget and adjust sizing
+## with dimensions defined in absolute terms
+10 x 5 inches = 960 x 480 pxls  
+*advantage*: vertical space after plot remains fixed; text flow does not get distorted  
+*disadvantage*: iframe/graph does not shrink horizontally; graph reaches into table of contents on the right side when changing size of browser/screen
+
+```{r, eval=F}
+
+
+<iframe id="inlineFrameExample2"
+
+    title="Inline Frame Example2"
+
+    width="960"
+
+    height="480"
+
+    frameborder="0" scrolling="no" 
+
+
+    src="/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding_with_rescaling.html">
+
+</iframe>
+
+```
+
+<iframe id="inlineFrameExample2"
+
+    title="Inline Frame Example2"
+
+    width="960"
+
+    height="480"
+
+    frameborder="0" scrolling="no" 
+
+
+    src="/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding_with_rescaling.html">
+
+</iframe>
+text under plot; is there excessive space?
+
+
+## relative definition of dimensions
+*disadvantage*: vertical space too small; graph is cut off;
+
+
+```{r, eval=F}
+
+<iframe id="inlineFrameExample3"
+
+    title="Inline Frame Example3"
+
+    frameborder="0" scrolling="no" 
+
+    style="position: relative; height: 100%; width: 100%;"
+
+    src="/post/2019-11-12-size-issue-ggraph_files/widget_saved_w_padding_with_rescaling.html">
+
+</iframe>
+
+```
+
+
+<iframe id="inlineFrameExample3"
+
+    title="Inline Frame Example3"
+
+    frameborder="0" scrolling="no" 
+
+    style="position: relative; width: 100%; height: 100%"
+
+    src="/post/2019-11-12-size-issue-ggraph_files/widget_saved_w_padding_with_rescaling.html">
+
+</iframe>
+text under plot; is there excessive space?
+
+
+
+## mixing relative and absolute definition of dimensions
+*disadvantage*: excessive vertical space reemerges when moving to smaller screen
+
+```{r, eval=F}
+
+<iframe id="inlineFrameExample4"
+
+    title="Inline Frame Example3"
+
+    frameborder="0" scrolling="no" 
+
+    style="position: relative; height:480px; width: 100%;"
+
+    src="/post/2019-11-12-size-issue-ggraph_files/widget_saved_w_padding_with_rescaling.html">
+
+</iframe>
+
+```
+
+
+<iframe id="inlineFrameExample3"
+
+    title="Inline Frame Example3"
+
+    frameborder="0" scrolling="no" 
+
+    style="position: relative; height:480px; width: 100%;"
+
+    src="/post/2019-11-12-size-issue-ggraph_files/widget_saved_w_padding_with_rescaling.html">
+
+</iframe>
+text under text under plot; is there excessive space?
+
+
+# Javascript (digging a hole...)
+
+resizes the plot when reloading the browser; should be a reising trigger though...
+
+<iframe src="/post/2019-11-12-size-issue-ggraph_files/widget_saved_w_padding_with_rescaling.html" onload='javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight+"px";}(this));' style="height:480px;width:100%;border:none;overflow:hidden;"></iframe>
+text under plot; is there excessive space?
+
+
+
+<br/><br/>
+<br/><br/>
+
+
+# OLD: Import widget and adjust sizing
 
 Now let's import the widget into the a `blogdown` blogpost (via the insert image function of the blogdown add-in). Several seizing versions are demonstrated below:
 
@@ -123,20 +247,35 @@ my_plot <- girafe(code = print(my_plot),
                                  opts_sizing(rescale=F),
                                  opts_tooltip(css="background-color:lightgray;")))
 
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding_no_rescaling.html){width=100% height=100%}
+
 ```
+
 
 ![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding_no_rescaling.html){width=100% height=100%}
 
 
-<!-- ## Use widget frame page -->
 
-<!-- saveWidget(frameableWidget(my_plot), file="widget_saved_wo_padding_frameable.html", -->
-<!--             background = "red" -->
+##without padding=0
 
-<!-- ```{r remedy002} -->
-
-<!-- frameWidget(![]/post/2019-11-12-testing-new-post_files/widget_saved_wo_padding.html, height = 350, width = '95%') -->
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_w_padding_with_rescaling.html)
 
 
-<!-- ``` -->
 
+```{r, eval=F}
+# Attempt with plotly
+
+library(plotly)
+my_plot_2 <- mtcars %>% 
+  rownames_to_column(., var="car_name") %>% 
+  ggplot()+
+  geom_point(aes(x=mpg,
+                 y=drat))
+  
+plotly::ggplotly(my_plot_2)
+my_plotly <- plotly::ggplotly(my_plot_2)
+htmlwidgets::saveWidget(as_widget(my_plotly), paste0(wdr, "plotly_graph.html"))
+
+```
+
+![](/post/2019-11-12-size-issue-ggraph_files/plotly_graph.html){width=100% height=100%}
