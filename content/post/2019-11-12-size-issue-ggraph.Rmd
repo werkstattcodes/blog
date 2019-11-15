@@ -56,6 +56,13 @@ saveWidget(my_plot, file="widget_saved_wo_padding_with_rescaling.html",
             background = "red")
 
 ```
+
+
+
+***
+
+
+
 # Import widget as an iframe
 
 ## with dimensions defined in absolute terms
@@ -182,6 +189,43 @@ text under plot; is there excessive space?
 <br/><br/>
 <br/><br/>
 
+
+---
+
+
+# Export and Import with `widgetframe` package
+
+## Export
+
+```{r, eval=F}
+library(widgetframe)
+saveWidget(frameableWidget(my_plot), file="widget_saved_wo_padding_with_rescaling_widgetframe.html",
+            background = "red")
+
+```
+
+## Import widgetframe
+
+
+
+<iframe id="inlineFrameExample3"
+
+    title="Inline Frame Example3"
+
+    frameborder="0" scrolling="no" 
+
+    style="position: relative; height:480px; width: 100%;"
+
+    src="/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding_with_rescaling_widgetframe.html">
+
+</iframe>
+
+![](/post/2019-11-12-size-issue-ggraph_files/widget_saved_wo_padding_with_rescaling_widgetframe.html){width=100% height=480px}
+
+
+
+
+---
 
 # OLD: Import widget and adjust sizing
 
