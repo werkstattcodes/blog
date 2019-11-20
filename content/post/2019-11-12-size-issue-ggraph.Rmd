@@ -4,7 +4,7 @@ author: rs
 date: '2019-11-12'
 slug: size-interactive-plots
 categories: []
-draft: false
+draft: true
 tags:
   - ggiraph
 description: ''
