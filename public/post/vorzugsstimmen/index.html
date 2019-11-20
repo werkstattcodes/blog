@@ -52,8 +52,7 @@ Austria,
 />
 <meta
   name="twitter:description"
-  content="Draft
-ContextOn 29 September, Austria held its general elections to the national assembly (Nationalrat). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (and government formation train finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate.|"
+  content="ContextOn 29 September, Austria held its general elections to the national assembly (Nationalrat). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (the government formation train is finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate.|"
 />
 <meta name="twitter:image:src" content="" />
 <meta name="twitter:domain" content="/post/vorzugsstimmen/" />
@@ -122,81 +121,84 @@ if (!doNotTrack) {
 
       <article itemprop="articleBody" id="content" class="w-90 lh-copy">
         
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
 
-<p>Draft</p>
 <div id="context" class="section level1">
 <h1>Context</h1>
-<p>On 29 September, Austria held its general elections to the national assembly (<em>Nationalrat</em>). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (and <a href="https://www.nytimes.com/reuters/2019/11/10/world/europe/10reuters-austria-politics.html" target="_blank"><u>government formation</u></a> train finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate. So this post is essentially my first ‘exploratory’ go at preference votes. So no specific question, no specific theoretical framework in mind, just poking. I’ll first present the results, then detail the steps implemented in R to obtain, analyze and visualize the relevant data. The entire code for the analysis is available on my github <a href="https://github.com/zoowalk/NRW19_preference_votes/" target="_blank"><u>account</u></a>. As always, if you spot any glaring error etc, don’t hesitate and let me know.</p>
-<p>Preference vote (<em>Vorzugsstimme</em>) refer to voters’ option (but not obligation) to indicate their support/preference for specific candidates running for the party of their choice. Since Austrian candidates run on a nation wide federal district list (<em>Bundeswahlkreis</em>), one of nine state district lists (<em>Landeswahlkreis</em>), or/and one of 39 regional district lists (<em>Regionalwahlkreis</em>), voters can cast up to three preference votes <a href="https://www.help.gv.at/Portal.Node/hlpd/public/resources/documents/NRW2017_Vorzugsstimmen.jpg" target="_blank">(<u>here</u></a> a sample ballot slip). Eventually, a candidate’s number of preference votes can be consequential when it comes to distributing the seats which a party won to the individual candidates. Without preference votes, seats are distributed in accordance to their position on he electoral list. The lower a candidate is on a list, the lower the likelihood that she can actually get a seat. However, with a sufficient large number of preference votes, the pre-election order on the electoral list can change and initially lower ranked candidates can move further up and eventually gain a seat. For details see <a href="https://www.oesterreich.gv.at/themen/leben_in_oesterreich/wahlen/1/Seite.320260.html" target="_blank"><u>here</u></a>. But more on that later. First some general results.</p>
+<p>On 29 September, Austria held its general elections to the national assembly (<em>Nationalrat</em>). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (the <a href="https://www.nytimes.com/reuters/2019/11/10/world/europe/10reuters-austria-politics.html" target="_blank"><u>government formation</u></a> train is finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate. This post is essentially my first ‘exploratory’ go at preference votes. No specific question, no specific theoretical framework in mind, just poking. I’ll first present the results, then detail some of the steps implemented in R to obtain, analyze and visualize the relevant data. The entire code for the analysis is available on my github <a href="https://github.com/zoowalk/NRW19_preference_votes/" target="_blank"><u>account</u></a>. As always, if you spot any glaring error etc, don’t hesitate and let me know.</p>
+<p>Preference vote (<em>Vorzugsstimme</em>) refer to voters’ option (but not obligation) to indicate their support/preference for specific candidates running for the party of their choice. Since Austrian candidates run on a nation wide federal district list (<em>Bundeswahlkreis</em>), one of nine state district lists (<em>Landeswahlkreis</em>), or/and one of 39 regional district lists (<em>Regionalwahlkreis</em>), voters can cast up to three preference votes <a href="https://www.help.gv.at/Portal.Node/hlpd/public/resources/documents/NRW2017_Vorzugsstimmen.jpg" target="_blank">(<u>here</u></a> a sample ballot slip). Eventually, a candidate’s number of preference votes can be consequential when it comes to distributing the seats which a party won to the individual candidates. Without preference votes, seats are distributed in accordance to candidates’ position on the electoral list. The lower a candidate is on a list, the lower the likelihood that she can actually get a seat. However, with a sufficient large number of preference votes, the pre-election order on the electoral list can change and initially lower ranked candidates can move up and eventually gain a seat. For details see <a href="https://www.oesterreich.gv.at/themen/leben_in_oesterreich/wahlen/1/Seite.320260.html" target="_blank"><u>here</u></a>.</p>
 </div>
 <div id="results" class="section level1">
 <h1>Results</h1>
 <div id="by-district-list" class="section level2">
 <h2>by district list</h2>
 <p>Overall, there were 1,8 million preference votes cast. The largest part (more than 60 %) were cast for candidates running on regional district lists. Probably this could be read as voters been particularly keen to support ‘their’ local/regional candidates to make it into the new parliament. Ties between voters and regional candidates are likely to be different than those between voters and candidates running on the more ‘removed’ federal or state constituency list.</p>
-<p><img src="/post/2019-10-15-vorzugsstimmen_files/2019-11-11Total_preferences_per_district.png" /></p>
+<p><img src="/post/2019-10-15-vorzugsstimmen_files/2019-11-19Total_preferences_per_district.png" /></p>
 </div>
 <div id="by-constituency-list-and-party" class="section level2">
 <h2>by constituency list and party</h2>
-<p>If we further disaggregate these numbers and differentiate between parties, we see that preference votes obtained on the regional level accounted for the majority of preference votes for all parties. However, there is a noticeable difference between the comparable low 55.9 % of the Freedom Party (FPÖ) and e.g. the 65.7 % of the Social Democrats (SPÖ) or the 64.1 % of the NEOS. Or put differently, with 34.1 % the share of preference votes obtained on the federal level, the Freedom Party stands out. As for the underlying reasons, I can only speculate. One reading could be that voters of the FPÖ have weaker ties to their candidates on the regional or state level and hence felt less inclined to cast a preference vote for them. Another one could be that the relation among FPÖ’s candidates on the federal list were particularly competitive and hence a disproportionate high number of voters casted preference votes on the federal list. Considering the exit of former party leader HC Strache (<a href="https://www.theguardian.com/world/2019/may/20/austria-ibiza-scandal-sting-operation-what-happened-why-does-it-matter" target="_blank"><u>Ibiza</u></a>…) and the subsequent (not yet consolidated?) change in the leadership, this seems plausible (see below). It however does not explain why FPÖ voters did not cast preference votes for candidates on state or regional lists.</p>
-<p><img src="/post/2019-10-15-vorzugsstimmen_files/2019-11-11Total_preferences_per_district_per_party.png" /></p>
+<p>If we further disaggregate these numbers and differentiate between parties, we see that preference votes obtained on the regional level accounted for the majority of preference votes for all parties. However, there is a noticeable difference between the comparable low 55.9 % of the Freedom Party (FPÖ) and e.g. the 65.7 % of the Social Democrats (SPÖ) or the 64.1 % of the NEOS. Or put differently, with 34.1 % the share of preference votes obtained on the federal level, the Freedom Party stands out. As for the underlying reasons, I can only speculate. One reading could be that voters of the FPÖ have weaker ties to their candidates on the regional or state level and hence felt less inclined to cast a preference vote for them. Another one could be that the relation among FPÖ’s candidates on the federal list were particularly competitive and hence a disproportionate high number of voters were mobilized to cast their preference votes on the federal list. Considering the exit of former party leader HC Strache (<a href="https://www.theguardian.com/world/2019/may/20/austria-ibiza-scandal-sting-operation-what-happened-why-does-it-matter" target="_blank"><u>Ibiza</u></a>…) and the subsequent (not yet consolidated?) change in the leadership, this seems plausible (see below). It however does not explain why FPÖ voters did not cast preference votes for candidates on state or regional lists.</p>
+<p><img src="/post/2019-10-15-vorzugsstimmen_files/2019-11-19Total_preferences_per_district_per_party.png" /></p>
 </div>
 <div id="top-5-candidates" class="section level2">
 <h2>Top 5 candidates</h2>
 <p>If we are interested in candidates, which candidates were particularly successful in securing preference votes?</p>
-<p><img src="/post/2019-10-15-vorzugsstimmen_files/2019-11-11Top_candidates.png" /></p>
-<p>The graph above clearly demonstrates the predominate role of former chancellor Sebastian Kurz when it comes to preference votes. With more than 150,000 votes his result clearly outclasses those of any other candidate. With the notable exception of the FPÖ, the leading candidates/party leaders of all parties succeeded in securing most of the preference votes. In the case of the FPÖ, former Minister of Interior Herbert Kickl overtook his party’s leader, Norbert Hofer. What is also noticeable is that party leaders almost exclusively secured their preference votes from the federal constituency list, while their colleagues largely relied on votes from the regional constituency list. Reportedly, Hofer’s ‘defeat’ to Kickl might be due to an administrative issue though. There was another FPÖ candidate with the family name Hofer running on the federal constituency list. When voters put only the candidate’s family name on the ballot to indicate their preference, it was not clear which Hofer was actually meant. As a consequence, these preference votes were reportedly ruled as invalid.</p>
+<p><img src="/post/2019-10-15-vorzugsstimmen_files/2019-11-19Top_candidates.png" /></p>
+<p>The graph above clearly demonstrates the predominate role of former chancellor Sebastian Kurz when it comes to preference votes. With more than 150,000 votes his result clearly outclasses those of any other candidate. With the notable exception of the FPÖ, the leading candidates/party leaders of all parties succeeded in securing most of the preference votes. In the case of the FPÖ, former Minister of Interior Herbert Kickl overtook his party’s leader, Norbert Hofer. What is also noticeable is that party leaders almost exclusively secured their preference votes from the federal constituency list, while their colleagues largely relied on votes from the regional constituency list.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
 <p>Looking at the rankings within parties, I have to admit that I was a bit surprised by the strong performance of a some candidates which I at least had never heard of. The result of T. Mete for the SPÖ, and J Hechenberger for the ÖVP were particularly surprising to me.</p>
 </div>
 <div id="regional-dimension" class="section level2">
 <h2>Regional dimension</h2>
 <div id="by-district-magnitude" class="section level3">
 <h3>by district magnitude</h3>
-<p>The plot below displays a party’s total number of preference votes as percentage of a party’s total vote in each regional electoral constituencies (let’s call this <em>parties’ preference vote share</em>), grouped by constituencies’ magnitude (number of mandates). The motivation behind is the assumption that the fewer mandates are available the higher will be also intra-party competition. With a smaller cake to distribute (fewer mandates), candidates will try particularly hard to win preference votes and move up the electoral list. Here the analysis is limited to the 39 regional electoral lists. Hover</p>
-<p>The plot seems to provide at least some backing to this proposition. The constituency with only 1 mandate to compete for (Osttirol), features the highest median of parties’ preference vote share. While the picture is not entirely clear cut, there seems to be indeed a decreasing median share as constituencies’ magnitude increases from to two to seven mandates. The constituencies with eight and nine mandates (Graz-Umgebung, Hausruckviertel, OberStmk), however, do aberate. over the individual dots to get details.</p>
-<p>Note that a random vertical variation is introduced to avoid individual dots overlapping.</p>
-<p><embed src="/post/2019-10-15-vorzugsstimmen_files/plot_interactive_n_mandates.html" style="width:100.0%" height="504" /></p>
+<p>The plot below displays a party’s total number of preference votes as percentage of a party’s total vote in each regional electoral constituency. Let’s call this for the sake of easier reference <strong>parties’ preference votes - party votes ratio</strong>. Or to predend a serious color, <strong>P-PVPV</strong> ratio.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> This PVPV ratio are grouped by constituencies’ magnitude (number of mandates). The motivation behind is the assumption that the fewer mandates are available the higher will be also intra-party competition. With a smaller cake to distribute (fewer mandates), candidates will try particularly hard to win preference votes and move up the electoral list. Here the analysis is limited to the 39 regional electoral lists. To avoid the indivudal dots overlapping, some random vertical variation was introduced.</p>
+<p>The plot seems to provide at least some backing to this proposition. The constituency with only 1 mandate to compete for (Osttirol) features the highest median of parties’ PVPV ratio. While the picture is not entirely clear cut, there seems to be indeed a decreasing median share as constituencies’ magnitude increases from to two to seven mandates. The constituencies with eight and nine mandates (Graz-Umgebung, Hausruckviertel, OberStmk), however, do deviate.
+Hover-over the individual dots to get details.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
+<iframe id="Party_PVPV_v_district_magnitude" title="Parties&#39; Preference Votes - Party Votes Ratio (P-PVPV) and district magnitude" frameborder="0" scrolling="no" style="position: relative; width: 100%; height: 700px;" src="/post/2019-10-15-vorzugsstimmen_files/Party_PVPV_district_magnitude.html">
+</iframe>
 </div>
 <div id="by-state" class="section level3">
 <h3>by state</h3>
-<p>If we are interested in whether there are any regional differences when it comes to the share of preference votes, grouping parties’ preference vote share by states can be of some help. As the boxplots below show, on average parties’ preference vote share was the largest in Burgenland followed by Vorarlberg. These two states are the two smallest in the country. On the other end, Niederösterreich (Lower Austria), Steiermark (Styria), and Vienna featured on average clearly lower preference vote shares. These three states are Austria’s largest in terms of population. This difference would be in line with the proposition that candidates in smaller states are better in mobilizing personal support, i.e. preference votes. Closer candidate-voter relations due to smaller population size sounds rather probable to me.</p>
-<p><embed src="/post/2019-10-15-vorzugsstimmen_files/party_prefence_share_by_state.html" style="width:100.0%" height="625" /></p>
+<p>If we are interested in whether there are any regional differences when it comes to parties’ PVPV ratios, grouping them by states can be of some help. As the boxplots below show, on average parties’ PVPV ratio was the largest in Burgenland followed by Vorarlberg. These two states are Austria’s two smallest in terms of population. On the other end, Upper Autria (Oberösterreich), Lower Austria (Niedrösterreich), Styria (Steiermark), and Vienna featured on average clearly lower PVPV ratios. These states are Austria’s largest. This difference would be in line with the proposition that candidates in smaller states are better in mobilizing personal support, i.e. preference votes. Closer candidate-voter relations due to smaller population size sounds rather probable to me. But this would certainly need further analysis to corroborate the claim.</p>
+<iframe id="Party_PVPV_v_state" title="Parties&#39; Preference vote - vote ratio (PVPV) by state" frameborder="0" scrolling="no" style="position: relative; width: 100%; height: 700px;" src="/post/2019-10-15-vorzugsstimmen_files/Party_PVPv_state.html">
+</iframe>
 </div>
 </div>
 <div id="intra-party-dynamics" class="section level2">
 <h2>Intra-party dynamics</h2>
 <p>As already outlined above, preference votes are first and foremost interesting from an intra-party perspective. With sufficient votes, candidates which embarked on the electoral campaign from a lower ranked position can move up the intra-party ladder and secure a seat.</p>
-<p>So when do candidate’s move up the ballot list?<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
+<p>So when do candidate’s move up the ballot list?<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a></p>
 <ul>
-<li>On the federal constituency list: when a candidate got a preference votes of at least 7 % of those who voted for her party.</li>
-<li>On the state level constituency list: when a candidate got preference votes of of at least 10 % of those who voted for her party, <em>or</em> at least as many preference votes as the ‘electoral number’ (Wahlzahl)<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>.</li>
+<li>On the federal level: when a candidate got a preference votes of at least 7 % of those who voted for her party.</li>
+<li>On the state level: when a candidate got preference votes of of at least 10 % of those who voted for her party, <em>or</em> at least as many preference votes as the ‘electoral number’ (<em>Wahlzahl</em>)<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>.</li>
 <li>On the regional level: when a candidate got preference votes by at least 14 % of those who voted for her party.</li>
 </ul>
-<p>Did this happen often? Were the constituencies where intra-party movements were particularly strong?</p>
-<div id="candidates-preference-votes-share" class="section level3">
-<h3>Candidates’ preference votes share</h3>
-<p>The graph below presents the number of <strong>preference votes of each candidate as percentage of her party’s total votes in the respective constituency</strong>. Let’s call this here a <em>candidate’s preference vote share</em>. The term might be not ideal since it could be confused with a candidate’s share of preference votes from a party’s total preference votes (which will be relevant later). But since I highlight the difference here, and do not pretend to speak to any theoretical literature which will likely have already coined adequate terms for this, I leave it here. The vertical orange lines indicate the thresholds which candidates have to pass in order to move up on the party’s electoral list. Hover over the individual points to get the data pertaining to each candidate. Note that the x axis is log-transformed to ensure candidates with low share of preference votes remain (somewhat) visible. Note also that only those candidates are included which actually obtained at least one preference vote.</p>
-<p><embed src="/post/2019-10-15-vorzugsstimmen_files/candidate_vote_share_by_list.html" style="width:100.0%" height="1550" /></p>
-<p>At least to me, there were quite a few surprises which I either had missed in the news or maybe were to specific to be taken up. E.g. Josef Cap, a dinosaurs or the Mike Jagger of the SPÖ (well, the dinos eventually made space for a newer breed), was rather successful in his efforts to secure preference votes (Wien Nord West, 40 %).</p>
+<p>Did this happen often?</p>
+<div id="candidates-preference-vote-party-vote-ratio" class="section level3">
+<h3>Candidates’ preference vote party vote ratio</h3>
+<p>The graph below presents <strong>candidates’ preference votes - party votes ratio</strong>, or, to stay <del>serious</del> clumsy, <strong>C-PVPV</strong>. This ratio is candidates’ number of preference votes expressed as % of the total number of votes of her party (in the respective constituency/list). The vertical orange lines indicate the stipulated thresholds which candidates have to pass in order to move up on the party’s electoral list. Hover over the individual points to get the data pertaining to each candidate. Note that the x-axis is log-transformed to ensure candidates with low C-PVPV ratios remain (somewhat) visible. Note also that only those candidates are included which actually obtained at least one preference vote.</p>
+<iframe id="/C_PVPV_by_list" title="C_PVPV_by_list" frameborder="0" scrolling="no" style="position: relative; width: 100%; height: 1550px;" src="/post/2019-10-15-vorzugsstimmen_files/C_PVPV_by_list.html">
+</iframe>
+<p>While the graph provides plenty of details, a few general things standout. First, on the federal level, only two candidates crossed the threshold. Former chancellor Kurz (ÖVP) and former Minister of Interior Kickl (FPÖ). Second, on the state level, not a single candidate secured sufficient preference votes. However, there are several candidates running on regional lists who were able to cross the pertaining threshold. Note that there is no district in which more than one candidate from one party crossed the threshold.</p>
 </div>
 <div id="candidates-preference-votes-and-electoral-number" class="section level3">
 <h3>Candidates’ preference votes and electoral number</h3>
-<p>Aside from candidate’s preference vote share, there is one further avenue to be promoted. See point two of the list above. As for the state constituency level, candidates can move up the ladder not only if they crossed the 10 % threshold, but also if they would have reached more votes than the electoral number (see above). The graph below presents the pertaining figures. In short, none of the candidates succeeded in doing so this elections.</p>
+<p>Aside from candidates’ preference-vote party-vote ratio, candidates have one further avenue to be promoted. See point two of the conditions listed above. On the state constituency level, candidates can move up the ladder not only if they crossed the 10 % threshold, but also if they would have reached more preference votes than the electoral number. The graph below presents the pertaining figures. In short, none of the candidates succeeded in doing so in these elections. In fact, candidates are pretty far from this threshold.</p>
 <p><embed src="/post/2019-10-15-vorzugsstimmen_files/state_electoral_number_plot.html" style="width:100.0%" height="650" /></p>
-<p>So, to sum up, how often did candidates succeed to change the pre-election order of the ballot list? The graph below gives the answer:</p>
-<p><img src="/post/2019-10-15-vorzugsstimmen_files/2019-11-09n_candidates_crossing_threshold.png" /></p>
-<p>A few things are notable. First, most changes happened at the regional constituency lists. There are hardly no changes on the federal wide list (those candidates which managed to cross the threshold were the leading candidates). Second, there is relatively little difference between the parties. At least from this perspective, intra-party competition by means of preference votes seems to be similar among all parties. This is some sort of a surprise to me.</p>
+<p>With the above, we know by now who was able to muster sufficient preference votes to cross the relevant thresholds. However, when aggregating, it makes sense to differentiate between list leaders and those of lower ranks.</p>
+<p><img src="/post/2019-10-15-vorzugsstimmen_files/2019-11-19n_candidates_crossing_threshold.png" /></p>
+<p>The graph below provides the number of candidates per party who were able to cross the required preference vote threshold. On the regional list level, ÖVP, SPÖ, and FPÖ had the same number of candidates, followed by the Greens and Neos. What the graph also reveals is that in the predominant part of cases, the succuessful candidates were in fact parties’ federal/regional list leaders. In total, only seven candidates which were not list leaders succeeded in securing the necessary preference votes. Probably notworthy, 4 of these 7 cases originate from the FPÖ. Does this mean anything? I am tempted to suspect that parties with clear hiearchial structures are less likely to see lower rank candidates overtake their party’s list leaders. In cases, though, in which e.g. the leadership question is not entirely settled, or leaders are confronted with very strong ‘colleagues’ (Feind, Todfeind… Parteifreund), successful preference vote campaigns are more likely to occur. At least that’s an interpretation which came to my mind when seeing the numbers pertaining to the FPÖ (did I hear ‘selecting on the dependent variable’?). On the other hand, this proposition is immediately relativized when checking who these candidates were. With Kunasek (former Minister of Defense, leader of Styria’s FPÖ) and Haimbuchner (leader of Upper Austria’s FPÖ), we have two FPÖ representatives from the party’s upper echelons, who put their names on the ballot list, but - as far as I am aware - see their future as for now (again) in their home states rather than in the national parlament. I am only speculating here, but I found it at least noteworthy that the FPÖ somewhat deviates.</p>
 </div>
 <div id="difference-leader-and-runners-up" class="section level3">
 <h3>Difference Leader and Runners-up</h3>
-<p>Another angle to look at preference votes could be to examine the difference between the two candidates leading in terms of number of preference votes. This gives us some idea on how dominant a candidate has been, i.e. whether the intra-party contestation at the top was particularly high. The graph above seeks to display the difference in candidates preference vote share per party and electoral district. The higher the difference, the lower the competition for the top spot.</p>
-<iframe id="inlineFrameExample2" title="Inline Frame Example2" width="960" height="576" frameborder="0" scrolling="yes" style="position: relative; width: 100%;" src="/post/2019-10-15-vorzugsstimmen_files/candidate_vote_share_difference_rescale_T_padding_0.html">
+<p>Another angle to look at preference votes could be to examine the difference between the two candidates leading in terms of the number of preference votes. This gives us some idea on how dominant a candidate has been, i.e. whether the intra-party contestation at the top was particularly high. The graph above seeks to display the difference in candidates’ <strong>preference vote share</strong> per party and electoral district. Preference vote share is a candidate’s share of her party’s total preference votes in the respective list/constituency. Here, the higher the difference between those, the lower the contestation for the top spot. Hover over the dots to see the two top candidate and their respective share of preference votes. Not the small gap between SPÖ’s leader Rendi-Wagner and Mete.</p>
+<iframe id="inlineFrameExample2" title="Inline Frame Example2" width="960" height="620" frameborder="0" scrolling="no" style="position: relative; width: 100%;" src="/post/2019-10-15-vorzugsstimmen_files/candidate_vote_share_difference.html">
 </iframe>
 </div>
 <div id="concentration-of-preference-votes" class="section level3">
 <h3>Concentration of preference votes</h3>
-<p>Last but not least, let’s see how different parties are when it comes to the concentration of preference votes. Are a party’s preference votes going almost exclusively to one or a few few candidates (high concentration)? Or, are preference votes relatively evenly shared among different candidates (low concentration)? A measure of concentration (Gini coefficient) can provide us with another angle on intra-party dynamics. Below the results:</p>
+<p>Last but not least, to round off the picture, let’s see how different parties are when it comes to the concentration of preference votes. Are a party’s preference votes going almost exclusively to one or only a few candidates (high concentration)? Or, are preference votes relatively evenly shared among different candidates (low concentration)? A measure of concentration (Gini coefficient) can provide us with another angle on intra-party dynamics. Below the results:</p>
 <p><embed src="/post/2019-10-15-vorzugsstimmen_files/concentration_preference_votes.html" style="width:100.0%" height="625" /></p>
 </div>
 </div>
@@ -206,7 +208,7 @@ if (!doNotTrack) {
 <p>Below some of the most important steps in R to obtain the results above. The full code is published on my github account <a href="https://github.com/zoowalk/NRW19_preference_votes" target="_blank">here</a></p>
 <div id="obtaining-the-preference-vote-results" class="section level2">
 <h2>Obtaining the preference vote results</h2>
-<p>The first potential hurdle is to virtually ‘liberate’ the results pertaining to the preference vote. Just have a look a the format of the data <a href="https://www.bmi.gv.at/412/Nationalratswahlen/Nationalratswahl_2019/files/NRW19_Vorzugsstimmen_Landes_Regionalparteiliste_16102019.pdf" target="_blank">here</a> and <a href="https://www.bmi.gv.at/412/Nationalratswahlen/Nationalratswahl_2019/files/NRW19_Vorzugsstimmen_bundesweit_16102019.pdf" target="_blank">here</a>. Particularly the results for the state and regional electoral district lists is not what a follower of ‘<a href="https://vita.had.co.nz/papers/tidy-data.pdf" target="_blank">tidy data</a>’ would hope for. So let’s start wrangling:</p>
+<p>The first potential hurdle is to virtually ‘liberate’ the results pertaining to the preference vote. Just have a look a the format of the data <a href="https://www.bmi.gv.at/412/Nationalratswahlen/Nationalratswahl_2019/files/NRW19_Vorzugsstimmen_Landes_Regionalparteiliste_16102019.pdf" target="_blank">here</a> and <a href="https://www.bmi.gv.at/412/Nationalratswahlen/Nationalratswahl_2019/files/NRW19_Vorzugsstimmen_bundesweit_16102019.pdf" target="_blank">here</a>. Particularly the results for the state and regional electoral district lists are not what a follower of ‘<a href="https://vita.had.co.nz/papers/tidy-data.pdf" target="_blank">tidy data</a>’ would hope for. So let’s start wrangling:</p>
 <pre class="r"><code># get state and regional list--------------------------------------
 df_state_region &lt;- readxl::read_xlsx(path = paste0(wdr, &quot;/data/NRW19_Vorzugsstimmen_Landes_Regionalparteiliste_16102019.xlsx&quot;))
 
@@ -255,8 +257,6 @@ df_state_region_long &lt;- df_state_region %&gt;%
   rename(
     name = familien_vorname,
     pref_votes_abs = vorz_stimm,
-    district_type = district_type,
-    district = district,
     rank_list = reihung,
     birth_year = geb_jahr,
   ) %&gt;%
@@ -300,10 +300,202 @@ df_merge &lt;- bind_rows(
   df_federal_clean
 ) %&gt;%
   ungroup()</code></pre>
+<p>Et voila (here only the first entries). If needed, you can downlaod the cleaned file <a href="https://github.com/zoowalk/NRW19_preference_votes/master/data/AUT_NRW19_preference_votes.csv" target="_blank"><u>here</u></a> github repo.</p>
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:200px; overflow-x: scroll; width:100%; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+district_type
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+district
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+party
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+rank_list
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+name
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+birth_year
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+beruf
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+pref_votes_abs
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Landeswahlkreis
+</td>
+<td style="text-align:left;">
+Landesparteiliste Burgenland
+</td>
+<td style="text-align:left;">
+Liste 1, Liste Sebastian Kurz - die neue Volkspartei (ÖVP)
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+Schwarz, Gabriela
+</td>
+<td style="text-align:right;">
+1990
+</td>
+<td style="text-align:left;">
+Abgeordnete
+</td>
+<td style="text-align:right;">
+2089
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Landeswahlkreis
+</td>
+<td style="text-align:left;">
+Landesparteiliste Burgenland
+</td>
+<td style="text-align:left;">
+Liste 1, Liste Sebastian Kurz - die neue Volkspartei (ÖVP)
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+Berlakovich, DI Nikolaus
+</td>
+<td style="text-align:right;">
+1961
+</td>
+<td style="text-align:left;">
+Landwirt
+</td>
+<td style="text-align:right;">
+3556
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Landeswahlkreis
+</td>
+<td style="text-align:left;">
+Landesparteiliste Burgenland
+</td>
+<td style="text-align:left;">
+Liste 1, Liste Sebastian Kurz - die neue Volkspartei (ÖVP)
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+Kirisits, Karin
+</td>
+<td style="text-align:right;">
+1968
+</td>
+<td style="text-align:left;">
+Angestellte
+</td>
+<td style="text-align:right;">
+403
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Landeswahlkreis
+</td>
+<td style="text-align:left;">
+Landesparteiliste Burgenland
+</td>
+<td style="text-align:left;">
+Liste 1, Liste Sebastian Kurz - die neue Volkspartei (ÖVP)
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+Zarits, Christoph
+</td>
+<td style="text-align:right;">
+1980
+</td>
+<td style="text-align:left;">
+Angestellter
+</td>
+<td style="text-align:right;">
+696
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Landeswahlkreis
+</td>
+<td style="text-align:left;">
+Landesparteiliste Burgenland
+</td>
+<td style="text-align:left;">
+Liste 1, Liste Sebastian Kurz - die neue Volkspartei (ÖVP)
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:left;">
+Pölz, Margot
+</td>
+<td style="text-align:right;">
+1994
+</td>
+<td style="text-align:left;">
+Landwirtin
+</td>
+<td style="text-align:right;">
+102
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Landeswahlkreis
+</td>
+<td style="text-align:left;">
+Landesparteiliste Burgenland
+</td>
+<td style="text-align:left;">
+Liste 1, Liste Sebastian Kurz - die neue Volkspartei (ÖVP)
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+Feiler, Andreas
+</td>
+<td style="text-align:right;">
+1994
+</td>
+<td style="text-align:left;">
+Betriebsleiter
+</td>
+<td style="text-align:right;">
+369
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If needed, you can downlaod the cleaned file <a href="https://github.com/zoowalk/NRW19_preference_votes/master/data/AUT_NRW19_preference_votes.csv" target="_blank"><u>here</u></a> from the github repo.</p>
 </div>
 <div id="abbreviating-names-removing-titles" class="section level2">
 <h2>Abbreviating names, removing titles</h2>
-<p>An issue which has as been a frequent source of annoyance is the verbose use of academic and other (obviously even more important) titles in names. It only unnecessarily takes space from graphs and has something, in my personal view deeply inegalitarian to it (the very purpose of using titles is probably to signal inegalitrianism; but digress). So, let’s remove all titles and only use the first letter of the first name. <a href="https://stringr.tidyverse.org/articles/regular-expressions.html" target="_blank"><code>Regex</code></a> and <a href="https://stringr.tidyverse.org/index.html" target="_blank"><code>stringr</code></a> are here your friends. Since this is a task which comes up time and again, it actually screams for a package…</p>
+<p>An issue which has as been a frequent source of annoyance is the verbose use of academic and other (obviously even more important) titles in names. It only unnecessarily takes space from graphs and has something, in my personal view, deeply inegalitarian to it (the very purpose of using titles is probably to signal inegalitrianism). So, let’s remove all titles and only use the first letter of the first name. <a href="https://stringr.tidyverse.org/articles/regular-expressions.html" target="_blank"><code>Regex</code></a> and <a href="https://stringr.tidyverse.org/index.html" target="_blank"><code>stringr</code></a> are your friends here. Since this is a task which comes up time and again, it actually screams for a r package…</p>
 <pre class="r"><code>fn_remove_titles &lt;- function(x) {
   titles &lt;- c(
     &quot;Mag&quot;, &quot;MMag&quot;, &quot;Prof&quot;, &quot;Dr&quot;, &quot;O\\.Univ\\.Prof&quot;, &quot;Dipl-Ing&quot;, &quot;Dipl.-Ing.&quot;, &quot;Dipl.-Rev.&quot;, &quot;Ing&quot;,
@@ -446,7 +638,7 @@ df_list %&gt;%
   guides(fill = guide_legend(reverse = T))</code></pre>
 </div>
 <div id="group_split-map-and-ggplot" class="section level2">
-<h2>group_split, map, and ggplot</h2>
+<h2>Group_split, map, and ggplot</h2>
 <p>Another part of the code which I’d like to highlight is the one producing the <a href="http://werk.statt.codes/post/vorzugsstimmen/#candidates-preference-votes-share"><em>plot on candidates’ preference votes share</em></a>. Here, rather than using a <code>facet_grid</code>, I split the dataframe by the electoral district lists, and mapped the plot function to each of the three parts, and subsequently combined them with <code>patchwork</code>. The advantage was that graph is more efficient in using the available space.</p>
 <pre class="r"><code>share &lt;- df %&gt;%
   filter(!party3 == &quot;Other&quot;) %&gt;%
@@ -486,9 +678,27 @@ df_share &lt;- share %&gt;%
   mutate(electoral_number_indicator = case_when(
     pref_votes_abs &gt; electoral_number ~ &quot;yes&quot;,
     TRUE ~ as.character(&quot;no&quot;)
-  ))
+  )) %&gt;% 
+  mutate(district_name=case_when(district_name==&quot;Gesamt&quot; ~ &quot;Österreich&quot;,
+                                 TRUE ~ as.character(district_name))) %&gt;% 
+  left_join(., df_results %&gt;% select(district_type, -district_name, district, party, votes_abs) %&gt;% 
+              mutate(party=as_factor(party)),
+              by=c(&quot;district_type&quot;=&quot;district_type&quot;,
+               #  &quot;district_name&quot;=&quot;district_name&quot;,
+                 &quot;district&quot;=&quot;district&quot;,
+                 &quot;party3&quot;=&quot;party&quot;)) %&gt;% 
+  mutate(c_pvpv_ratio=round(pref_votes_abs/votes_abs, 4)) %&gt;%  #c_pvpv candidates&#39; preference vote vote ratio
+  mutate(party3=as_factor(party3)) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(sorting_index=group_indices(., district))
 
-plot_share &lt;- df_share %&gt;%
+
+x &lt;- df_share %&gt;% 
+  select(district, district_name_short, sorting_index) %&gt;% 
+  distinct()
+
+
+plot_c_pvpv_ratio &lt;- df_share %&gt;%
   filter(party3 != &quot;Other&quot;) %&gt;%
   group_split(district_type) %&gt;%
   map(~ ggplot(.) +
@@ -496,15 +706,15 @@ plot_share &lt;- df_share %&gt;%
       title = paste(unique(.$district_type)),
       subtitle = paste(&quot;Candidates securing preference votes more than
                     &lt;span style=&#39;color:orange&#39;&gt;&quot;, unique(.$threshold) * 100, &quot;&lt;/span&gt; % of their party&#39;s overall vote in their respective constituency are re-ranked.&quot;),
-      x = &quot;Candidate&#39;s preference votes in % of party votes&quot;
+      x = &quot;Candidate&#39;s preference votes in % of party votes (C-PVPV)&quot;
     ) +
     geom_point_interactive(aes(
-      y = district_name_short,
-      x = share_pref,
+      y = reorder(district_name_short, sorting_index),
+      x = c_pvpv_ratio*100,
       # shape = as_factor(electoral_number_indicator),
       color = party3,
       data_id = name_short,
-      tooltip = paste(name_short, round(share_pref, 2), sep = &quot;; &quot;)
+      tooltip = paste(name_short, round(c_pvpv_ratio*100, 2), sep = &quot;; &quot;)
     ),
     position = position_jitter(width = 0, height = 0.2, seed = 2),
     stat = &quot;identity&quot;
@@ -515,10 +725,10 @@ plot_share &lt;- df_share %&gt;%
     scale_y_discrete(expand = expansion(add = 0.2)) +
     scale_x_continuous(
       trans = &quot;log10&quot;,
-      limits = c(NA, 100),
+      limits = c(NA, 40),
       labels = scales::label_percent(accuracy = 1, scale = 1),
       minor_breaks = NULL,
-      breaks = c(NA, 0, 1, 25, 50, 100)
+      breaks = c(NA, 0, 1, 10, 40)
     ) +
     scale_color_manual(values = party_colors) +
     ggforce::facet_row(vars(party3),
@@ -543,9 +753,11 @@ plot_share &lt;- df_share %&gt;%
         face = &quot;bold&quot;
       ),
       strip.placement = &quot;outside&quot;,
-      plot.title = element_text(size = 11, face = &quot;bold&quot;),
+      plot.title = element_text(size = 11, face = &quot;bold.italic&quot;, 
+                                margin=margin(b=0, unit=&quot;cm&quot;)),
+      plot.subtitle = element_markdown(size = 11, color = &quot;grey30&quot;,
+                                       face=&quot;italic&quot;),
       plot.title.position = &quot;plot&quot;,
-      plot.subtitle = element_markdown(size = 11, color = &quot;grey30&quot;),
       legend.position = &quot;bottom&quot;,
       legend.title = element_blank(),
       legend.justification = &quot;right&quot;,
@@ -554,25 +766,613 @@ plot_share &lt;- df_share %&gt;%
     ) +
     guides(color = &quot;none&quot;))
 
-
-plot_share &lt;- (patchwork::wrap_plots(plot_share, ncol = 1) &amp;
+plot_c_pvpv_ratio &lt;- (patchwork::wrap_plots(plot_c_pvpv_ratio, ncol = 1) &amp;
   theme(plot.margin = margin(unit = &quot;cm&quot;, 0))) +
   plot_annotation(
-    title = &quot;Candidates&#39; preference vote shares&quot;,
-    subtitle = &quot;Candidates above vertical line move up the &quot;,
+    title = &quot;Candidates&#39; preference votes v. party votes ratio (C-PVPV)&quot;,
+    subtitle = &quot;Candidates above vertical line move up the electoral list.&quot;,
     caption = my_caption,
-    theme = theme(plot.title = element_text(
-      family = &quot;Roboto Condensed&quot;,
-      size = 12,
-      face = &quot;bold&quot;
-    ))
-  ) +
-  plot_layout(heights = c(1, 9, 39))</code></pre>
+    theme = theme(
+      plot.title = element_text(family = &quot;Roboto Condensed&quot;, size = 12,face = &quot;bold&quot;),
+      plot.subtitle = element_text(family = &quot;Roboto Condensed&quot;, size = 12,face = &quot;plain&quot;)))+
+      plot_layout(heights = c(1, 9, 39))</code></pre>
+</div>
+<div id="obtaining-district-magnitude" class="section level2">
+<h2>Obtaining district magnitude</h2>
+<p>A convenient way to get data on the districts’ magnitude (number of mandates) is to scrap the pertainnig data from the website of the Ministry of Interior. The <code>rvest</code>package´ is our reliable tool here.</p>
+<pre class="r"><code>library(rvest, quietly = T, verbose = F, warn=F)
+library(tidyverse, quietly = T, verbose = F, warn=F)
+library(knitr, quietly =T)
+library(kableExtra, quietly = T)
+
+MoI_url &lt;- &quot;https://www.bmi.gv.at/412/Nationalratswahlen/Wahlkreiseinteilung.aspx&quot;
+
+n_mandates_regional_districts &lt;- MoI_url %&gt;%
+  read_html() %&gt;%
+  html_nodes(&quot;table&quot;) %&gt;%
+  html_table() %&gt;%
+  map_df(., bind_rows)
+
+kable(n_mandates_regional_districts) %&gt;% 
+  kable_styling() %&gt;%
+  scroll_box(width = &quot;100%&quot;, height = &quot;200px&quot;)</code></pre>
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:200px; overflow-x: scroll; width:100%; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Regionalwahlkreis
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Bezeichnung
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Stimmbezirke
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+Mandate
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1A
+</td>
+<td style="text-align:left;">
+Burgenland Nord
+</td>
+<td style="text-align:left;">
+Städte: Eisenstadt und Rust;politische Bezirke: Eisenstadt-Umgebung, Mattersburg, Neusiedl am See
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1B
+</td>
+<td style="text-align:left;">
+Burgenland Süd
+</td>
+<td style="text-align:left;">
+politische Bezirke: Güssing, Jennersdorf, Oberpullendorf, Oberwart
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2A
+</td>
+<td style="text-align:left;">
+Klagenfurt
+</td>
+<td style="text-align:left;">
+Stadt: Klagenfurt;politischer Bezirk: Klagenfurt-Land
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2B
+</td>
+<td style="text-align:left;">
+Villach
+</td>
+<td style="text-align:left;">
+Stadt: Villach;politischer Bezirk: Villach-Land
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2C
+</td>
+<td style="text-align:left;">
+Kärnten West
+</td>
+<td style="text-align:left;">
+politische Bezirke: Feldkirchen, Hermagor, Spittal an der Drau
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2D
+</td>
+<td style="text-align:left;">
+Kärnten Ost
+</td>
+<td style="text-align:left;">
+politische Bezirke: St. Veit an der Glan, Völkermarkt, Wolfsberg
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3A
+</td>
+<td style="text-align:left;">
+Weinviertel
+</td>
+<td style="text-align:left;">
+Verwaltungsbezirke: Hollabrunn, Korneuburg, Mistelbach
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3B
+</td>
+<td style="text-align:left;">
+Waldviertel
+</td>
+<td style="text-align:left;">
+Stadt: Krems;Verwaltungsbezirke: Gmünd, Horn, Krems, Waidhofen an der Thaya, Zwettl
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3C
+</td>
+<td style="text-align:left;">
+Mostviertel
+</td>
+<td style="text-align:left;">
+Stadt: Waidhofen an der Ybbs;Verwaltungsbezirke: Amstetten, Melk, Scheibbs
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3D
+</td>
+<td style="text-align:left;">
+Niederösterreich Mitte
+</td>
+<td style="text-align:left;">
+Stadt: Sankt Pölten;Verwaltungsbezirke: Lilienfeld, Sankt Pölten, Tulln
+</td>
+<td style="text-align:right;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3E
+</td>
+<td style="text-align:left;">
+Niederösterreich Süd
+</td>
+<td style="text-align:left;">
+Stadt: Wiener Neustadt;Verwaltungsbezirke: Neunkirchen, Wiener Neustadt
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3F
+</td>
+<td style="text-align:left;">
+Thermenregion
+</td>
+<td style="text-align:left;">
+Verwaltungsbezirke: Baden, Mödling
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3G
+</td>
+<td style="text-align:left;">
+Niederösterreich Ost
+</td>
+<td style="text-align:left;">
+Verwaltungsbezirke: Bruck an der Leitha, Gänserndorf
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4A
+</td>
+<td style="text-align:left;">
+Linz und Umgebung
+</td>
+<td style="text-align:left;">
+Stadt: Linz;politischer Bezirk: Linz-Land
+</td>
+<td style="text-align:right;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4B
+</td>
+<td style="text-align:left;">
+Innviertel
+</td>
+<td style="text-align:left;">
+politische Bezirke: Braunau am Inn, Ried im Innkreis, Schärding
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4C
+</td>
+<td style="text-align:left;">
+Hausruckviertel
+</td>
+<td style="text-align:left;">
+Stadt: Wels;politische Bezirke: Eferding, Grieskirchen, Vöcklabruck, Wels-Land
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4D
+</td>
+<td style="text-align:left;">
+Traunviertel
+</td>
+<td style="text-align:left;">
+Stadt: Steyr;politische Bezirke: Gmunden, Kirchdorf an der Krems, Steyr-Land
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4E
+</td>
+<td style="text-align:left;">
+Mühlviertel
+</td>
+<td style="text-align:left;">
+politische Bezirke: Freistadt, Perg, Rohrbach, Urfahr-Umgebung
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5A
+</td>
+<td style="text-align:left;">
+Salzburg Stadt
+</td>
+<td style="text-align:left;">
+Stadt: Salzburg
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5B
+</td>
+<td style="text-align:left;">
+Flachgau/Tennengau
+</td>
+<td style="text-align:left;">
+politische Bezirke: Hallein, Salzburg-Umgebung
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5C
+</td>
+<td style="text-align:left;">
+Lungau/Pinzgau/Pongau
+</td>
+<td style="text-align:left;">
+politische Bezirke: St. Johann im Pongau, Tamsweg, Zell am See
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+6A
+</td>
+<td style="text-align:left;">
+Graz und Umgebung
+</td>
+<td style="text-align:left;">
+Stadt: Graz; politischer Bezirk: Graz-Umgebung
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+6B
+</td>
+<td style="text-align:left;">
+Oststeiermark
+</td>
+<td style="text-align:left;">
+politische Bezirke: Hartberg-Fürstenfeld, Südoststeiermark, Weiz
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+6C
+</td>
+<td style="text-align:left;">
+Weststeiermark
+</td>
+<td style="text-align:left;">
+politische Bezirke: Deutschlandsberg, Leibnitz, Voitsberg
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+6D
+</td>
+<td style="text-align:left;">
+Obersteiermark
+</td>
+<td style="text-align:left;">
+politische Bezirke: Bruck-Mürzzuschlag, Leoben, Liezen, Murau, Murtal
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+7A
+</td>
+<td style="text-align:left;">
+Innsbruck
+</td>
+<td style="text-align:left;">
+Stadt: Innsbruck
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+7B
+</td>
+<td style="text-align:left;">
+Innsbruck-Land
+</td>
+<td style="text-align:left;">
+politische Bezirke: Innsbruck-Land, Schwaz
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+7C
+</td>
+<td style="text-align:left;">
+Unterland
+</td>
+<td style="text-align:left;">
+politische Bezirke: Kitzbühel, Kufstein
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+7D
+</td>
+<td style="text-align:left;">
+Oberland
+</td>
+<td style="text-align:left;">
+politische Bezirke: Imst, Landeck, Reutte
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+7E
+</td>
+<td style="text-align:left;">
+Osttirol
+</td>
+<td style="text-align:left;">
+politischer Bezirk: Lienz
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+8A
+</td>
+<td style="text-align:left;">
+Vorarlberg Nord
+</td>
+<td style="text-align:left;">
+Verwaltungsbezirke: Bregenz, Dornbirn
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+8B
+</td>
+<td style="text-align:left;">
+Vorarlberg Süd
+</td>
+<td style="text-align:left;">
+Verwaltungsbezirke: Bludenz, Feldkirch
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+9A
+</td>
+<td style="text-align:left;">
+Wien Innen-Süd
+</td>
+<td style="text-align:left;">
+Gemeindebezirke: Landstraße, Wieden, Margareten
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+9B
+</td>
+<td style="text-align:left;">
+Wien Innen-West
+</td>
+<td style="text-align:left;">
+Gemeindebezirke: Innere Stadt, Mariahilf, Neubau, Josefstadt, Alsergrund
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+9C
+</td>
+<td style="text-align:left;">
+Wien Innen-Ost
+</td>
+<td style="text-align:left;">
+Gemeindebezirke: Leopoldstadt, Brigittenau
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+9D
+</td>
+<td style="text-align:left;">
+Wien Süd
+</td>
+<td style="text-align:left;">
+Gemeindebezirke: Favoriten, Simmering, Meidling
+</td>
+<td style="text-align:right;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+9E
+</td>
+<td style="text-align:left;">
+Wien Süd-West
+</td>
+<td style="text-align:left;">
+Gemeindebezirke: Hietzing, Penzing, Rudolfsheim-Fünfhaus, Liesing
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+9F
+</td>
+<td style="text-align:left;">
+Wien Nord-West
+</td>
+<td style="text-align:left;">
+Gemeindebezirke: Ottakring, Hernals, Währing, Döbling
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+9G
+</td>
+<td style="text-align:left;">
+Wien Nord
+</td>
+<td style="text-align:left;">
+Gemeindebezirke: Floridsdorf, Donaustadt
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div id="geo_facet" class="section level2">
-<h2>geo_facet</h2>
-<p>Finally, as the last item, I’d like to highlight the wonderful <a href="https://hafen.github.io/geofacet/">´geo_fact´ package</a>{target="_blank}. Rather than plotting data to map by means of different color (shades), the <code>geo_facet</code> package allows to arrange facets of a plot to be arranged (more or less) in accordance with e.g. the map of a country. Here, I first created a grid which approximates the position the Austria’s states (<strong>Bundesländer</strong>), i.e. state electoral districts. This grid is subsequently passed passed on to the faceting function in an otherwise ordinary ggplot command. The results is <a href="http://werk.statt.codes/post/vorzugsstimmen/#candidates-preference-votes-and-electoral-number" target="_blank"><em>this</em></a>. Sweet, isn’t ;-)</p>
-<pre class="r"><code>aut_grid &lt;- data.frame(
+<h2>Geo_facet</h2>
+<p>Finally, as the last item, I’d like to highlight the wonderful <a href="https://hafen.github.io/geofacet" target="_blank"><code>geo_fact</code> package</a>. Rather than plotting data to a map by means of different color (shades), the <code>geo_facet</code> package allows facets of a plot to be arranged (more or less) in accordance with the map of e.g. a country. Here, I first created a grid which approximates the position the Austria’s states (<em>Bundesländer</em>), i.e. state electoral districts. This grid is subsequently passed on to the faceting function used in an otherwise ordinary ggplot command. The result you saw above <a href="http://werk.statt.codes/post/vorzugsstimmen/#candidates-preference-votes-and-electoral-number"><u>here</u></a>. Sweet, isn’t ;-)</p>
+<p>Gladly, the author of the <code>geo_facet</code> package offers users the possibility to <a href="https://hafen.github.io/grid-designer/" target="_blank"><u>submit</u></a> new grids to be integrated into the package. Once I have polished the grid (e.g. add iso codes), I’ll submit it and you can use it by simply calling the grid’s name in the geo_facet function.</p>
+<pre class="r"><code>library(geofacet)
+
+#create grid
+aut_grid &lt;- data.frame(
   row = c(1, 1, 1, 2, 2, 2, 2, 2, 3),
   col = c(3, 4, 5, 1, 2, 3, 4, 5, 4),
   code = c(&quot;Oberösterreich&quot;, &quot;Niederösterreich&quot;, &quot;Wien&quot;, &quot;Vorarlberg&quot;, &quot;Tirol&quot;, &quot;Salzburg&quot;, &quot;Steiermark&quot;, &quot;Burgenland&quot;, &quot;Kärnten&quot;),
@@ -634,7 +1434,7 @@ state_electoral_number_plot &lt;- state_electoral_number %&gt;%
     panel.grid.major.x = element_blank(),
     strip.text.y = element_text(angle = 0, vjust = 1),
     legend.position = &quot;none&quot;,
-    plot.title = element_text(size = 12),
+    plot.title = element_text(size = 12, face=&quot;bold.italic&quot;, margin=margin(b=0, unit=&quot;cm&quot;)),
     plot.title.position = &quot;plot&quot;,
     plot.caption = element_markdown(hjust = c(0, 1), color = &quot;grey30&quot;),
     plot.margin = margin(0, r = 0.2, unit = &quot;cm&quot;),
@@ -648,8 +1448,11 @@ state_electoral_number_plot &lt;- state_electoral_number %&gt;%
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>See <a href="https://www.oesterreich.gv.at/themen/leben_in_oesterreich/wahlen/1/Seite.320260.html" target="_blank"><u>here</u></a> for details<a href="#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>By dividing the number of valid votes in a state level constituency by the number of the constituency’s available mandates one gets the ‘electoral number’<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>Reportedly, Hofer’s ‘defeat’ to Kickl might be due to an administrative issue though. There was another FPÖ candidate with the family name Hofer running on the federal constituency list. When voters put only the candidate’s family name on the ballot to indicate their preference, it was not clear which Hofer was actually meant. As a consequence, these preference votes were reportedly ruled as invalid.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>I assume that the literature on preference votes has already coined a term for this indicator, but for the limited analysis here I leave it with this.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>There seems to be an issue with the hoover over effect on mobile devices. If anyone knows how to iron this out, please let me know.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>See <a href="https://www.oesterreich.gv.at/themen/leben_in_oesterreich/wahlen/1/Seite.320260.html" target="_blank"><u>here</u></a> for details<a href="#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn5"><p>By dividing the number of valid votes in a state level constituency by the number of the constituency’s available mandates one gets the ‘electoral number’<a href="#fnref5" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
 
@@ -795,8 +1598,8 @@ state_electoral_number_plot &lt;- state_electoral_number %&gt;%
                 
                 
                 
-                <li class="toc-h3 no-underline"><a href="#candidates-preference-votes-share">
-                    Candidates’ preference votes share
+                <li class="toc-h3 no-underline"><a href="#candidates-preference-vote-party-vote-ratio">
+                    Candidates’ preference vote party vote ratio
                 </a></li>
               
             
@@ -880,7 +1683,19 @@ state_electoral_number_plot &lt;- state_electoral_number %&gt;%
                 
                 
                 <li class="toc-h2 no-underline"><a href="#group_split-map-and-ggplot">
-                    group_split, map, and ggplot
+                    Group_split, map, and ggplot
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#obtaining-district-magnitude">
+                    Obtaining district magnitude
                 </a></li>
               
             
@@ -892,7 +1707,7 @@ state_electoral_number_plot &lt;- state_electoral_number %&gt;%
                 
                 
                 <li class="toc-h2 no-underline"><a href="#geo_facet">
-                    geo_facet
+                    Geo_facet
                 </a></li>
               
             
