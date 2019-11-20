@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Wed, 13 Nov 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 20 Nov 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -15,7 +15,7 @@
     <item>
       <title>Austria</title>
       <link>/tags/austria/</link>
-      <pubDate>Wed, 13 Nov 2019 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/austria/</guid>
       <description></description>
@@ -24,7 +24,7 @@
     <item>
       <title>elections</title>
       <link>/tags/elections/</link>
-      <pubDate>Wed, 13 Nov 2019 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/elections/</guid>
       <description></description>
@@ -33,7 +33,7 @@
     <item>
       <title>stringr</title>
       <link>/tags/stringr/</link>
-      <pubDate>Wed, 13 Nov 2019 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/stringr/</guid>
       <description></description>
@@ -42,7 +42,7 @@
     <item>
       <title>tidyr::pivot</title>
       <link>/tags/tidyrpivot/</link>
-      <pubDate>Wed, 13 Nov 2019 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/tidyrpivot/</guid>
       <description></description>
