@@ -22,6 +22,15 @@
     </item>
     
     <item>
+      <title>BiH: Voting behavior of MPs in House of Representatives</title>
+      <link>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</link>
+      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</guid>
+      <description>ContextA while ago I noticed that the website of Bosnia’s parliament now also provides the voting records for each separate vote taken in both houses. These records also include the voting behavior for each individual MP. While the dominant role of the ethnic cleavage in Bosnian politics has been a constant theme and continuously emphasized for the last 25 years (to an extent which frequently blanks out other salient issues), I hadn’t seen any empirical record on MP’s voting behavior which could cooroberate the cleavage’s prevalence in the legislative arena (one insightful exception is Birgit Kunrath’s 2011 paper).</description>
+    </item>
+    
+    <item>
       <title>Potential sizing issue when importing interactive plots (ggraph; htmlWidget)</title>
       <link>/post/size-interactive-plots/</link>
       <pubDate>Tue, 12 Nov 2019 00:00:00 +0000</pubDate>
@@ -46,7 +55,7 @@ Create interactive plotFirst, let’s create an interactive plot. Here it has t
       <pubDate>Wed, 23 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/link-to-previous-posts/</guid>
-      <description>Earlier ramblings were collected on my RPubs file. I’ll gradually move theme to this site, but till then they remain available at here.</description>
+      <description>Earlier ramblings were collected on my RPubs file. I’ll gradually move theme to this site, but till then they remain available here.</description>
     </item>
     
   </channel>

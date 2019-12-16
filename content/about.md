@@ -10,7 +10,7 @@ Not that the world would have been waiting for another blog... but there you go.
 Roland Schmidt
 #IStandWithCEU #CYG
 
-Codes are collected at [www.github.com/zoowalk](https://www.github.com/zoowalk)<br>
+Codes are collected at [www.github.com/werkstattcodes](https://www.github.com/werkstattcodes)<br>
 Tweets are at [@zoowalk](https://twitter.com/zoowalk?lang=en).
 
 ## Site
