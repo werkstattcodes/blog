@@ -132,7 +132,7 @@ a:link {
 section a:hover:not(toc-h1):not(toc-h2):not(toc-h3) {
     /*color: var(--accent) !important;*/
     color: white;
-    background-color: #29AB87;
+    background-color: #475D81; /*#29AB87;*/
     font-style: bold;
 
 }
@@ -152,4 +152,8 @@ section a:hover:not(toc-h1):not(toc-h2):not(toc-h3) {
     color: var(--accent) !important;
     background-color: lightgray;
     font-style: bold;
+}
+
+scrollable-element {
+  scrollbar-color: red yellow;
 }
