@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>social media on werk.statt.codes</title>
+    <link>/tags/social-media/</link>
+    <description>Recent content in social media on werk.statt.codes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
+    <lastBuildDate>Thu, 25 Jul 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/social-media/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>European Parliament Elections 2019: Facebook ads of Austrian candidates</title>
+      <link>/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</link>
+      <pubDate>Thu, 25 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</guid>
+      <description>For the analysis of the use of political ads on facebook in the run-up to the European Parliament elections 2019 in Austria see here.</description>
+    </item>
+    
+  </channel>
+</rss>

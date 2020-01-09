@@ -1,0 +1,13 @@
+---
+title: 'European Parliament Elections 2019: Facebook ads of Austrian candidates'
+author: rs
+date: '2019-07-25'
+slug: european-parliament-elections-2019-facebook-ads-of-austrian-candidates
+categories: []
+tags:
+  - elections
+  - Austria
+  - social media
+description: ''
+---
+For the analysis of the use of political ads on facebook in the run-up to the European Parliament elections 2019 in Austria see [<u>here</u>](http://rpubs.com/zoowalk/FB_EP2019){target="_blank"}.
