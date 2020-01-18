@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>web scraping on werk.statt.codes</title>
+    <link>/tags/web-scraping/</link>
+    <description>Recent content in web scraping on werk.statt.codes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
+    <lastBuildDate>Sat, 18 Jan 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/web-scraping/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Bosnia: Voting behavior of MPs in the House of Representatives</title>
+      <link>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</link>
+      <pubDate>Sat, 18 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</guid>
+      <description>this post is still work in progress and may undergo some change
+CONTEXTA while ago I noticed that the website of Bosnia’s parliament also provides the voting records for each separate vote taken in both houses. These records also include the voting behavior for each individual MP. Here an example of one of these voting records:
+While the dominant role of the ethnic cleavage in Bosnian politics has been a constant theme and continuously emphasized for the last 25 years (to an extent which frequently blanks out other salient issues), I hadn’t seen any empirical record on MP’s individual voting behavior which could corroborate the cleavage’s prevalence in the legislative arena (one insightful exception is Birgit Kunrath’s 2011 paper).</description>
+    </item>
+    
+  </channel>
+</rss>

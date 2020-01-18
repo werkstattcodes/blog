@@ -7,10 +7,31 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Wed, 20 Nov 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 18 Jan 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Bosnia: Voting behavior of MPs in the House of Representatives</title>
+      <link>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</link>
+      <pubDate>Sat, 18 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</guid>
+      <description>this post is still work in progress and may undergo some change
+CONTEXTA while ago I noticed that the website of Bosnia’s parliament also provides the voting records for each separate vote taken in both houses. These records also include the voting behavior for each individual MP. Here an example of one of these voting records:
+While the dominant role of the ethnic cleavage in Bosnian politics has been a constant theme and continuously emphasized for the last 25 years (to an extent which frequently blanks out other salient issues), I hadn’t seen any empirical record on MP’s individual voting behavior which could corroborate the cleavage’s prevalence in the legislative arena (one insightful exception is Birgit Kunrath’s 2011 paper).</description>
+    </item>
+    
+    <item>
+      <title>Bosnia: Voting behavior of MPs in the House of Representatives - part 2</title>
+      <link>/post/bih-voting-behavior-of-mps-in-house-of-representatives-part2/</link>
+      <pubDate>Mon, 13 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/bih-voting-behavior-of-mps-in-house-of-representatives-part2/</guid>
+      <description>Entity vetoArticle IV 3(d)
+‘All decisions in both chambers shall be by majority of those present and voting. The Delegates and Members shall make their best efforts to see that the majority includes at least one-third of the votes of Delegates or Members from the territory of each Entity. If a majority vote does not include one-third of the votes of Delegates or Members from the territory of each Entity, the Chair and Deputy Chairs shall meet as a commission and attempt to obtain approval within three days of the vote.</description>
+    </item>
     
     <item>
       <title>Austrian General Elections 2019: Preference votes</title>
@@ -19,15 +40,6 @@
       
       <guid>/post/vorzugsstimmen/</guid>
       <description>ContextOn 29 September, Austria held its general elections to the national assembly (Nationalrat). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (the government formation train is finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate.</description>
-    </item>
-    
-    <item>
-      <title>Bosnia: Voting behavior of MPs in the House of Representatives</title>
-      <link>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</link>
-      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</guid>
-      <description>ContextA while ago I noticed that the website of Bosnia’s parliament now also provides the voting records for each separate vote taken in both houses. These records also include the voting behavior for each individual MP. While the dominant role of the ethnic cleavage in Bosnian politics has been a constant theme and continuously emphasized for the last 25 years (to an extent which frequently blanks out other salient issues), I hadn’t seen any empirical record on MP’s voting behavior which could cooroberate the cleavage’s prevalence in the legislative arena (one insightful exception is Birgit Kunrath’s 2011 paper).</description>
     </item>
     
     <item>

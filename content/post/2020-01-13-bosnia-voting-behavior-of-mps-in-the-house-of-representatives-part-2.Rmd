@@ -1,0 +1,297 @@
+---
+title: 'Bosnia: Voting behavior of MPs in the House of Representatives - part 2'
+author: rs
+date: '2020-01-13'
+slug: bih-voting-behavior-of-mps-in-house-of-representatives-part2
+categories: []
+tags:
+  - Bosnia
+description: ''
+draft: true
+---
+```{r include=FALSE}
+
+# setup -------------------------------------------------------------------
+library(tidyverse)
+library(paletteer)
+library(glue)
+library(extrafont)
+library(paletteer)
+loadfonts(device = "win", quiet = T)
+library(hrbrthemes)
+library(paletteer)
+library(ggtext)
+library(scales)
+library(patchwork)
+library(padr)
+library(here)
+library(ggiraph)
+library(ggforce)
+library(knitr)
+library(kableExtra)
+
+wdr <- getwd() 
+
+my_caption <- c("Data: parlament.ba", "Analysis: Roland Schmidt | @zoowalk | <span style='color:black'>**werk.statt.codes**</span>")
+
+df_ocr_results_unnested <- readr::read_csv2(here("blog_data", "Bosnia_MP_voting_behavior", "df_ocr_results_unnested.csv"))
+  
+df_ocr_results_unnested <- df_ocr_results_unnested %>% 
+  mutate_if(is.character, as.factor) 
+  
+#parse_date_time order allows to specify different formats and their priority
+#could be moved to other R script
+df_ocr_results_unnested <- df_ocr_results_unnested %>% 
+  mutate(session_date=as.character(session_date)) %>% 
+  mutate(session_date=lubridate::parse_date_time(session_date,
+                                                 orders=c("dmy","ymd", "mdy")) %>% 
+           lubridate::as_date(.)) 
+
+#order factor of vote
+df_ocr_results_unnested <- df_ocr_results_unnested %>% 
+  mutate(vote=forcats::fct_infreq(vote)) #%>% 
+ # mutate(vote=forcats::fct_collapse(vote, abstained=c("abstained", "no vote", "restrained")) %>% 
+ #          forcats::fct_drop(.))
+
+
+voting_colors <- c("no"="red",
+                   "no vote" = "orange",
+                   "not present" = "grey",
+                   "yes" = "green",
+                   "abstained"="orange")
+
+
+# _ ----------------------------------------------------------------------
+
+# FILTER ------------------------------------------------------------------
+
+#identify start of new legislative session
+# date_new_parliament <- df_ocr_results_unnested %>% 
+#   filter(str_detect(delegate_name_2, "^Ahmetovic")) %>% 
+#   filter(session_date==min(session_date)) %>% 
+#   distinct(session_date) %>% 
+#   pull(session_date)
+
+df_ocr_results_unnested_truncated <- df_ocr_results_unnested %>% 
+  filter(session_date > lubridate::dmy("12/10/2014")) %>% #date of elections
+  mutate(party=forcats::fct_drop(party)) %>% #remove empty party factor levels
+  mutate_at(vars(contains("name")), ~fct_drop(.))
+```
+## Entity veto
+
+Article IV 3(d)
+
+'All decisions in both chambers shall be by majority of those present and voting. The Delegates and Members shall make their best efforts to see that the majority includes at least one-third of the votes of Delegates or Members from the territory of each Entity. If a majority vote does not include one-third of the votes of Delegates or Members from the territory of each Entity, the Chair and Deputy Chairs shall meet as a commission and attempt to obtain approval within three days of the vote. If those efforts fail, decisions shall be taken by a majority of those present and voting, provided that the dissenting votes do not include two-thirds or more of the Delegates or Members elected from either Entity.'
+
+
+
+ 
+```{r echo=FALSE, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+# entity voting -----------------------------------------------------------
+
+df_entity_voting <- df_ocr_results_unnested_truncated %>% 
+  filter(house=="HoR") %>% 
+  group_by(house, entity, law_id, record_id, vote, .drop=F) %>%  #drop to include all vote types
+  summarise(votes_n=n()) %>% 
+  filter(vote!="not present") %>% #of those present? PENDING!
+  mutate(entity_delegates=sum(votes_n)) %>% 
+  mutate(votes_rel=votes_n/entity_delegates) %>% 
+  filter(vote=="yes") %>% 
+  ungroup() %>% 
+  arrange(law_id, record_id) %>% 
+  #select(entity, record_id, votes_rel) %>% 
+  pivot_wider(id_cols=record_id, names_from=entity, values_from = c(entity_delegates, votes_rel, votes_n)) %>% 
+  mutate(votes_yes_total_abs = votes_n_FBiH + votes_n_RS) %>% 
+  mutate(votes_yes_total_rel = votes_yes_total_abs/(entity_delegates_FBiH+entity_delegates_RS)) %>% 
+  mutate(overall_majority = ifelse(votes_yes_total_rel>0.5, "yes", "no")) %>% 
+  mutate(RS_veto = ifelse(votes_rel_RS<0.3, "yes", "no"),
+         FBiH_veto = ifelse(votes_rel_FBiH<0.3, "yes", "no"))
+
+
+df_details_all_status_wide <- readr::read_csv2(here::here("blog_data","Bosnia_MP_voting_behavior","df_details_all_status_wide.csv")) %>% 
+    mutate_at(vars(contains("status")), as.factor)
+
+df_voting_results_links <- readr::read_csv2(file="https://raw.githubusercontent.com/werkstattcodes/Bosnia_MP_voting_behavior/master/data/df_voting_results_links.csv")
+
+df_entity_voting <- df_entity_voting %>% 
+  left_join(., df_voting_results_links) %>% 
+  left_join(., df_details_all_status_wide %>% 
+              select(doc_name_eng,
+                     seq_page_links))
+
+# df_ocr_results_unnested_truncated %>% 
+#   filter(is.na(record_id))
+# 
+# #one observation wiht NA
+# df_entity_voting %>%
+#   filter_at(vars(votes_rel_FBiH, votes_rel_RS, overall_majority),
+#             any_vars(is.na(.)))
+
+plot_entity_voting <- df_entity_voting %>% 
+  ggplot()+
+  labs(x="yes vote-share among FBiH representatives",
+       subtitle="Legislative period 2014-2019. House of Representatives only. Click on
+       dots to open voting record.",
+       title="Vote results by entity support in BiH HoR (incl. entity vetoes)",
+       caption=my_caption,
+       y="yes vote-share among RS representatives")+
+  geom_rect(data=. %>% slice(1),
+            aes(xmin=1/3, xmax=Inf,
+                ymin=-Inf, ymax=1/3),
+            alpha=0.3,
+            fill="#DF8F44FF")+
+  geom_rect(data=. %>% slice(1),
+            aes(xmin=-Inf, xmax=1/3,
+                ymin=1/3, ymax=1),
+            alpha=0.7,
+            fill=paletteer_d("ggsci::default_jama")[1])+
+  geom_rect(data=. %>% slice(1),
+            aes(xmin=-Inf, xmax=1/3,
+                ymin=-Inf, ymax=1/3),
+            alpha=0.3,
+            fill="grey")+
+  geom_text(data=. %>% slice(1), aes(x=.02,
+                                     y=.2),
+            check_overlap = T,
+            hjust=0,
+            size=4,
+            fontface="italic",
+            family = "Roboto Condensed",
+            color = "grey30",
+            label="both entities with vetoes")+
+  geom_text(data=. %>% slice(1), aes(x=.02,
+                                     y=.7),
+            check_overlap = T,
+            hjust=0,
+            size=4,
+            fontface="italic",
+            family = "Roboto Condensed",
+            color = "white",
+            label="Fed entity  veto")+
+  geom_text(data=. %>% slice(1), aes(x=.55,
+                                     y=.20),
+            check_overlap = T,
+            hjust=0,
+            size=4,
+            fontface="italic",
+            family = "Roboto Condensed",
+            color = "grey30",
+            label="RS entity  veto")+
+  geom_jitter_interactive(aes(x=votes_rel_FBiH,
+                              y=votes_rel_RS,
+                              data_id=record_id,
+                              color=overall_majority,
+                              shape=overall_majority,
+                              tooltip=paste(str_wrap(doc_name_eng, 30), "\n",
+                                        #    "record link", "<a href='", link_to_voting_record, 
+                                        #    "'>", record_id, "</a>\n",
+                                            "total yes:", percent(votes_yes_total_rel, accuracy=0.01),"\n",
+                                            "Fed:", percent(votes_rel_FBiH, accuracy=0.01),"\n",
+                                            "RS:", percent(votes_rel_RS, accuracy=0.01), "\n","\n",
+                                        "Click on dot to open pertaining voting record"),
+                              onclick=paste0('window.open("', link_to_voting_record,'")')),
+                          size=2) +
+  geom_vline(xintercept = c(1/3))+
+  geom_hline(yintercept = c(1/3))+
+  theme_ipsum_rc()+
+  theme(legend.position = "bottom",
+        legend.justification = "right",
+        legend.title=element_text(size=10),
+        plot.caption=element_markdown(hjust=c(0, 1)),
+        axis.text=element_text(size=8),
+        axis.title = element_text(size=12),
+        panel.grid = element_blank())+
+  scale_y_continuous(labels = scales::label_percent(accuracy = 1),
+                     minor_breaks = NULL,
+                     breaks=c(seq(0, 1, .25), 1/3),
+                     expand=expansion(mult=0.02))+
+  scale_x_continuous(labels = scales::label_percent(accuracy = 1),
+                     breaks=c(seq(0, 1, .25), 1/3),
+                     minor_breaks = NULL,
+                     expand=expansion(mult=0.02))+
+  scale_color_manual(values=c("yes"="seagreen",
+                              "no"="firebrick"),
+                     na.translate=F,
+                     name="Overall majority:")+
+  scale_shape_manual(values=c("yes"=19, "no"=1), #not all symbols can be used in ggiraph
+                     na.translate=F,
+                     name="Overall majority:")
+
+girafe(ggobj=plot_entity_voting,
+       options=list(opts_tooltip(css = "background-color:lightgray; font-family:Roboto Condensed;",
+                                 delay_mouseout = 5000)),
+       pointsize=6,
+       width_svg = 8,
+       height_svg = 8)
+
+
+```
+
+## Outcome of votes 
+
+```{r echo=FALSE, fig.height=4, fig.width=10, message=FALSE, warning=FALSE}
+# entity voting (bar) --------------------------------------------------
+
+
+df_overall_majority<- df_entity_voting %>% 
+  filter(overall_majority=="no") %>% 
+  group_by(overall_majority) %>% 
+  summarise(n_obs=n()) %>% 
+  mutate(type="no overall majority")
+
+df_entity_vetoes<- df_entity_voting %>% 
+  filter(overall_majority=="yes") %>% 
+  select(contains("veto")) %>% 
+  group_by_all() %>% 
+  summarise(n_obs=n()) %>% 
+  mutate(type=case_when(RS_veto=="yes" & FBiH_veto=="no" ~ "RS entity veto only",
+                        RS_veto=="yes" & FBiH_veto=="yes" ~ "RS and FBiH entity veto",
+                        RS_veto=="no" & FBiH_veto=="yes" ~ "FBiH enttiy veto",
+                        RS_veto=="no" & FBiH_veto=="no" ~ "passed"))
+
+df_entity_vetoes <- bind_rows(df_overall_majority,
+          df_entity_vetoes) %>% 
+  select(n_obs, type) %>% 
+  mutate(type=fct_rev(fct_relevel(type, "passed", "no overall majority", "RS entity veto only"))) %>% 
+  arrange(desc(type)) %>% 
+  mutate(n_obs_cum=cumsum(n_obs)) %>% 
+  mutate(n_obs_total=sum(n_obs)) %>% 
+  mutate(n_obs_rel=n_obs/n_obs_total)
+
+df_entity_vetoes %>% 
+  ggplot()+
+  labs(y="total number of votes",
+       title="Outcome of votes in BiH House of Representatives",
+       caption=my_caption)+
+  geom_bar(aes(x=1,
+               y=n_obs,
+               fill=type),
+           position=position_stack(),
+           stat="identity")+
+  geom_text(aes(x=1,
+                label=paste(n_obs,
+                            "\n\n", 
+                            scales::percent(n_obs_rel)),
+                y=n_obs),
+           position=position_stack(vjust = 0.5),
+           family = "Roboto Condensed",
+           color = "white",
+           stat="identity")+
+  coord_flip()+
+  hrbrthemes::theme_ipsum_rc()+
+  theme(panel.grid = element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        plot.title.position="plot",
+        plot.caption=element_markdown(hjust=c(0, 1)),
+        plot.caption.position = "plot",
+        plot.margin=margin(l=0, t=0.5, b=0.5,unit="cm"),
+        legend.position = "bottom",
+        legend.justification = "right")+
+  scale_fill_paletteer_d("ggsci::default_jama",
+                         name="Vote result")+
+  scale_y_continuous(breaks=df_entity_vetoes$n_obs_cum,
+                     expand=expansion(mult=c(0)))+
+  guides(fill=guide_legend(reverse = T))
+
+```

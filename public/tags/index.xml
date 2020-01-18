@@ -7,10 +7,37 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Wed, 20 Nov 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 18 Jan 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Bosnia</title>
+      <link>/tags/bosnia/</link>
+      <pubDate>Sat, 18 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/bosnia/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>OCR</title>
+      <link>/tags/ocr/</link>
+      <pubDate>Sat, 18 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/ocr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>web scraping</title>
+      <link>/tags/web-scraping/</link>
+      <pubDate>Sat, 18 Jan 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/web-scraping/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Austria</title>
@@ -22,29 +49,11 @@
     </item>
     
     <item>
-      <title>Bosnia</title>
-      <link>/tags/bosnia/</link>
-      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/bosnia/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>elections</title>
       <link>/tags/elections/</link>
       <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/elections/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>OCR</title>
-      <link>/tags/ocr/</link>
-      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/ocr/</guid>
       <description></description>
     </item>
     
