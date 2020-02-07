@@ -1,0 +1,654 @@
+---
+title: 'Bosnia: House of Peoples'
+author: rs
+date: '2020-01-24'
+slug: bosnia-house-of-peoples
+categories: []
+draft: true
+tags:
+  - Bosnia
+description: ''
+---
+
+```{r message=FALSE, include=FALSE}
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(extrafont)
+loadfonts(device = "win", quiet = T)
+extrafont::fonts()
+library(hrbrthemes)
+library(ggtext)
+library(tidytext)
+library(scales)
+library(ggiraph)
+library(grid)
+library(knitr)
+
+
+```
+
+```{r setup, echo = F}
+knit_hooks$set(wrap = function(before, options, envir){
+  if (before){
+    paste0('<', options$wrap, '>')
+  } else {
+    paste0('</', options$wrap, '>')
+  }
+})
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, dpi = 180, fig.height = 5, fig.width = 7, fig.align = "center")
+options(width=180, dplyr.width = 150)
+```
+
+ 
+```{r, include=FALSE}
+# setup -------------------------------------------------------------------
+
+my_caption <- c("Data: parlament.ba", "Analysis: Roland Schmidt | @zoowalk | <span style='color:black'>**werk.statt.codes**</span>")
+
+
+voting_colors <- c("no"="firebrick2",
+                   "no vote" = "steelblue",
+                   "not present" = "grey",
+                   "yes" = "springgreen3",
+                   "abstained"="orange")
+
+colors_ethnicity=c("Bosniak"="darkgreen",
+                   "Croat"="blue",
+                   "Serb"="red",
+                   "civic"="orange",
+                   "independent"="grey")
+
+
+# import files & filter ------------------------------------------------------------
+
+df_ocr_results_unnested <- readr::read_csv2(here("blog_data", "Bosnia_MP_voting_behavior", "df_ocr_results_unnested.csv")) %>% 
+  mutate(session_date=lubridate::parse_date_time(session_date,
+                                                 orders=c("dmy","ymd", "mdy")) %>% 
+           lubridate::as_date(.)) %>% 
+mutate(vote=forcats::fct_relevel(vote, "yes", "no", "abstained", "no vote", "not present"))
+
+df_HoP <- df_ocr_results_unnested %>% 
+  filter(house=="HoP") %>% 
+  filter(session_date > lubridate::dmy("12/10/2014")) %>% 
+  mutate(delegate_name_party=paste0(delegate_name_family, " (", party, ")")) #%>% 
+
+#get title of voting decision and translate to English
+library(googleLanguageR)
+#gl_auth("C:/Users/Roland/Google Drive/Events - Projects/R-Projects/GoogleAPI/BiH-Laws-49dca6b0c199.json")
+
+# df_decision_titles <- df_HoP %>% 
+#   distinct(raw_text, law_id, record_id) %>% 
+#   mutate(decisions_title_bcs=str_extract(raw_text, regex("(?<=Glasanje.{1,2}:).*(?=Tip)"))) %>% 
+#   mutate(decisions_title=googleLanguageR::gl_translate(decisions_title_bcs, target="en", format=c("text"),
+#                                                     source="bs")$translatedText)
+
+#write_csv2(df_decision_titles, here("data", "df_decision_titles.csv"))
+           
+df_decision_titles <- readr::read_csv2(here::here("blog_data", "Bosnia_MP_voting_behavior", "df_decision_titles.csv")) 
+  
+df_HoP_votes <- df_HoP %>% 
+  mutate(vote=as.factor(vote)) %>% 
+  group_by(delegate_name, delegate_name_party,
+           ethnicity, party, vote, .drop=F) %>%
+  summarise(n_obs = n()) %>% 
+  mutate(n_rel = n_obs/(sum(n_obs))) 
+
+
+
+```
+*Site might be best viewed on a computer, rather than mobile device.*
+
+# CONTEXT
+This blog post is a continuation of the analysis of voting behavior in Bosnia’s parliament during the 2014 to 2018 legislative period. In a [<u>previous post</u>]( https://werk.statt.codes/post/bih-voting-behavior-of-mps-in-house-of-representatives/){target=”_blank”}, I looked primarily into the lower chamber, the House of Representatives. This post now deals with the upper chamber, the House of Peoples (HoP, dom naroda). The chamber comprises 10 delegates from the Federation (5 Bosniaks and 5 Croats) and 5 from the RS (5 Serbs). A summary of the chambers tasks and rules of procedure can be found [<u>here</u>]( https://www.parlament.ba/Content/Read/36?title=Op%C4%87i-podaci){target=”_blank”}. 
+
+Again, as with the previous post, the subsequent results are based on retrieving all pertaining voting records from the Parliament’s website, OCR-ing their content and extracting the data of interest. Overall, 295 voting records pertaining to the HoP were analyzed. Most interestingly, each voting record provides details on each delegate’s individual voting decisions.
+
+The most relevant R code snippets are provided in drop-down fields. The entire analysis, including the raw data, is available on my [<u>github account</u>]( https://github.com/werkstattcodes/Bosnia_MP_voting_behavior){target=”_blank”}. Should there be anything what strikes you as improbable etc, feel free to let me know, and I’ll try to look into it (best via [<u>Twitter DM</u>]( https://twitter.com/zoowalk){target=”_blank”}).
+
+# RESULTS
+## Individual voting behavior
+Drawing on the individual voting decisions contained in the voting records, we can aggregate each delegate’s voting behavior for the 2014-2018 legislative period.^[As mentioned in the earlier post on the HOuse of Representatives, I unfortunately had to remove diacritics during the analysis.] 
+
+<details closed> 
+<summary>Click to see code</summary>
+```{r}
+plot_delegates_votes <- df_HoP_votes %>% 
+  ggplot()+
+  labs(title="Voting decisions of delegates in the BiH House of Peoples",
+       subtitle="Legislative period 2014-2018.",
+       y="number of decisions (% of delegate's total number)",
+       caption=my_caption)+
+  geom_bar(aes(x=tidytext::reorder_within(delegate_name_party,
+                                          by = n_obs,
+                                          within=vote),
+               y=n_obs,
+               fill=ethnicity),
+           stat="identity",
+           position="stack")+
+  geom_text(aes(x=tidytext::reorder_within(delegate_name_party,
+                                           by = n_obs,
+                                           within=vote),
+                y=350,
+                label=paste0(n_obs, 
+                             " (",
+                             percent(n_rel, 
+                                     accuracy=1),
+                             ")")),
+            family = "Roboto Condensed",
+            color = "grey30",
+            hjust = 1,
+            stat="identity")+
+  scale_y_continuous(expand=expansion(mult=c(0)),
+                     breaks=seq(0, 250, 50),
+                     minor_breaks = NULL)+
+  scale_fill_manual(values=colors_ethnicity,
+                    na.value="gray")+
+  tidytext::scale_x_reordered(sep="__")+
+  lemon::facet_rep_wrap(vars(vote),
+                        repeat.tick.labels = T,
+                        ncol=2,
+                        scales="free_y")+
+  coord_flip()+
+  theme_ipsum_rc()+
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.spacing = unit(0, "cm"),
+        strip.text = element_text(face="bold"),
+        plot.title = element_text(size = 14, face="bold", margin=margin(b=0.3, unit="cm")),
+        plot.title.position = "plot",
+        plot.caption.position = "plot",
+        plot.caption = element_markdown(hjust=c(0,1)),
+        plot.margin=margin(l=0, t=0.5, b=0.5, r=0, unit="cm"),
+        plot.subtitle = element_text(size = 12, color = "grey30"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(hjust=0),
+        axis.text.x.bottom = element_blank(),
+        legend.position = "top",
+        legend.title=element_blank(),
+        legend.justification = "left")+
+  guides(fill=guide_legend(reverse = F))
+```
+</details>
+```{r echo=FALSE, fig.height=10, fig.width=10, message=FALSE}
+plot_delegates_votes
+```
+A look at the ‘yes’ category reveals that most delegates voted in more than 50 % of all decisions with yes. Bosniak delegates from the SDA lead the category with remarkable 84 %, closely followed by Croat delegates. The numbers of Serb delegates are somewhat, ranging between 49 % and 64 %.  If we look at the ‘no’ category, it’s noteworthy that Serb delegates are leading the ranking. Bosniak delegates, in contrast, were voting in considerably fewer instances with ‘no’. This pattern mirrors what was already visible in the analysis of the voting behavior in the House of Representative. 
+
+When it comes to the absence during the ballots, one delegate stands out:  Fahrudin Radončić, leader of the SBB party and Bosniak delegate to the House of Peoples, was in 63 % of all ballots not present (187 sessions). To put this figure in context, the delegate with the second highest rate of absence, HDZ’s Martin Raguz, missed only 13 % (37) of all votes. 
+
+It’s noteworthy that there were no incidents of delegates not voting (despite being present and not opting to ‘abstain’).  Related, the Rules of Procedure for the House of Peoples stipulate that such incidents would have to be counted as ‘abstained’ (see [<u>here</u>](https://www.parlament.ba/Content/Read/38?title=Odlu%C4%8Divanje-u-Domu-naroda){target="_blank"}). The empty ‘no vote’ category hence may already reflect that such incidents were counted as cases of abstention, rather than the actual absence of such cases. 
+
+
+## Quorum
+The regulatory framework covering the decision-making process in the House of Peoples requires a quorum of nine (out of 15) members, provided that at least three Bosniak, three Croat and three Serb delegates are present. 'Present' means to have voted either with 'yes', 'no', 'abstained', or simply not casted a voted despite being present [<u>see here</u>](https://www.parlament.ba/Content/Read/38?title=Odlu%C4%8DivanjeuDomunaroda&lang=en).
+
+As the analysis of the voting records show, there was not a single case in which the presence requirement was not fulfilled. I must admit, this was somewhat surprising to me. Furthermore, there were only relatively few cases, in which only the minimum of three delegates per constituent people was present. Somewhat against the state of play in the House of Representatives, Serb and Croat delegates were present in full strength in an overwhelming number of cases. The two graphs below present the pertaining figures.  
+
+<details closed> 
+<summary>Click here for code</summary>
+```{r message=FALSE, warning=FALSE}
+df_quorum <- df_HoP %>% 
+  select(law_id, record_id, ethnicity, delegate_name_party, vote, session_date) %>% 
+  mutate(ethnicity=as_factor(ethnicity)) %>% 
+  mutate(present=case_when(vote %in% c("yes", "abstained", "no", "no vote") ~ "present",
+                           TRUE ~ as.character(vote))) %>% 
+  group_by(law_id, record_id, ethnicity, present, session_date) %>% 
+  summarise(n_obs=n()) %>% 
+  filter(present=="present") %>% 
+  ungroup()
+
+df_quorum_wide <-  df_quorum %>% 
+  pivot_wider(id_cols=c(law_id, record_id), names_from=ethnicity, values_from=n_obs) %>% 
+  mutate(quorum=case_when(Bosniak<3|Croat<3|Serb<3 ~ "no quorum",
+                          TRUE ~ as.character("quorum")))
+
+df_quorum_wide %>% 
+  group_by(quorum) %>% 
+  summarise(n_obs=n())
+
+plot_quorum_number <- df_quorum %>% 
+  mutate(record_id=as.factor(record_id)) %>% 
+  ggplot()+
+  labs(title="Presence of HoP: Number of delegates per decision and constituent people",
+       subtitle=str_wrap("Legilsative period 2014-2018. In no instance less than three delegates per constitutent people were present. Hence quorum requirements were always fullfiled.", 160),
+       y="Number of present delegates",
+       x="decisions (chronologically ordered)",
+       caption=my_caption)+
+  geom_bar(aes(x=reorder(record_id, session_date),
+               y=n_obs,
+               fill=ethnicity,
+               group=ethnicity),
+           orientation="x",
+           stat="identity")+
+  geom_hline(yintercept=3, 
+             color="gray80",
+             linetype="dotted",
+             size=0.5)+
+  scale_fill_manual(values=colors_ethnicity,
+                    na.value="gray")+
+  facet_wrap(vars(ethnicity),
+             labeller=labeller(ethnicity=function(x) paste(x, "delegates")),
+             ncol=3)+
+  theme_ipsum_rc()+
+  theme(panel.grid.major = element_blank(),
+        axis.text.x=element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(size = 14, face="bold", margin=margin(b=0.3, unit="cm")),
+        plot.title.position = "plot",
+        plot.margin=margin(l=0, t=0.5, b=0.5, r=0, unit="cm"),
+        plot.subtitle = element_text(size = 12, color = "grey30"),
+        legend.position = "none",
+        plot.caption = element_markdown(hjust=c(0, 1)),
+        strip.text = element_text(face="bold"))
+#plot_quorum_number
+
+plot_quorum_frequency <- df_quorum %>% 
+  mutate(record_id=as.factor(record_id)) %>% 
+  mutate(n_obs=as.factor(n_obs)) %>% 
+  group_by(ethnicity, n_obs, .drop=F) %>% 
+  summarise(freq=n()) %>% 
+  ggplot()+
+  labs(x="Number of present delegates",
+       y="Frequency/Number of decisions",
+       title="Presence of HoP delegates: Number and frequency",
+       subtitle="2014-2018 legislative period.",
+       caption=my_caption)+
+  geom_bar(aes(x=n_obs,
+               y=freq,
+               fill=ethnicity),
+           stat="identity",
+           position=position_dodge(preserve = c("single")))+
+  geom_vline(xintercept = 3.5,
+             linetype="dotted")+
+  scale_y_continuous(expand=expansion(mult=c(0)))+
+  scale_fill_manual(values=colors_ethnicity,
+                    na.value="gray")+
+  scale_x_discrete(breaks=as.character(seq(0,5, 1)),
+                   limits=as.character(seq(0,5, 1)))+
+  theme_ipsum_rc()+
+  theme(plot.caption = element_markdown(hjust=c(0, 1)),
+        panel.grid.major.x = element_blank(),
+        plot.title = element_text(size = 14, face="bold", margin=margin(b=0.3, unit="cm")),
+        plot.margin=margin(l=0, t=0.5, b=0.5, r=0, unit="cm"),
+        plot.subtitle = element_text(size = 12, color = "grey30"),
+        plot.title.position = "plot",
+        legend.position = "top",
+        legend.title=element_blank(),
+        legend.justification = "left")
+#plot_quorum_frequency
+
+plot_quorum <- patchwork::wrap_plots(plot_quorum_number, plot_quorum_frequency, ncol = 1)
+
+```
+</details>
+```{r echo=FALSE, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+plot_quorum
+
+```
+
+## Voting by entity
+According to the Rules of Procedure of the House, decisions are taken by a majority of the vote of the delegates who are present and voting and require that at least one third of the votes from each entity are ‘yes’ votes. 
+
+### Dot plot
+The dot plot below depicts the yes share of each decision by delegates’ entity.^[Note that some minimal random variation was added to each dot's position to avoid dots overlapping.] Decisions which did cross the overall threshold of 50 % are in green. Note the vertical and horizontal line which indicates the required 1/3 support from each entity. As highlighted by the blue polygon, there were a few decisions which did not pass since they failed to secure the minimum support of at least 1/3 of an entity’s voting delegates despite having secured an overall majority. Move the mouse over the individual dots to get details.
+
+<details closed> 
+<summary>Click here for code</summary>
+```{r fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+df_entity <- df_HoP %>% 
+  group_by(entity, law_id, record_id, session_date, vote, .drop=F) %>% 
+  summarise(vote_abs=n()) %>% 
+  filter(vote  %in% c("yes", "no", "abstained", "no vote")) %>% 
+  mutate(n_present_voting = sum(vote_abs)) %>% 
+  mutate(vote_rel=vote_abs/n_present_voting) 
+
+df_entity_abs_majority <- df_HoP %>% 
+  group_by(law_id, record_id, vote, .drop=F) %>% 
+  summarise(votes_abs=n()) %>% 
+  filter(vote %in% c("yes", "no", "abstained", "no vote")) %>% 
+  mutate(votes_total=sum(votes_abs)) %>% 
+  mutate(votes_rel_total=votes_abs/votes_total) %>% 
+  filter(vote=="yes")
+
+df_entity2 <- df_entity %>% 
+  left_join(., df_entity_abs_majority %>% 
+              select(law_id, record_id, votes_rel_total)) %>% 
+  mutate(majority=case_when(votes_rel_total>=0.5 ~ "majority",
+                            TRUE ~ as.character("no majority")))
+
+df_entity3<- df_entity2 %>% 
+  filter(vote=="yes") %>% 
+  arrange(law_id, record_id, entity) %>% 
+  pivot_wider(id_cols=c("law_id", "record_id", "session_date","majority", "votes_rel_total"),
+              names_from=entity,
+              values_from=vote_rel) %>% 
+  left_join(., df_decision_titles) %>% 
+  ungroup()
+
+
+library(ggforce)
+
+plot_HoP_majorities <- df_entity3 %>% 
+  ggplot()+
+  labs(title="House of Peoples: 'Yes' vote share by entity",
+       subtitle=str_wrap("% of 'yes' votes of those present and voting by entity in BiH House of Peoples. 2014-2018 legislative period.
+       Hover over dots to get details.", 160),
+       x="% yes votes from Federation delegates",
+       y="% yes votes from RS delegates",
+       caption=my_caption)+
+  geom_mark_hull(aes(x=FBiH, 
+                     y=RS,
+                     #  description=description_hull,
+                     filter=FBiH>1/3 & RS<1/3 & majority=="majority"),
+                 color="lightblue",
+                 fill="lightblue",
+                 expand=0.01,
+                 concavity=2)+
+  geom_jitter_interactive(aes(x=FBiH,
+                  y=RS,
+                  tooltip=paste0(str_wrap(str_to_sentence(decisions_title), 40),
+                                 "\n","\n",
+                                 "Total: ", scales::percent(votes_rel_total),
+                                 "\n",
+                                 "FBiH: ", scales::percent(FBiH),
+                                 "\n",
+                                 "RS: ", scales::percent(RS)),
+                  color=majority,
+                  shape=majority))+
+  geom_hline(yintercept=1/3)+
+  geom_vline(xintercept=1/3)+
+  hrbrthemes::theme_ipsum_rc()+
+  theme(legend.position="none",
+        plot.title = element_text(size = 12, face="bold.italic", margin=margin(b=0.0, unit="cm")),
+        plot.title.position = "plot",
+        plot.subtitle = element_text(size = 12, color = "grey30"),
+        axis.title = element_blank(),
+        axis.text.x=element_text(vjust=1,
+                                 hjust=0.5,
+                                 size=11),
+        plot.margin = margin(t=0, b=0, unit="cm"),
+        plot.caption = element_markdown(hjust=c(0, 1)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.spacing.x = unit(0.3, "cm"),
+        panel.spacing.y = unit(0.3, "cm"))+
+  scale_y_continuous(labels=scales::label_percent(accuracy=1),
+                     minor_breaks = NULL,
+                     breaks=c(.33, seq(0,1,.25)),
+                     limits=c(-0.02, 1.02),
+                     position = "left")+
+  scale_x_continuous(labels=scales::label_percent(accuracy=1),
+                     limits=c(-0.02, 1.02),
+                     expand=expansion(mult=c(0, 0)),
+                     breaks=c(.33, seq(0,1,.25)))+
+  scale_color_manual(values=c("majority"="darkgreen",
+                             "no majority"="firebrick"))
+
+plot_jitter <- girafe(ggobj=plot_HoP_majorities,
+       options=list(opts_tooltip(css = "background-color:lightgray; font-family:Roboto Condensed;",
+                                 delay_mouseout = 5000)),
+       pointsize=6,
+       width_svg=10, 
+       height_svg=7) #10 15
+
+
+```
+</details>
+ 
+```{r echo=FALSE, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+plot_jitter
+
+```
+
+### Bar plot
+The bar plot below provides another summary of the outcome of votes taken in House of Peoples. Overall, 73.56 % (217) of all decisions secured the overall majority plus the required entity support of at least 1/3 of each entity’s delegates (who were either voting, abstained or did not cast a vote). 14.24 % (42) of all decisions fell short of the overall 50 % majority threshold. And in 12.20 % (36) decision, the issue at stake gained majoritarian support, but failed to secure the required minimum support of at least 1/3 of the RS delegates. There were no cases which fell short due to missing support from the Federation’s delegates.
+
+<details closed> 
+<summary>Click here for code</summary>
+```{r}
+df_outcome <- df_entity3 %>% 
+  mutate_at(vars(FBiH, RS), ~case_when(. >=0.3 ~ "entity support",
+                                      TRUE ~ as.character("no entity support"))) %>% 
+  select(majority, FBiH, RS) %>% 
+  group_by_all() %>% 
+  summarise(n_obs=n()) %>% 
+  ungroup()
+
+
+df_outcome <- df_outcome %>% 
+  mutate(category=case_when(majority == "no majority" ~ "no overall majority",
+                            majority == "majority" & FBiH=="entity support" & RS == "entity support" ~ "overall majority & entity support",
+                            majority == "majority" & FBiH=="no entity support"  & RS == "entity support" ~ "overall majority & RS support, no FBiH support",
+                            majority == "majority" & FBiH=="entity support" & RS == "no entity support" ~ "overall majority & FBiH support, no RS support")) %>% 
+  group_by(category) %>% 
+  summarise(n_obs=sum(n_obs)) %>% 
+  ungroup() %>% 
+  mutate(n_rel=n_obs/sum(n_obs))
+
+
+plot_outcome <- df_outcome %>% 
+  ggplot()+
+  labs(y="number of decisions (% in brackets)",
+       title="House of Peoples: Outcome of votes (2014-2018)",
+       caption=my_caption)+
+  geom_bar(aes(x=reorder(category, n_obs),
+               y=n_obs),
+           fill="steelblue",
+           stat="identity")+
+  geom_text(aes(x=reorder(category, n_obs),
+                y=n_obs+4,
+                label=paste0(n_obs, "\n",
+                             scales::percent(n_rel, accuracy = 0.01))),
+            family = "Roboto Condensed",
+            color = "grey30",
+            hjust = 0,
+            stat="identity")+
+  scale_x_discrete(labels=function(x) str_replace(x, "&", "&\n"),
+                   expand=expansion(mult=0)) +
+  scale_y_continuous(expand=expansion(mult=0),
+                     limits=c(0, 250))+
+  coord_flip()+
+  theme_ipsum_rc()+
+  theme_ipsum_rc()+
+  theme(axis.title.x.top = element_text(hjust=0, size=11),
+        axis.title.y.left = element_blank(),#element_text(hjust=0, size=11),
+        legend.position = "none",
+        plot.margin=margin(l=0, t=0.5, b=0.5, r=0, unit="cm"),
+        panel.grid.major.y = element_blank(),
+        plot.title = element_text(size = 12, face="bold.italic", margin=margin(b=0.5, unit="cm")),
+        plot.title.position = "plot",
+        plot.subtitle = element_text(size = 12, color = "grey30"),
+        plot.caption.position = "panel",
+        plot.caption = element_markdown(color = "grey30", hjust = c(0, 1)))
+
+```
+</details>
+
+```{r echo=FALSE, fig.height=4, fig.width=10, message=FALSE, warning=FALSE}
+plot_outcome
+```
+
+
+## Voting by constituent peoples
+The following two graphs are attempts to visualize the voting decisions in the House of Peoples by delegates' affiliatino to a constituent peoples (and not entitiy, as above). 
+
+### Cube
+Since there are three constituent peoples, we basically have three dimensions. The first attempt is a cube with each dimension representing the ‘yes’ share of a constituent group. Again, the ‘yes’ share is here calculated based on the number of yes votes in relation to all votes casted by those present and voting (for each group). MP’s who were not present were not considered.  Each bubble or point in the cube represents a specific combination of Bosnia-Croat-Serb ‘yes’ shares. The size is proportionate to the number of decisions taken with each distinct combination, i.e. the larger the bubble the more often representatives of the groups have voted accordingly.  Hoover over each dot to get the corresponding yes-shares and the number of decisions displayed. You can also zoom in or move the cube around with the mouse to focus on the axis (constituent people’s yes-share) of your interest.
+
+<details closed> 
+<summary>Click here for code</summary>
+```{r message=FALSE, warning=FALSE}
+df_HoP_share <- df_HoP %>% 
+  select(session_date, law_id, record_id, ethnicity, vote) %>% 
+  group_by(session_date, law_id, record_id, ethnicity, vote) %>% 
+  summarise(n_vote=n()) %>% 
+  filter(vote!="not present") %>%  #important!
+  mutate(n_present=sum(n_vote)) %>% 
+  mutate(vote_share=n_vote/n_present) %>% 
+  pivot_wider(id_cols=c(session_date, law_id, record_id),
+              names_from=c(ethnicity, vote),
+              values_from=c(n_vote, n_present, vote_share),
+              values_fill=list(n_vote=0, n_present=0, vote_share=0)) %>% 
+  select(session_date, law_id, record_id, matches("vote_share_.*_yes")) 
+
+library(plotly)
+
+df_HoP_share_grouped <- df_HoP_share %>% 
+  group_by_at(vars(contains("share"))) %>% 
+  summarise(n_obs=n())
+
+plot_cube <- plot_ly(df_HoP_share_grouped, 
+             size=~n_obs,
+             x = ~vote_share_Bosniak_yes, 
+             y = ~vote_share_Serb_yes, 
+             z = ~vote_share_Croat_yes) %>%
+  add_markers() %>%
+  layout(scene = list(xaxis = list(title = 'yes share Bosniak'),
+                      yaxis = list(title = 'yes share Serb'),
+                      zaxis = list(title = 'yes share Croat')),
+         title = "<b>HoP: Support for decisions by delegates' constitutent peoples</b>",
+         title_x=0)
+```
+</details>
+
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, warning=FALSE}
+plot_cube
+```
+As one can see, the dot in the corner with all groups having a yes vote share of 100 % is the largest. Furthermore, if we focus on the Bosniak yes-share (axis) we see that a considerable number of decisions were passed with 100 % or slightly less support by Bosniak delegates. These dots are also by and large situated on the upper end of the Croat axis, i.e. a high Croat yes share. In contrast, if we focus on the Serb delegates, we’ll see that their ‘yes-shares’ are less concentrated on the upper end of the scale, and also exhibit lower degrees of support.
+
+In short, what the locations of the dots reflect is that the yes share of Bosniak and Croat delegates is more often higher than that of the Serb delegates. Admittedly, the representation of the results in the cube is most likely not everybody’s cup of tea and it can be a bit confusing. While it can provid a useful representation for getting a visual impression, it is difficult to infer any actual numbers on the overall distribution of ‘yes-share’-combinations.
+
+### Nested Table(heatmap)
+To remedy this shortcoming, the second graph seeks to present the results in a more accessible way by depicting the relative percentage of each yes-share combination in a nested table/heatmap. First, I cut the yes-shares into intervals (share=0%, 0%> share <25%, 25%>= share <50%, 50%>= share <75%, 75%>=share<100%, share=100%). Then I calculated the relative number of decisions located in each interval. 
+
+To make things clearer, let’s have a look: The six plots present the Serb-Croat yes share combination for each Bosniak yes-share interval (they are nested). The cell with the largest share, 18 %, is the 100%-100%-100% share combination. Hence, the most frequent combination has been when all Bosniak, Croat and Serb delegates who voted opted for yes. The second most frequent combination is again located in the 100 % Bosniak ‘yes-share’ panel. In 10 % of all decisions, 100 % of Bosniak and 100 % Croat delegates, but only between 25 % and less than 50 % of Serb delegates opted for yes (of those who voted). In 8 % of all decisions, the yes-share of Serb delegates was even 0 % when Bosniak and Croat delegates voted all with yes.
+
+<details closed> 
+<summary>Click here for code</summary> 
+```{r message=FALSE, warning=FALSE}
+df_HoP_table <- df_HoP_votes %>% 
+  pivot_wider(id_cols=c(ethnicity, 
+                        party,
+                        delegate_name),
+              names_from="vote",
+              values_from=c("n_obs", "n_rel"))
+
+df_HoP_share_table <- df_HoP %>% 
+  select(session_date, law_id, record_id, ethnicity, vote) %>% 
+  group_by(session_date, law_id, record_id, ethnicity, vote, .drop=F) %>% 
+  summarise(n_vote=n()) %>% 
+  #ungroup() %>% 
+  filter(vote!="not present") %>%  #important!
+  mutate(n_present=sum(n_vote)) %>% 
+  mutate(vote_share=n_vote/n_present) %>% 
+  mutate(vote_share_interval=case_when(vote_share==0 ~ "[0%]",
+                                       vote_share > 0 & vote_share < .25 ~ "(0%-25%)",
+                                       vote_share >=.25 & vote_share < .5 ~ "[25%-50%)",
+                                       vote_share >=.5 & vote_share < .75 ~ "[50%-75%)",
+                                       vote_share >=.75 & vote_share < 1 ~ "[75%-100%)",
+                                       vote_share==1 ~ "[100%]")) %>% 
+  ungroup() %>% 
+  mutate(vote_share_interval=fct_relevel(vote_share_interval, "[0%]", "(0%-25%)", "[25%-50%)","[50%-75%)","[75%-100%)", "[100%]"))
+
+levels(df_HoP_share_table$vote_share_interval)
+
+df_HoP_share_table2 <- df_HoP_share_table %>% 
+  filter(vote=="yes") %>% 
+  select(record_id, ethnicity, vote_share_interval) %>% 
+  pivot_wider(id_cols=record_id, 
+              names_from=ethnicity,
+              values_from=vote_share_interval,
+              values_fill=list(vote_share_interval="[0%]"))
+
+df_HoP_share_table3 <- df_HoP_share_table2 %>% 
+  group_by(Bosniak, Croat, Serb, .drop=T) %>% 
+  summarise(n_obs=n()) %>% 
+  ungroup() %>% 
+  mutate(n_total=sum(n_obs)) %>% 
+  mutate(n_rel=n_obs/n_total) %>% 
+  mutate_at(vars(Bosniak, Croat,Serb), .funs=list(indicator=~as.numeric(.)))
+
+Bosniak_levels <- levels(df_HoP_share_table3$Bosniak)
+Croat_levels <- levels(df_HoP_share_table3$Croat)
+Serb_levels <- levels(df_HoP_share_table3$Serb)
+
+
+library(lemon)
+
+plot_table <- df_HoP_share_table3 %>%
+  mutate(Bosniak=fct_rev(Bosniak)) %>% 
+  group_split(Bosniak) %>% 
+  map(~
+  ggplot(.)+
+  labs(x="Croat yes-share interval",
+       y="Serb yes-share interval")+
+  geom_rect(aes(xmin=Croat_indicator,
+                xmax=Croat_indicator+1,
+                ymin=Serb_indicator,
+                ymax=Serb_indicator+1,
+                fill=n_rel))+
+  geom_text(aes(x=Croat_indicator+.5,
+                y=Serb_indicator+.5,
+                label=scales::percent(n_rel,
+                                      accuracy=0.1)),
+            color="white")+
+  scale_x_continuous(breaks = seq(1.5, length(Croat_levels)+0.5, 1), 
+                     labels = Croat_levels, 
+                     limits=c(1, max(df_HoP_share_table3$Croat_indicator)+1),
+                     position = 'top', 
+                     sec.axis = dup_axis(),
+                     expand = c(0,0)) +
+  scale_y_continuous(breaks = seq(1.5, length(Serb_levels) + 0.5, 1), 
+                     labels = Serb_levels, 
+                     position = 'right', 
+                     sec.axis = dup_axis(),
+                     limits=c(1, max(df_HoP_share_table3$Serb_indicator)+1),
+                     expand = c(0,0)) +
+  scale_fill_gradient(low="midnightblue", high="lightskyblue1",
+                      limits=c(0, .20)) +  #limit important since plot created with patchwork; scale has to be equal across all plots
+  # scale_x_discrete(drop=F)+
+  hrbrthemes::theme_ipsum_rc() +
+  theme(legend.position = "none",
+        strip.text=element_text(face="bold"),
+        strip.background = element_rect(fill="gray80"),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        plot.caption = element_markdown(hjust=c(0, 1)),
+        plot.caption.position = "panel",
+        plot.margin = margin(t=0.5, b=0.5, r=0.5, unit="cm"),
+        panel.border = element_rect(fill="transparent"),
+        strip.placement = "outside",
+        strip.background.x = element_rect(fill="white", color="white"),
+        axis.text.y.left = element_blank(),
+        axis.text.x.top = element_blank(),
+        axis.text.x.bottom = element_text(size=10),
+        axis.title.x.bottom = element_text(face="plain", size=13, hjust=0),
+        axis.title.x.top = element_blank(),
+        axis.title.y.left=element_text(face="plain", size=13, hjust=0),
+        axis.title.y.right=element_blank())+
+  lemon::facet_rep_wrap(vars(Bosniak),
+                        repeat.tick.labels = T,
+             labeller=labeller(Bosniak=function(x) {paste("Bosniak yes-share interval:", x)}))
+  )
+
+library(patchwork)
+plot_table_all<- patchwork::wrap_plots(plot_table, nrow=3) +
+  plot_annotation(title ="Share of yes-votes by constituent peoples", 
+                  subtitle = str_wrap("Percentage of delegates in House of Peoples voting with 'yes' by constituent people (excluding absentees); 2014-2018 legislative period.", 150),
+                  caption="Data: parlament.ba - Analysis: Roland Schmidt | @zoowalk | https://werk.statt.codes",
+                  theme=theme(plot.subtitle = element_text(color="grey30", 
+                                                           margin(t=0, r=0.5, b=2, l=0.5 ,unit="cm")),
+                              plot.margin = margin(t=0, unit="cm")))
+
+```  
+</details>
+
+```{r echo=FALSE, fig.height=15, fig.width=10, message=FALSE, warning=FALSE}
+plot_table_all
+```
+
+

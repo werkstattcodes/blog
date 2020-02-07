@@ -8,12 +8,13 @@ body {
 }
 
 p {text-align: left;
+   /* line-height: 100%;*/
 }
 
 code {
   padding: 2px 4px;
   font-size: 90%;
-  background-color: #eeeeee;
+  background-color: lightgray; /*#eeeeee;*/
   border-style: none;
   }
 
@@ -24,8 +25,8 @@ pre {
   line-height: 1.4;
   word-break: break-all;
   word-wrap: break-word;
-  border: .5px solid #ccc; /* border for code snippets  */
-  border-radius: 5px;
+  border: .0px solid #ccc; /* border for code snippets  */
+  border-radius: 5px;  
 }
 
 pre,
@@ -54,7 +55,8 @@ h3 {
   color: black;
   font-style: italic;
   font-size: 100%;
-  /*margin-bottom:-20px;*/
+  line-height: 100%; 
+  margin-bottom:-10px;
 }
 
 h4,
@@ -157,4 +159,9 @@ section a:hover:not(toc-h1):not(toc-h2):not(toc-h3) {
 
 scrollable-element {
   scrollbar-color: red yellow;
+}
+
+summary {
+	color: firebrick;
+	font-size: 70%;
 }
