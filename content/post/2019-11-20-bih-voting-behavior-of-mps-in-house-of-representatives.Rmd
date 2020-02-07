@@ -1,30 +1,27 @@
-
 ---
 title: 'Bosnia: Voting behavior of MPs in the House of Representatives'
-author: roland schmidt
-date: '2020-01-18'
-slug: bih-voting-behavior-of-mps-in-house-of-representatives
-categories: []
+author: "roland schmidt"
+date: '2020-02-07'
 draft: false
+description: ''
+slug: bih-voting-behavior-of-mps-in-house-of-representatives
 tags:
   - Bosnia
   - OCR
   - web scraping
-description: ''
+categories: []
 ---
-
-*this post is still work in progress and may undergo some change*
 
 # CONTEXT
 A while ago I noticed that the website of Bosnia's parliament also provides the voting records for each separate vote taken in both houses. These records also include the voting behavior for each individual MP. Here an example of one of these voting records:
 
 ![](/post/2019-11-20-bih-voting-behavior-of-mps-in-house-of-representatives_files/record.PNG){width=50% height=50%}
 
-While the dominant role of the ethnic cleavage in Bosnian politics has been a constant theme and continuously emphasized for the last 25 years (to an extent which frequently blanks out other salient issues), I hadn't seen any empirical record on MP's individual voting behavior which could corroborate the cleavage's prevalence in the legislative arena (one insightful exception is Birgit Kunrath's 2011 [paper](https://www.cambridge.org/core/journals/nationalities-papers/article/of-veto-players-and-entityvoting-institutional-gridlock-in-the-bosnian-reform-process/96BB80A5191E12B40F501841546C151D){target="_blank"}).
+While the dominant role of the ethnic cleavage in Bosnian politics has been a constant theme and continuously emphasized for the last 25 years (to an extent which frequently blanks out other salient issues), I hadn't seen any empirical record on MP's individual voting behavior which could corroborate the cleavage's prevalence in the legislative arena (one insightful exception is Birgit Bahtić-Kunrath's 2011 [paper](https://www.cambridge.org/core/journals/nationalities-papers/article/of-veto-players-and-entityvoting-institutional-gridlock-in-the-bosnian-reform-process/96BB80A5191E12B40F501841546C151D){target="_blank"}).
 
-This post digs into the now available records for the 2014-2018 parliament and seeks to shed some light on the legislative process. The first part presents the results, the second highlights the most relevant steps in R to produce them. The entire code for the analysis is again available on my [github account](http://www.github.com/werkstattcodes){target="_blank"}. Since the post got a bit longer than initially expected, this one will mainly focus on the lower chamber (House of Representatives). A later post will take up the upper chamber in detail (House of Peoples).
+This post digs into the now available records for the 2014-2018 parliament and seeks to shed some light on the legislative process. The first part presents the results, the second highlights the most relevant steps in R to produce them. The entire code for the analysis is again available on my [github account](https://github.com/werkstattcodes/Bosnia_MP_voting_behavior){target="_blank"}. Since the post got a bit longer than initially expected, this one will mainly focus on the lower chamber (House of Representatives). A later post will take up the upper chamber in detail (House of Peoples).
 
-As always, if you see any glaring error, feel free to let me know (best via [twitter](https://twitter.com/zoowalk){target="_blank"} DM). If you think the blog is interesting and feel like quoting it, please refer to it as _Roland Schmidt, "Bosnia: Voting behavior of MPs in the House of Representatives (2014-2018)", https://werk.statt.codes/post/bih-voting-behavior-of-mps-in-house-of-representatives/, 18 January 2020.
+As always, if you see any glaring error, feel free to let me know (best via [twitter](https://twitter.com/zoowalk){target="_blank"} DM). If you think the blog is interesting and feel like quoting it, please refer to it as _Roland Schmidt, "Bosnia: Voting behavior of MPs in the House of Representatives (2014-2018)", https://werk.statt.codes/post/bih-voting-behavior-of-mps-in-house-of-representatives/, 18 January 2020_.
 
 For those working in R, the blog post might be particularly interesting when it comes to retrieving the actual data. As so often with empirical research the challenges has been less the analysis of the data itself, but 'liberating' it from the format within which it is provided. In this case, the voting records for both the House of Peoples and the House of Representative are provided in pdfs, such as the one above or this [_one_](http://parlament.ba/oLaw/GetOwisDocument/?documentId=206164&data=10788B4568269048D57D8F644F829519&lang=hr){target="_blank"} or this [_one_](http://parlament.ba/oLaw/GetOwisDocument/?documentId=193121&data=E0B8243EF8B51ED931E698C78D196E84&lang=hr){target="_blank"}. Hence, there's been some hefty OCR-ing involved thanks to the powerful [`pdf_tools`](https://docs.ropensci.org/pdftools/){target="_blank"} package by [Jeroen Ooms](https://twitter.com/opencpu){target="_blank"}.
 
@@ -33,6 +30,7 @@ For those working in R, the blog post might be particularly interesting when it 
 ```{r include=FALSE}
 # setup -------------------------------------------------------------------
 library(tidyverse)
+library(ggplot2)
 library(paletteer)
 library(glue)
 library(extrafont)
@@ -156,7 +154,7 @@ df_laws_outcome %>%
 
 ### by house
 
-Looking separately at each of the two houses provides a more detailed picture. In the lower chamber, the House of Representatives,  153 bills were considered in total out of which a bit more than 50 % were approved. In the upper chamber, the House of Peoples, which comprises 5 delegates of each constituent people (Bosniak, Croats, Serbs), 56.7 % of all considered bills were passed. 
+Looking separately at each of the two houses provides a more detailed picture. In the lower chamber, the House of Representatives,  153 bills were considered in total out of which a bit more than 50 % were approved. In the upper chamber, the House of Peoples, which comprises five delegates of each constituent people (Bosniak, Croats, Serbs), 56.7 % of all considered bills were passed. 
 
 ```{r echo=FALSE, fig.height=3, fig.width=10}
 #in which house are bills rejected
@@ -231,7 +229,8 @@ plot_df_outcome_chambers <- df_outcome_chambers %>%
   #                       labeller = labeller(house=c("HoP_status"="House of Peoples",
   #                                                "HoR_status"="House of Representatives")))+
   theme_ipsum_rc()+
-  theme(panel.grid = element_blank(),
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
         axis.text.y = element_blank(),
         axis.title.y = element_blank(),
         plot.title = element_text(size = 14, face="bold", margin=margin(b=0, unit="cm")),
@@ -253,9 +252,9 @@ plot_df_outcome_chambers <- df_outcome_chambers %>%
 
 ### intersection of houses
 
-If we intersect the developments for each law in each chamber, we get a clearer picture were bills were actually rejected/not passed. The table/heatmap below intends to show this. The x-axis shows a bill's outcome in the House of Representative, the y-axis the outcome of the same bill in the House of Peoples (if a bill was considered only in one chamber, the respective status in the other chamber is 'missing').
+If we intersect the developments for each law in each chamber, we get a clearer picture where bills were actually rejected/not passed. The table/heatmap below intends to show this. The x-axis shows a bill's outcome in the House of Representative, the y-axis the outcome of the same bill in the House of Peoples (if a bill was considered only in one chamber, the respective status in the other chamber is 'missing').
 
-Out of the 67 bills adopted in the House of Peoples and 77 in the House of Representatives, 60 were actually considered in both chamber and eventually passed.  With 37 % of all bills it's the largest category in the table. The second largest category comprises 27 bills (16.7 % of all bills) which were rejected in the House of Representatives and never made it to the House of Peoples. The third largest category contains 12 bills (7.4 % of all bills) which were adopted in the lower house but rejected in the upper chamber. 
+Out of the 67 bills adopted in the House of Peoples and 77 in the House of Representatives, 60 were actually considered in both chambers and eventually passed.  With 37 % of all bills it's the largest category in the table. The second largest category comprises 27 bills (16.7 % of all bills) which were rejected in the House of Representatives and never made it to the House of Peoples. The third largest category contains 12 bills (7.4 % of all bills) which were adopted in the lower house but rejected in the upper chamber. 
 
 ```{r echo=FALSE, fig.width=10, message=FALSE}
 df_outcome_chambers_combined <- df_details_all_status_wide %>% 
@@ -296,7 +295,7 @@ plot_df_outcome_chambers_combined <- df_outcome_chambers_combined  %>%
             # group = name,
             stat="identity")+
   scale_fill_gradient(low="white", high="steelblue",
-                      na.value="grey")+
+                      na.value="white")+
   scale_x_continuous(labels=levels(df_outcome_chambers_combined$HoR_outcome_label) %>% map_chr(., label_wrap(15)),
                      breaks=seq(1, length(unique(df_outcome_chambers_combined$HoR_outcome_label))),
                      sec.axis = dup_axis())+
@@ -313,6 +312,8 @@ plot_df_outcome_chambers_combined <- df_outcome_chambers_combined  %>%
         axis.title.y.right = element_blank(),
         #axis.text.x.bottom=element_text(angle=0, hjust=.5),
         panel.grid = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
         legend.position = "none",
         panel.border = element_rect(color="grey30", fill=NA),
         axis.title.y = element_text(angle=0),
@@ -330,9 +331,9 @@ plot_df_outcome_chambers_combined
 
 ## Legislative votes over time
 
-How was the legislative activity distributed over time? The graph below provides the number of votes in both houses per month. Note that the graph also includes votes which were held in both houses outside of the 2014-2018 legislative session. The reason is that bills considered in 2014-2018 also include bills which were initiated prior to 2014 and hence also votes which were taken outside of the 2014-2018 legislative session.
+How was the legislative activity distributed over time? The graph below provides the number of ballots in both houses per month. Note that the graph also includes votes which were held in both houses outside of the 2014-2018 legislative session. The reason is that bills considered in 2014-2018 also include bills which were initiated prior to 2014 and hence also ballots which were taken outside of the 2014-2018 legislative session.
 
-If we focus only on the 2014-2018 session, it is rather clear that both chamber were most active in the first half of 2016 and the end of 2017. I am not sure exactly what caused this bout of activity, but it's quite distinct if contrasted e.g. with 2015 or the early parts of 2017.
+If we focus only on the 2014-2018 session, it is rather clear that both chambers were most active in the first half of 2016 and the end of 2017. I am not sure exactly what caused this bout of activity, but it's quite distinct if contrasted e.g. with 2015 or the early parts of 2017.
 
 ```{r echo=FALSE, fig.width=10}
 #number of votes per week
@@ -361,7 +362,8 @@ df_ocr_results_unnested %>%
        caption=my_caption)+
   geom_bar(aes(y=n_votes,
                x=month),
-           fill="steelblue",
+          orientation="x",
+          fill="steelblue",
            stat="identity")+
   geom_vline(data=election_dates,
              aes(xintercept=election_month,
@@ -402,9 +404,11 @@ df_sessions <- df_ocr_results_unnested %>%
 
 ## Voting behavior per MP
 
-So far the analysis presented was limited to bills as the unit of analysis. Now let's dig a bit deeper and see how individual MPs voted. The graph below provides the results for every voting decision (including abstentions, no vote, not present) of every MP, by party affiliation, during the 2014-2018 legislative period. Since a bill undergoes several readings before it can become a law/is forwarded to the other chamber, there are more votes than bills. Overall, MPs in the House of Representatives were asked to cast their votes 451 times in total. These votes pertain to 148 laws (out of the initial 162 laws above eleven have not entailed any vote by the end of the legislative period and three entailed ballots prior to the 2014 elections).
+So far the analysis presented was limited to bills as the unit of analysis. Now let's dig a bit deeper and see how individual MPs voted. The graph below provides the results for every voting decision (including abstentions, no vote, not present) of every MP, by party affiliation, during the 2014-2018 legislative period. Since a bill undergoes several readings before it can become a law/is forwarded to the other chamber, there are more votes than bills. Overall, MPs in the House of Representatives were asked to cast their votes 451 times in total. These votes pertain to 148 laws (out of the initial 162 laws above eleven have not entailed any vote by the end of the 2014-2018 legislative period and three entailed ballots prior to the 2014 elections).
 
-In the graphs below each vertical line (small rectangle) represents an MP's vote in one ballot (hence the x axis is 451 small rectangles long; ordered chronologically). According to the ballot records, there are five possible options: an MP can cast 1) a 'yes' (*za*), or 2) an 'against' or 'no' vote (*protiv*); 3) be not present during the ballot (*nije prisuta*); 4) abstained (*suzdržan*), or 5) do not cast a vote (*nije glasao*). The important difference between the latter two is that 'abstained' are technically counted as having 'voted' and hence count for the required quorum (many thanks to [Elena Stavrevska and Davide Denti](https://twitter.com/zoowalk/status/1216820737132191744){target="_blank"} for helping to clarify this point.) Unfortunately, I had to remove names' diacritics which added a major source of complication (at least for me)...
+In the graphs below each vertical line (small rectangle) represents an MP's vote in one ballot (hence the x axis is 451 small rectangles long; ordered chronologically). According to the voting records, there are five possible options: an MP can cast 1) a 'yes' (*za*), or 2) an 'against' or 'no' vote (*protiv*); 3) be not present during the ballot (*nije prisuta*); 4) abstained (*suzdržan*), or 5) do not cast a vote (*nije glasao*). Note that the Rules of Procedure for the House of Representatives (as for the House of Peoples) stipulate that 'in case a representative does not vote “in favour”, “against” or “abstained”, but he/she is present at the session during the voting, he/she is considered “abstained” (see [here](https://www.parlament.ba/Content/Read/60?title=Odlu%C4%8Divanje-u-Predstavni%C4%8Dkom-domu){target="_blank"}.'
+
+Unfortunately, I had to remove names' diacritics which added a major source of complication (at least for me).
 
 ```{r echo=FALSE, fig.height=10, fig.width=10, warning=FALSE}
 # tile graph --------------------------------------------------------------
@@ -417,31 +421,32 @@ n_record_ids <- df_ocr_results_unnested_truncated %>%
   n_distinct()
 
 plots_tile <- df_ocr_results_unnested_truncated %>% 
-  filter(house=="HoR") %>% 
- # mutate(vote=forcats::fct_collapse(vote, abstained=c("abstained", "no vote", "restrained"))) %>% 
+  filter(house=="HoR") #%>% 
+  #mutate(vote=forcats::fct_collapse(vote, abstained=c("abstained", "no vote", "restrained"))) 
+
+plots_tile <- plots_tile %>% 
   ggplot()+
   labs(x="item voted at",
        y="MP",
-       title="Vote by members of House of Representative and item",
-       subtitle="Ballots during 2014-2018 legislative period. Each stripe one vote.",
+       title="Vote by MP and item",
        caption=my_caption)+
   geom_tile(aes(x=reorder(record_id, session_date),
                 y=fct_rev(delegate_name_family),
-                                     fill=vote))+
- # scale_y_discrete(label=delegate_name_2)+
-  scale_fill_manual(values=voting_colors)+
+                fill=vote))+
+  # scale_y_discrete(label=delegate_name_2)+
+  scale_fill_manual(values=voting_colors,
+                    na.value="white")+
   theme_ipsum_rc() +
-  theme(axis.title.y=element_blank(),
-        axis.text.x=element_blank(),
-        axis.title.x=element_text(hjust=0),
+  theme(axis.text.x=element_blank(),
+        panel.background = element_rect(fill="white", color="white"),
+        panel.grid.major = element_blank(),
         plot.subtitle = element_text(size = 12, color = "grey30"),
         plot.title = element_text(size = 14, face="bold", margin=margin(b=0.3, unit="cm")),
-        plot.title.position="plot",
-        panel.grid = element_blank(),
         plot.margin=margin(l=0, t=0.5, b=0.5, unit="cm"),
+        plot.title.position = "plot",
+        plot.caption = element_markdown(hjust=c(0, 1)),
         legend.position = "top",
-        legend.justification = "left",
-        plot.caption = element_markdown(hjust=c(0,1)))+
+        legend.justification = "left")+
   facet_wrap(vars(party),
              scales="free_y")
 
@@ -449,17 +454,17 @@ plots_tile
 
 ```
 
-Even without going into numeric details, I find the graph rather informative. While with most parties/MPs the yes votes (green) dominate, the SNSD is a glaring aberration. Milorad Dodik's SNSD clearly stands out as the party which says 'no' (to paraphrase Ian Paisley) or simply doesn't show up when it asked to cast a vote.
+Even without going into numeric details, I find the graph rather informative. While with most parties/MPs the yes votes (green) dominate, the SNSD is a glaring aberration. Milorad Dodik's SNSD clearly stands out as the party which says 'no' (to paraphrase Ian Paisley) or simply doesn't show up when asked to cast a vote.
 
-Note that the representatives Vjekoslav Bevanda and Halid Genjac were only briefly members of parliament. If not mistaken, Bevanda subsequently became Chairperson of the Council of Ministers and hence left his position as an MP. From the graph it appears that his place was taken by Predrag Kozul. Similarly, SDA's Genjac was only for the early sessions member of the HoR. His place seems to have been taken over by Hazim Rančić.
+Note that the representatives Vjekoslav Bevanda and Halid Genjac were only briefly members of the House of Representatives. If not mistaken, Bevanda subsequently became Chairperson of the Council of Ministers. From the graph it appears that his place was taken by Predrag Kožul. Similarly, SDA's Genjac was only for the early sessions member of the HoR. His place seems to have been taken over by Hazim Rančić.
 
 As a general caveat, note that I took MPs' party affiliation as stated on the parliament's website which may omit instances in which MPs have changed their party affiliation in the course of the 2014-2018 legislative period. I am not aware that this was actually the case, but if so, please let me know.^[One way to improve the graph would be to have equally sized heights per MP.]
 
 ## MP ranking per vote category 
 
-To get a more detailed view on MPs' individual voting behavior, the next graph presents each MP's voting behavior per voting category as % of an MP's number of total voting decisions (incl. abstentions etc). In other words, the graph reveals how often an MP votes for e.g. yes, no etc. as % of all instances in which she was tasked to cast a vote. Party affiliation is presented next to each MP's name. Furthermore, to highlight discrepancies between representatives originating (in terms of mandate) from the Federation or the RS, the bars are colored differently. The variation is rather remarkable, particularly with regard to MPs' 'no' votes and absence (not present and abstentions). 
+To get a more detailed view on MPs' individual voting behavior, the next graph presents each MP's voting behavior per voting category as % of an MP's number of total voting decisions (incl. abstentions etc). In other words, the graph reveals how often an MP votes for e.g. yes, no etc. as % of all instances in which she was tasked to cast a vote. Party affiliation is presented next to each MP's name. Furthermore, to highlight discrepancies between representatives originating (in terms of mandate) from the Federation and the RS, the bars are colored differently. The variation is rather remarkable, particularly with regard to MPs' 'no' votes and absence (not present and abstentions). 
 
-I leave it up to the reader to go through each category, but just to highlight one case: According to the published voting records, Nikola Špirić, one of SNSD's main figure heads (and previously Chairperson of the Council of Ministers), was absent in 44.8 % of all ballots. Even with the benefit of doubht and acknowledging that an MP's work entails more than participating in ballots (work in committees etc), this is a rather, let's say, 'remarkably' low rate of presence.  His party colleagues Markovic and Milovanovic participated only a few times more often. In those instances in which they were present, they voted predominantly with 'no'. Constructive engagement in the legislative process looks different, at least to me.
+I leave it up to the reader to go through each category, but just to highlight one case: According to the published voting records, Nikola Špirić, one of SNSD's main figure heads (and previously Chairperson of the Council of Ministers), was absent in 44.8 % of all ballots. Even with the benefit of doubt and acknowledging that an MP's work entails more than participating in ballots (work in committees etc), this is a rather, let's say, 'remarkably' low rate of presence.  His party colleagues Markovic and Milovanovic participated only a few times more often. In those instances in which they were present, they voted predominantly with 'no'. Constructive engagement in the legislative process looks different, at least to me.
 
 ```{r echo=FALSE, fig.height=20, fig.width=10, message=FALSE, warning=FALSE}
 library(tidytext)
@@ -524,7 +529,7 @@ df_votes_delegates %>%
 ```
 
 ## Party differences
-As a next step, let's group MPs' voting behavior by party and their (ascribed or self-declared) ethnic affiliation. Admittedly, the latter is not without problems, but I guess the categorization below reflects some kind of middle-ground (SDP could probably be moved to the 'Bosniak' category, but well...). The table provides the total number of votes casted by each party and their respective share in each vote category. Note the high percentage rate of SDA in the 'yes' category; SNSD's ratio in the 'no' or 'not present' category. 
+As a next step, let's group MPs' voting behavior by party and the respective (ascribed or self-declared) ethnic affiliation. Admittedly, the latter is not without problems, but I guess the categorization below reflects some kind of middle-ground (SDP could probably be moved to the 'Bosniak' category, but well...). The table provides the total number of votes casted by all representatives of each party and their respective share in each vote category. Note the high percentage rate of SDA in the 'yes' category and SNSD's ratio in the 'no' or 'not present' category. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
@@ -555,6 +560,7 @@ df_party_voting %>%
 
 ```
 
+Below the same results, put presented as a graph.
 
 ```{r echo=FALSE, fig.height=6, fig.width=10, message=FALSE, warning=FALSE}
 
@@ -666,9 +672,9 @@ girafe(ggobj=wrap_plot_delegats,
 
 ## Conclusion
 
-Overall, the results are pretty much in line with what I expected, but the details nevertheless are quite intriguing. 
+Overall, the results are pretty much in line with what I expected, but the details nevertheless are quite intriguing. Delegates of SNSD are either absent or vote with 'no' in the House of Representatives. There is a clear gulf between representatives from the Federation and the RS when it comes to 'no' votes.
 
-Since this has been already rather lengthy (not to speak of the actual coding), I leave it here and will continue the analysis with a new post in a bit. If you spotted anything peculiar or have any other constructive comment etc. feel free to let me know and I will try to follow up on it. In any case, thanks for reading.  
+Since this has been already rather lengthy (not to speak of the actual coding), I leave it here and will continue the analysis with a new post in a bit. If you spotted anything peculiar or have any other constructive comment etc. feel free to let me know and I will try to follow up on it. In any case, thanks for reading. 
   
   
 ----
