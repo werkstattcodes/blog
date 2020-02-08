@@ -426,9 +426,10 @@ plots_tile <- df_ocr_results_unnested_truncated %>%
 
 plots_tile <- plots_tile %>% 
   ggplot()+
-  labs(x="item voted at",
-       y="MP",
-       title="Vote by MP and item",
+  labs(x="items voted at",
+       y="Member of House of Representative",
+       subtitle="451 decisions in total; 2014-2018 legislative period.",
+       title="House of Representative: Vote choice by individual MPs per decision",
        caption=my_caption)+
   geom_tile(aes(x=reorder(record_id, session_date),
                 y=fct_rev(delegate_name_family),
@@ -438,6 +439,8 @@ plots_tile <- plots_tile %>%
                     na.value="white")+
   theme_ipsum_rc() +
   theme(axis.text.x=element_blank(),
+        axis.title.x=element_text(hjust=0),
+        strip.text = element_text(face="bold"),
         panel.background = element_rect(fill="white", color="white"),
         panel.grid.major = element_blank(),
         plot.subtitle = element_text(size = 12, color = "grey30"),
@@ -562,7 +565,7 @@ df_party_voting %>%
 
 Below the same results, put presented as a graph.
 
-```{r echo=FALSE, fig.height=6, fig.width=10, message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=10, fig.width=10, message=FALSE, warning=FALSE}
 
 df_party_voting %>% 
   ggplot()+
@@ -570,19 +573,34 @@ df_party_voting %>%
                fill=vote,
                y=n_rel),
            stat="identity")+
+  geom_text(aes(x=tidytext::reorder_within(party, n_rel, within=vote),
+                #y=n_rel+.1,
+                y=1.1,
+                label=paste0(n_obs, "/", n_total, 
+                             " (", 
+                             scales::percent(n_rel, accuracy=.1),
+                             ")")),
+            hjust=1,
+            size=4,
+            family = "Roboto Condensed",
+            color = "grey30",
+            stat="identity")+
   scale_x_reordered()+
-  facet_wrap(vars(vote),
+  facet_rep_wrap(vars(vote),
+                 repeat.tick.labels = T,
+                 ncol=2,
              scales="free_y")+
   scale_y_continuous(expand=expansion(mult=0),
+                     limits=c(0, 1.2),
                      labels=scales::label_percent(accuracy=1),
-                     breaks=seq(0, .8, .1))+
+                     breaks=seq(0, .7, .25))+
   scale_fill_manual(values=voting_colors)+
   coord_flip()+
   theme_ipsum_rc()+
   theme(plot.subtitle = element_text(size = 12, color = "grey30"),
         plot.title = element_text(size = 14, face="bold", margin=margin(b=0.3, unit="cm")),
         plot.title.position="plot",
-        plot.margin=margin(l=0, t=0.5, b=0.5, unit="cm"),
+        plot.margin=margin(l=0, t=0.5, b=0.5, r=0, unit="cm"),
         panel.grid.major.y =  element_blank(),
         panel.grid.minor.x = element_blank(),
         legend.position = "none",
@@ -594,7 +612,6 @@ df_party_voting %>%
        subtitle="% of all decisions by members of each party; Legislative period 2014-2018.",
        caption=my_caption,
        y="voting decisions in category as % of all decisions by all MPs of each party")
-
 
 ```
 
@@ -674,7 +691,7 @@ girafe(ggobj=wrap_plot_delegats,
 
 Overall, the results are pretty much in line with what I expected, but the details nevertheless are quite intriguing. Delegates of SNSD are either absent or vote with 'no' in the House of Representatives. There is a clear gulf between representatives from the Federation and the RS when it comes to 'no' votes.
 
-Since this has been already rather lengthy (not to speak of the actual coding), I leave it here and will continue the analysis with a new post in a bit. If you spotted anything peculiar or have any other constructive comment etc. feel free to let me know and I will try to follow up on it. In any case, thanks for reading. 
+Since this has been already rather lengthy (not to speak of the actual coding), I leave it here and will continue the analysis with a new post in a bit. If you spotted anything peculiar or have any other constructive comment etc. feel free to let me know and I will try to follow up on it. In any case, thanks for reading.
   
   
 ----
@@ -685,14 +702,14 @@ Below the most important steps to obtain the results from above. The entire code
 As already mentioned above, getting the actual data from the voting records/pdfs has been the main challenge. Essentially, there were three steps required: 
 
 * First, get the links to each law 
-* *Second, from there extract
+* Second, from there extract
   + data on the status and details of the law in each chamber
   + the links to each voting record(s)
   + use this links to download each voting results file
 * Third, get 
   + the raw text from the voting result files and 
   + extract data of interest (e.g. MP and vote)
-* Finally, start with the actual analysis ;-)*
+* Finally, start with the actual analysis ;-)
 
 ## Get the data
 ### Getting the links to each law
