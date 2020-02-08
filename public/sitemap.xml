@@ -38,16 +38,6 @@
   </url>
   
   <url>
-    <loc>/tags/austria/</loc>
-    <lastmod>2020-02-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/new-post-in-markdown/</loc>
-    <lastmod>2020-02-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/post/bosnia-house-of-peoples/</loc>
     <lastmod>2020-01-24T00:00:00+00:00</lastmod>
   </url>
@@ -55,6 +45,11 @@
   <url>
     <loc>/post/bih-voting-behavior-of-mps-in-house-of-representatives-part2/</loc>
     <lastmod>2020-01-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/austria/</loc>
+    <lastmod>2019-11-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
