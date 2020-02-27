@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>crosstalk on werk.statt.codes</title>
+    <link>/tags/crosstalk/</link>
+    <description>Recent content in crosstalk on werk.statt.codes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
+    <lastBuildDate>Mon, 24 Feb 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/crosstalk/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>crosstalk test</title>
+      <link>/post/crosstalk-test/</link>
+      <pubDate>Mon, 24 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/crosstalk-test/</guid>
+      <description>df_main &amp;lt;- structure(list(pair_indicator = c(&amp;quot;902021-902071&amp;quot;, &amp;quot;902031-902071&amp;quot;,&amp;quot;902031-902091&amp;quot;, &amp;quot;902081-902101&amp;quot;, &amp;quot;902081-902241&amp;quot;, &amp;quot;902101-902241&amp;quot;), school_1_lat = c(48.2149026, 48.2221631, 48.2221631, 48.2205238,48.2205238, 48.223532), school_2_lat = c(48.2186668, 48.2186668,48.22407, 48.223532, 48.2231059, 48.2231059), school_1_long = c(16.3876769,16.3848147, 16.3848147, 16.4049726, 16.4049726, 16.402895), school_2_long = c(16.3853998,16.3853998, 16.3847968, 16.402895, 16.4063758, 16.4063758), distance = c(475.2529684845,379.0377208616, 203.6641400739, 395.8339316511, 316.9061306841,390.1434258679), diff_factor = c(1.</description>
+    </item>
+    
+  </channel>
+</rss>
