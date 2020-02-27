@@ -99,7 +99,7 @@ Overall, during the 2014 to 2018 parliament session 163 bills were considered in
 "Odbijen"="rejected", "Obustavljen zakonodavni postupak"="legislative process suspended", "Povucen"="withdrawn",
 "Ceka na pokretanje procedure"="waiting for the procedure to start", "Nije razmatran"="not considered". If you think there are more fitting translations, feel free to let me know.]
 
-```{r echo=FALSE, fig.height=3, fig.width=10, message=FALSE}
+```{r echo=FALSE, fig.height=6, fig.width=10, message=FALSE}
 df_details_all_status_wide <- readr::read_csv2(here::here("blog_data","Bosnia_MP_voting_behavior","df_details_all_status_wide.csv")) %>% 
     mutate_at(vars(contains("status")), as.factor)
 
@@ -141,7 +141,7 @@ df_laws_outcome %>%
   theme(legend.position = "none",
         panel.grid.minor = element_blank(),
         panel.grid.major.y = element_blank(),
-        axis.title=element_blank(),
+        axis.title = element_blank(),
         plot.margin=margin(l=0, t=0.5, b=0.5, unit="cm"),
         plot.title = element_text(size = 14, face="bold", margin=margin(b=0, unit="cm")),
         plot.title.position = "plot",
