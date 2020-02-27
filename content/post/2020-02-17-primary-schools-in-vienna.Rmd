@@ -1,0 +1,182 @@
+---
+title: Primary schools in Vienna
+author: rs
+date: '2020-02-17'
+slug: primary-schools-in-vienna
+categories: []
+tags:
+  - Austria
+description: ''
+draft: true
+
+---
+
+```{r include=FALSE}
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(extrafont)
+loadfonts(device = "win", quiet = T)
+extrafont::fonts()
+library(hrbrthemes)
+library(scales)
+library(ggiraph)
+library(knitr)
+library(mapdeck)
+library(widgetframe)
+library(htmlwidgets)
+library(plotly)
+library(crosstalk)
+
+
+```
+
+```{r setup, echo = F}
+knit_hooks$set(wrap = function(before, options, envir){
+  if (before){
+    paste0('<', options$wrap, '>')
+  } else {
+    paste0('</', options$wrap, '>')
+  }
+})
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, dpi = 180, fig.height = 5, fig.width = 7, fig.align = "center")
+options(width=180, dplyr.width = 150)
+```
+
+This is the mapdeck plot
+
+```{r eval=FALSE, fig.height=10, fig.width=10, message=FALSE, warning=FALSE, include=FALSE}
+df_mapdeck <- readr::read_csv2(here("blog_data", "Vienna_primary_schools", "df_mapdeck.csv")) 
+my_key <- "pk.eyJ1Ijoiem9vd2FsayIsImEiOiJjazFjMW52NWIwZDVjM21scmE1Y296MnUxIn0.ZXSu71B2VjyBwlUldNUtLg"
+mapdeck(token = my_key)
+
+my_style <- "mapbox://styles/zoowalk/ck6l2axc212wo1jtk9d58njp1"
+#my_style <- "mapbox://styles/zoowalk/ck6l2axc212wo1jtk9d58njp1"
+#my_style <- "mapbox://styles/zoowalk/ck6l2axc212wo1jtk9d58njp1"
+#my_style<- "mapbox://styles/zoowalk/cjp3wwp3d001w2rqk07jhr0pp"
+#my_style <- "mapbox://styles/zoowalk/ck6l2axc212wo1jtk9d58njp1"
+#mapdeck(token = my_key, style = my_style)
+
+  ii <- cut(df_mapdeck$elevation, breaks = seq(0, 1, len = 100), 
+            include.lowest = TRUE)
+  df_mapdeck$my_colors <- colorRampPalette(c("red", "green"))(99)[ii]
+  
+  # df_mapdeck %>% 
+  #   filter(is.na(my_colors))
+  df_mapdeck <- df_mapdeck %>% 
+    mutate(my_colors=case_when(is.na(my_colors) ~ "#DCDCDC",
+                               TRUE ~ as.character(my_colors)))
+  
+  df_mapdeck$my_colors
+  length(df_mapdeck$my_colors)
+  nrow(df_mapdeck)
+
+
+my_map <- mapdeck(token = my_key, 
+        #style = my_style, 
+        pitch = 45 ) %>%
+  add_column(
+    data = df_mapdeck
+    , lat = "lat"
+    , lon = "long"
+    , radius = 10
+    , elevation = "elevation"
+    , elevation_scale = 1000
+    , auto_highlight = TRUE
+    , highlight_colour = "#FFFF3300"
+    , tooltip="tooltip"
+    , fill_colour = "my_colors" 
+    
+  )
+
+
+```
+
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+frameWidget(my_map, 
+            width=900,
+            height=500)
+
+
+```
+
+
+```{r}
+library(here)
+shared_df_main <- readr::read_csv2(here("blog_data", "Vienna_primary_schools",
+                                        "shared_df_main.csv"))
+library(crosstalk)
+shared_df_main <- SharedData$new(shared_df_main)
+
+
+
+# > scatter plotly --------------------------------------------------------
+library(plotly)
+
+plot_distance_diff <-  
+  plot_ly(
+    data=shared_df_main,
+    mode='markers',
+    type="scatter"
+    ) %>% 
+  add_trace(
+    text=~tooltip,
+    marker=list(color='green'),
+    x=~distance,
+    y=~diff_factor,
+    showlegend=F
+  )
+    
+plot_distance_diff
+
+
+# > map -------------------------------------------------------------------
+
+Sys.setenv('MAPBOX_TOKEN' = 'pk.eyJ1Ijoiem9vd2FsayIsImEiOiJjazFjMW52NWIwZDVjM21scmE1Y296MnUxIn0.ZXSu71B2VjyBwlUldNUtLg')
+
+library(plotly)
+
+cross_map2 <- plot_mapbox(
+  data=shared_df_main) %>%
+  add_markers(
+    y = ~school_1_lat,
+    x = ~school_1_long,
+    color = "#FF0000",
+    text = ~address1
+    ) %>% 
+  add_markers(
+    y = ~school_2_lat,
+    x = ~school_2_long,
+    color = "#FF0000",
+    text = ~address2
+  ) %>%
+  layout(
+    mapbox = list(style = "mapbox://styles/zoowalk/ck6kz867d0jdi1io2lxyp9008",
+                  zoom = 10,
+                  center = list(lat = 48.21, 
+                                lon = 16.3720798)
+                  ),
+    showlegend=FALSE#,
+    #margin=0
+    )
+
+cross_map2
+
+ 
+# > combine graphs -----------------------------------------------------------
+
+crosstalk::bscols(
+    plot_distance_diff, 
+  cross_map2)
+
+library(htmltools)
+browsable(tagList(plot_distance_diff, cross_map2))
+
+
+
+
+```
+

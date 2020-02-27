@@ -296,7 +296,8 @@ The dot plot below depicts the yes share of each decision by delegates’ entity
 
 <details closed> 
 <summary>Click here for code</summary>
-```{r fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```{r message=FALSE, warning=FALSE}
 
 df_entity <- df_HoP %>% 
   group_by(entity, law_id, record_id, session_date, vote, .drop=F) %>% 
@@ -397,6 +398,7 @@ plot_jitter <- girafe(ggobj=plot_HoP_majorities,
 
 ```
 </details>
+ 
  
 ```{r echo=FALSE, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
 plot_jitter

@@ -1,0 +1,127 @@
+---
+title: crosstalk test
+author: ''
+date: '2020-02-24'
+slug: crosstalk-test
+categories: []
+tags:
+  - crosstalk
+description: ''
+draft: true
+
+---
+
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+options(digits=12)
+options(pillar.sigfig=12)
+library(magrittr)
+library(mapdeck)
+library(crosstalk)
+library(plotly)
+library(here)
+```
+
+```{r echo=TRUE}
+
+df_main <- structure(list(pair_indicator = c(
+  "902021-902071", "902031-902071",
+  "902031-902091", "902081-902101", "902081-902241", "902101-902241"
+), school_1_lat = c(
+  48.2149026, 48.2221631, 48.2221631, 48.2205238,
+  48.2205238, 48.223532
+), school_2_lat = c(
+  48.2186668, 48.2186668,
+  48.22407, 48.223532, 48.2231059, 48.2231059
+), school_1_long = c(
+  16.3876769,
+  16.3848147, 16.3848147, 16.4049726, 16.4049726, 16.402895
+), school_2_long = c(
+  16.3853998,
+  16.3853998, 16.3847968, 16.402895, 16.4063758, 16.4063758
+), distance = c(
+  475.2529684845,
+  379.0377208616, 203.6641400739, 395.8339316511, 316.9061306841,
+  390.1434258679
+), diff_factor = c(
+  1.96024763767, 2.27963849016,
+  2.27354570637, 1.3, 1.57575757576, 1.21212121212
+)), class = c(
+  "tbl_df",
+  "tbl", "data.frame"
+), row.names = c(NA, -6L))
+
+
+df_main <- readr::read_csv2(here("blog_data", "Vienna_primary_schools",
+                                        "shared_df_main.csv"))
+
+shared_df_main <- SharedData$new(df_main)
+
+
+# > scatter plotly --------------------------------------------------------
+library(plotly)
+
+plot_distance_diff <-  
+  plot_ly(
+    data=shared_df_main,
+    mode='markers',
+    type="scatter"
+    ) %>% 
+  add_trace(
+    #text=~tooltip,
+    marker=list(color='green'),
+    x=~distance,
+    y=~diff_factor,
+    showlegend=F
+  )
+    
+
+# > map -------------------------------------------------------------------
+
+Sys.setenv('MAPBOX_TOKEN' = 'pk.eyJ1Ijoiem9vd2FsayIsImEiOiJjazFjMW52NWIwZDVjM21scmE1Y296MnUxIn0.ZXSu71B2VjyBwlUldNUtLg')
+
+library(plotly)
+
+cross_map2 <- plot_mapbox(
+  data=shared_df_main) %>%
+  add_markers(
+    y = ~school_1_lat,
+    x = ~school_1_long,
+    color = "#FF0000"
+    #text = ~address1
+    ) %>%
+  add_markers(
+    y = ~school_2_lat,
+    x = ~school_2_long,
+    color = "#FF0000"
+    #text = ~address2
+   ) %>%
+  layout(
+    mapbox = list(style = 'light',
+                  zoom = 10,
+                  center = list(lat = 48.21, 
+                                lon = 16.3720798)
+                  ),
+    showlegend=FALSE#,
+    #margin=0
+    )
+
+
+ 
+# > combine graphs -----------------------------------------------------------
+
+crosstalk::bscols(
+    plot_distance_diff, 
+  cross_map2)
+
+library(htmltools)
+browsable(tagList(plot_distance_diff, cross_map2))
+
+
+
+
+```
+
