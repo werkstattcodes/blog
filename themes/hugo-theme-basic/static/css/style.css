@@ -159,6 +159,16 @@ section a:hover:not(toc-h1):not(toc-h2):not(toc-h3) {
     font-style: bold;
 }
 
+/* hide toc when printing */
+
+@media print {
+      #sidebar {
+            display:none;
+  }
+}
+
+
+
 scrollable-element {
   scrollbar-color: red yellow;
 }
@@ -184,5 +194,7 @@ summary {
 
 
   }
+
+
 
 
