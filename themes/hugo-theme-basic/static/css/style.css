@@ -40,7 +40,7 @@ h1  {
   color: black; /* change color for headers */
   font-style: bold;
   font-size: 100%;
-  margin: 5px 0 0px;
+  margin: 25px 0 0px;
   text-transform: uppercase;
 }
 
@@ -108,11 +108,13 @@ h6 {
 	font-size: 100%;
 	/*font-color:orange;*/
 	text-decoration:none;
+	padding: 5px 0px 0px 1px;	
 }
 
 .toc-h2 {
   font-size: 90%;
-  padding-left: 10px;
+  /*padding-left: 10px;*/
+  padding: 0px 0px 10px 0px;
 }
 
 .toc-h3 {
@@ -165,3 +167,22 @@ summary {
 	color: firebrick;
 	font-size: 70%;
 }
+
+
+/* mobile version */
+@media only screen and (max-width: 560px) {
+
+	#trail  {
+		/*color: red; doesn't work because color defined in single */
+		font-size: 60%;
+		}
+
+	p {text-align: left;
+	   font-size: 90%;
+	   /* line-height: 100%;*/
+          }
+
+
+  }
+
+
