@@ -23,6 +23,27 @@ library(mapdeck)
 library(crosstalk)
 library(plotly)
 library(here)
+library(govdown)
+```
+
+# heading 1
+## heading 1.1
+
+# heading 2
+
+
+```{r remedy001}
+unstrap <- function(x) {
+  attr(x, "html_dependencies") <-
+    Filter(
+      function(dependency) {dependency$name != "bootstrap"},
+      attr(x, "html_dependencies")
+    )
+  x
+}
+
+
+
 ```
 
 ```{r echo=TRUE}
@@ -58,6 +79,7 @@ df_main <- structure(list(pair_indicator = c(
 df_main <- readr::read_csv2(here("blog_data", "Vienna_primary_schools",
                                         "shared_df_main.csv"))
 
+library(crosstalk)
 shared_df_main <- SharedData$new(df_main)
 
 
@@ -113,13 +135,12 @@ cross_map2 <- plot_mapbox(
  
 # > combine graphs -----------------------------------------------------------
 
-crosstalk::bscols(
+d <- crosstalk::bscols(
     plot_distance_diff, 
   cross_map2)
 
-library(htmltools)
-browsable(tagList(plot_distance_diff, cross_map2))
-
+attr(d, "html_dependencies")
+d <- unstrap(d)
 
 
 

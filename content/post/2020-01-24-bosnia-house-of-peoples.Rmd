@@ -517,7 +517,7 @@ plot_cube <- plot_ly(df_HoP_share_grouped,
 </details>
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=4, message=FALSE, warning=FALSE}
 plot_cube
 ```
 As one can see, the dot in the corner with all groups having a yes vote share of 100 % is the largest. Furthermore, if we focus on the Bosniak yes-share (axis) we see that a considerable number of decisions were passed with 100 % or slightly less support by Bosniak delegates. These dots are also by and large situated on the upper end of the Croat axis, i.e. a high Croat yes share. In contrast, if we focus on the Serb delegates, we’ll see that their ‘yes-shares’ are less concentrated on the upper end of the scale, and also exhibit lower degrees of support.
