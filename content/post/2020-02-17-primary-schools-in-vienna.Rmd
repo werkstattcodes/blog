@@ -6,7 +6,7 @@ tags:
   - Austria
   - plotly
 slug: primary-schools-in-vienna
-draft: yes
+draft: false
 ---
 
 ```{r include=FALSE}

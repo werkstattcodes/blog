@@ -35,6 +35,10 @@ vignettes/*.pdf
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
 
-#data
+# data
 *.rds
 *.csv
+
+# recommneded
+blogdown
+public
