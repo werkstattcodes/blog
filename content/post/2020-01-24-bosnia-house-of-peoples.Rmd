@@ -1,7 +1,7 @@
 ---
-title: 'Bosnia: House of Peoples'
+title: 'Bosnia: Voting behavior in the House of Peoples (2014-2018)'
 author: rs
-date: '2020-01-24'
+date: '2020-03-03'
 slug: bosnia-house-of-peoples
 categories: []
 draft: true
@@ -25,6 +25,7 @@ library(scales)
 library(ggiraph)
 library(grid)
 library(knitr)
+library(patchwork)
 
 
 ```
@@ -39,6 +40,10 @@ knit_hooks$set(wrap = function(before, options, envir){
 })
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, dpi = 180, fig.height = 5, fig.width = 7, fig.align = "center")
 options(width=180, dplyr.width = 150)
+
+bgr_color <- "#ecf0f7"
+
+
 ```
 
  
@@ -98,18 +103,18 @@ df_HoP_votes <- df_HoP %>%
 
 
 ```
-*Site might be best viewed on a computer, rather than mobile device.*
+*Site might be best viewed on a desktop computer, rather than mobile device.*
 
 # CONTEXT
 This blog post is a continuation of the analysis of voting behavior in Bosnia’s parliament during the 2014 to 2018 legislative period. In a [<u>previous post</u>]( https://werk.statt.codes/post/bih-voting-behavior-of-mps-in-house-of-representatives/){target=”_blank”}, I looked primarily into the lower chamber, the House of Representatives. This post now deals with the upper chamber, the House of Peoples (HoP, dom naroda). The chamber comprises 10 delegates from the Federation (5 Bosniaks and 5 Croats) and 5 from the RS (5 Serbs). A summary of the chambers tasks and rules of procedure can be found [<u>here</u>]( https://www.parlament.ba/Content/Read/36?title=Op%C4%87i-podaci){target=”_blank”}. 
 
-Again, as with the previous post, the subsequent results are based on retrieving all pertaining voting records from the Parliament’s website, OCR-ing their content and extracting the data of interest. Overall, 295 voting records pertaining to the HoP were analyzed. Most interestingly, each voting record provides details on each delegate’s individual voting decisions.
+Again, as with the previous post, the subsequent results are based on retrieving all pertaining voting records (pdfs) from the Parliament’s website, OCR-ing their text and extracting the data of interest. Overall, 295 voting records pertaining to the HoP were analyzed. Most interestingly, each voting record provides details on each delegate’s individual voting decisions.
 
 The most relevant R code snippets are provided in drop-down fields. The entire analysis, including the raw data, is available on my [<u>github account</u>]( https://github.com/werkstattcodes/Bosnia_MP_voting_behavior){target=”_blank”}. Should there be anything what strikes you as improbable etc, feel free to let me know, and I’ll try to look into it (best via [<u>Twitter DM</u>]( https://twitter.com/zoowalk){target=”_blank”}).
 
 # RESULTS
 ## Individual voting behavior
-Drawing on the individual voting decisions contained in the voting records, we can aggregate each delegate’s voting behavior for the 2014-2018 legislative period.^[As mentioned in the earlier post on the HOuse of Representatives, I unfortunately had to remove diacritics during the analysis.] 
+Drawing on the individual voting decisions contained in the voting records, we can aggregate each delegate’s voting behavior for the 2014-2018 legislative period.^[As mentioned in the earlier post on the House of Representatives, I unfortunately had to remove diacritics during the analysis.] 
 
 <details closed> 
 <summary>Click to see code</summary>
@@ -161,6 +166,7 @@ plot_delegates_votes <- df_HoP_votes %>%
         plot.caption.position = "plot",
         plot.caption = element_markdown(hjust=c(0,1)),
         plot.margin=margin(l=0, t=0.5, b=0.5, r=0, unit="cm"),
+        plot.background=element_rect(fill=bgr_color, color="transparent"),
         plot.subtitle = element_text(size = 12, color = "grey30"),
         axis.title.y = element_blank(),
         axis.title.x = element_text(hjust=0),
@@ -174,7 +180,7 @@ plot_delegates_votes <- df_HoP_votes %>%
 ```{r echo=FALSE, fig.height=10, fig.width=10, message=FALSE}
 plot_delegates_votes
 ```
-A look at the ‘yes’ category reveals that most delegates voted in more than 50 % of all decisions with yes. Bosniak delegates from the SDA lead the category with remarkable 84 %, closely followed by Croat delegates. The numbers of Serb delegates are somewhat, ranging between 49 % and 64 %.  If we look at the ‘no’ category, it’s noteworthy that Serb delegates are leading the ranking. Bosniak delegates, in contrast, were voting in considerably fewer instances with ‘no’. This pattern mirrors what was already visible in the analysis of the voting behavior in the House of Representative. 
+A look at the ‘yes’ category reveals that most delegates voted in more than 50 % of all decisions with yes. Bosniak delegates from the SDA lead the category with remarkable 84 %, closely followed by Croat delegates. The numbers of Serb delegates are somewhat lower, ranging between 49 % and 64 %.  If we look at the ‘no’ category, it’s noteworthy that Serb delegates are leading the ranking. Bosniak delegates, in contrast, were voting in considerably fewer instances with ‘no’. This pattern mirrors what was already visible in the analysis of the voting behavior in the House of Representative. 
 
 When it comes to the absence during the ballots, one delegate stands out:  Fahrudin Radončić, leader of the SBB party and Bosniak delegate to the House of Peoples, was in 63 % of all ballots not present (187 sessions). To put this figure in context, the delegate with the second highest rate of absence, HDZ’s Martin Raguz, missed only 13 % (37) of all votes. 
 
@@ -182,9 +188,9 @@ It’s noteworthy that there were no incidents of delegates not voting (despite 
 
 
 ## Quorum
-The regulatory framework covering the decision-making process in the House of Peoples requires a quorum of nine (out of 15) members, provided that at least three Bosniak, three Croat and three Serb delegates are present. 'Present' means to have voted either with 'yes', 'no', 'abstained', or simply not casted a voted despite being present [<u>see here</u>](https://www.parlament.ba/Content/Read/38?title=Odlu%C4%8DivanjeuDomunaroda&lang=en).
+The regulatory framework covering the decision-making process in the House of Peoples requires a quorum of nine (out of 15) members, provided that at least three Bosniak, three Croat and three Serb delegates are present.^[Note that the BiH Constitution and the Rules of Proceudre may stipulate exceptions to the quorum requirement.] 'Present' means to have voted either with 'yes', 'no', 'abstained', or simply not casted a voted despite being present [<u>see here</u>](https://www.parlament.ba/Content/Read/38?title=Odlu%C4%8DivanjeuDomunaroda&lang=en).
 
-As the analysis of the voting records show, there was not a single case in which the presence requirement was not fulfilled. I must admit, this was somewhat surprising to me. Furthermore, there were only relatively few cases, in which only the minimum of three delegates per constituent people was present. Somewhat against the state of play in the House of Representatives, Serb and Croat delegates were present in full strength in an overwhelming number of cases. The two graphs below present the pertaining figures.  
+As the analysis of the voting records shows, there was not a single case in which the presence requirement was not fulfilled. I must admit, this was somewhat surprising to me. Furthermore, there were only relatively few cases, in which only the minimum of three delegates per constituent people was present. Somewhat against the state of play in the House of Representatives, Serb and Croat delegates were present in full strength in an overwhelming number of cases. The two graphs below present the pertaining figures.  
 
 <details closed> 
 <summary>Click here for code</summary>
@@ -212,7 +218,7 @@ plot_quorum_number <- df_quorum %>%
   mutate(record_id=as.factor(record_id)) %>% 
   ggplot()+
   labs(title="Presence of HoP: Number of delegates per decision and constituent people",
-       subtitle=str_wrap("Legilsative period 2014-2018. In no instance less than three delegates per constitutent people were present. Hence quorum requirements were always fullfiled.", 160),
+       subtitle=str_wrap("Legilsative period 2014-2018. In no instance less than three delegates per constitutent people were present. Hence quorum requirements were always fullfiled.", 130),
        y="Number of present delegates",
        x="decisions (chronologically ordered)",
        caption=my_caption)+
@@ -239,6 +245,7 @@ plot_quorum_number <- df_quorum %>%
         plot.title.position = "plot",
         plot.margin=margin(l=0, t=0.5, b=0.5, r=0, unit="cm"),
         plot.subtitle = element_text(size = 12, color = "grey30"),
+        plot.background=element_rect(fill=bgr_color, color="transparent"),
         legend.position = "none",
         plot.caption = element_markdown(hjust=c(0, 1)),
         strip.text = element_text(face="bold"))
@@ -274,12 +281,15 @@ plot_quorum_frequency <- df_quorum %>%
         plot.margin=margin(l=0, t=0.5, b=0.5, r=0, unit="cm"),
         plot.subtitle = element_text(size = 12, color = "grey30"),
         plot.title.position = "plot",
+        plot.background=element_rect(fill=bgr_color, color="transparent"),
         legend.position = "top",
         legend.title=element_blank(),
         legend.justification = "left")
 #plot_quorum_frequency
 
-plot_quorum <- patchwork::wrap_plots(plot_quorum_number, plot_quorum_frequency, ncol = 1)
+plot_quorum <- patchwork::wrap_plots(plot_quorum_number, plot_quorum_frequency, ncol = 1)+
+    plot_annotation(theme=theme(plot.background=element_rect(fill=bgr_color, color="transparent")))
+
 
 ```
 </details>
@@ -289,7 +299,8 @@ plot_quorum
 ```
 
 ## Voting by entity
-According to the Rules of Procedure of the House, decisions are taken by a majority of the vote of the delegates who are present and voting and require that at least one third of the votes from each entity are ‘yes’ votes. 
+According to the Rules of Procedure of the House, decisions are taken by a majority of the vote of the delegates who are present and voting and require that at least one third of the votes from each entity are ‘yes’ votes. Two important caveats have to be stated here: First, while the above state majority requirement is a general rule, Bosnia's constitution or the House's Rule of Procedure may stipulate exceptions to it. These exceptions were not considered here. My hunch is though, that these exceptions affect only a few, if at all, cases. Hence, the main message of the results should stand. Second, the House's Rules of Proceduer stipulate a mechanism how to deal with decisions which failed to secure the necessary votes from one entity (see [here](https://www.parlament.ba/Content/Read/38?title=Odlu%C4%8Divanje-u-Domu-naroda){target="_blank"}). This 'fallback mechanism' eventually provides for the avenue that 'the decision shall be made by the majority of the total number of delegates who are present and who vote, provided that the votes “against” are not cast by two thirds or more of the delegates elected from each entity.' The two graphs below do not specifially considere this avenue.
+
 
 ### Dot plot
 The dot plot below depicts the yes share of each decision by delegates’ entity.^[Note that some minimal random variation was added to each dot's position to avoid dots overlapping.] Decisions which did cross the overall threshold of 50 % are in green. Note the vertical and horizontal line which indicates the required 1/3 support from each entity. As highlighted by the blue polygon, there were a few decisions which did not pass since they failed to secure the minimum support of at least 1/3 of an entity’s voting delegates despite having secured an overall majority. Move the mouse over the individual dots to get details.
@@ -371,6 +382,7 @@ plot_HoP_majorities <- df_entity3 %>%
                                  hjust=0.5,
                                  size=11),
         plot.margin = margin(t=0, b=0, unit="cm"),
+        plot.background=element_rect(fill=bgr_color, color="transparent"),
         plot.caption = element_markdown(hjust=c(0, 1)),
         panel.grid.minor = element_blank(),
         panel.grid.major.x = element_blank(),
@@ -404,6 +416,11 @@ plot_jitter <- girafe(ggobj=plot_HoP_majorities,
 plot_jitter
 
 ```
+
+Let's have a closer look at those cases which failed to reach the necessary 1/3 support of the RS, but still got the necessary majority vote. See the table here:
+
+
+
 
 ### Bar plot
 The bar plot below provides another summary of the outcome of votes taken in House of Peoples. Overall, 73.56 % (217) of all decisions secured the overall majority plus the required entity support of at least 1/3 of each entity’s delegates (who were either voting, abstained or did not cast a vote). 14.24 % (42) of all decisions fell short of the overall 50 % majority threshold. And in 12.20 % (36) decision, the issue at stake gained majoritarian support, but failed to secure the required minimum support of at least 1/3 of the RS delegates. There were no cases which fell short due to missing support from the Federation’s delegates.
@@ -460,6 +477,7 @@ plot_outcome <- df_outcome %>%
         legend.position = "none",
         plot.margin=margin(l=0, t=0.5, b=0.5, r=0, unit="cm"),
         panel.grid.major.y = element_blank(),
+        plot.background=element_rect(fill=bgr_color, color="transparent"),
         plot.title = element_text(size = 12, face="bold.italic", margin=margin(b=0.5, unit="cm")),
         plot.title.position = "plot",
         plot.subtitle = element_text(size = 12, color = "grey30"),
@@ -478,7 +496,7 @@ plot_outcome
 The following two graphs are attempts to visualize the voting decisions in the House of Peoples by delegates' affiliatino to a constituent peoples (and not entitiy, as above). 
 
 ### Cube
-Since there are three constituent peoples, we basically have three dimensions. The first attempt is a cube with each dimension representing the ‘yes’ share of a constituent group. Again, the ‘yes’ share is here calculated based on the number of yes votes in relation to all votes casted by those present and voting (for each group). MP’s who were not present were not considered.  Each bubble or point in the cube represents a specific combination of Bosnia-Croat-Serb ‘yes’ shares. The size is proportionate to the number of decisions taken with each distinct combination, i.e. the larger the bubble the more often representatives of the groups have voted accordingly.  Hoover over each dot to get the corresponding yes-shares and the number of decisions displayed. You can also zoom in or move the cube around with the mouse to focus on the axis (constituent people’s yes-share) of your interest.
+Since there are three constituent peoples, we basically have three dimensions. The first attempt is a cube with each dimension representing the ‘yes’ share of a constituent group. Again, the ‘yes’ share is here calculated based on the number of yes votes in relation to all votes casted by those present and voting (for each group). MP’s who were not present were not considered.  Each bubble or point in the cube represents a specific combination of Bosnia-Croat-Serb ‘yes’ shares. The size is proportionate to the number of decisions taken with each distinct combination, i.e. the larger the bubble the more often representatives of the groups have voted accordingly.  Hover over each dot to get the corresponding yes-shares and the number of decisions displayed. You can also zoom in or move the cube around with the mouse to focus on the axis (constituent people’s yes-share) of your interest.
 
 <details closed> 
 <summary>Click here for code</summary>
@@ -506,13 +524,27 @@ plot_cube <- plot_ly(df_HoP_share_grouped,
              size=~n_obs,
              x = ~vote_share_Bosniak_yes, 
              y = ~vote_share_Serb_yes, 
-             z = ~vote_share_Croat_yes) %>%
-  add_markers() %>%
-  layout(scene = list(xaxis = list(title = 'yes share Bosniak'),
-                      yaxis = list(title = 'yes share Serb'),
-                      zaxis = list(title = 'yes share Croat')),
+             z = ~vote_share_Croat_yes,
+             hoverinfo='text',
+             text=~paste('</br>yes share Bosniak:', round(vote_share_Bosniak_yes, 2),
+                         '</br>yes share Serb:', round(vote_share_Serb_yes, 2),
+                          '</br>vote share Croat:', round(vote_share_Croat_yes, 2),
+                         '</br>number of laws:', n_obs)) %>%
+  plotly::add_markers(
+        marker=list(color='firebrick',
+                    fill='firebrick')) %>%
+  layout(font=list(family='Roboto Condensed'),
          title = "<b>HoP: Support for decisions by delegates' constitutent peoples</b>",
-         title_x=0)
+         title_x=0,
+         plot_bgcolor=bgr_color,
+         paper_bgcolor=bgr_color,
+         scene = list(xaxis = list(title = 'yes share Bosniak'),
+                       yaxis = list(title = 'yes share Serb'),
+                       zaxis = list(title = 'yes share Croat')))
+
+
+
+
 ```
 </details>
 
@@ -616,15 +648,16 @@ plot_table <- df_HoP_share_table3 %>%
   hrbrthemes::theme_ipsum_rc() +
   theme(legend.position = "none",
         strip.text=element_text(face="bold"),
-        strip.background = element_rect(fill="gray80"),
+        strip.background = element_rect(fill=bgr_color),
         panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_blank(),
         plot.caption = element_markdown(hjust=c(0, 1)),
+        plot.background=element_rect(fill=bgr_color, color="transparent"),
         plot.caption.position = "panel",
         plot.margin = margin(t=0.5, b=0.5, r=0.5, unit="cm"),
         panel.border = element_rect(fill="transparent"),
         strip.placement = "outside",
-        strip.background.x = element_rect(fill="white", color="white"),
+        strip.background.x =element_rect(fill=bgr_color, color="transparent"),
         axis.text.y.left = element_blank(),
         axis.text.x.top = element_blank(),
         axis.text.x.bottom = element_text(size=10),
@@ -644,6 +677,7 @@ plot_table_all<- patchwork::wrap_plots(plot_table, nrow=3) +
                   caption="Data: parlament.ba - Analysis: Roland Schmidt | @zoowalk | https://werk.statt.codes",
                   theme=theme(plot.subtitle = element_text(color="grey30", 
                                                            margin(t=0, r=0.5, b=2, l=0.5 ,unit="cm")),
+                              plot.background=element_rect(fill=bgr_color, color="transparent"),
                               plot.margin = margin(t=0, unit="cm")))
 
 ```  

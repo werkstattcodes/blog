@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Fri, 07 Feb 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 03 Mar 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/bosnia/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Bosnia: Voting behavior in the House of Peoples (2014-2018)</title>
+      <link>/post/bosnia-house-of-peoples/</link>
+      <pubDate>Tue, 03 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/bosnia-house-of-peoples/</guid>
+      <description>Site might be best viewed on a desktop computer, rather than mobile device.
+CONTEXTThis blog post is a continuation of the analysis of voting behavior in Bosnia’s parliament during the 2014 to 2018 legislative period. In a previous post, I looked primarily into the lower chamber, the House of Representatives. This post now deals with the upper chamber, the House of Peoples (HoP, dom naroda).</description>
+    </item>
     
     <item>
       <title>Bosnia: Voting behavior of MPs in the House of Representatives</title>
@@ -20,16 +30,6 @@
       <guid>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</guid>
       <description>CONTEXTA while ago I noticed that the website of Bosnia’s parliament also provides the voting records for each separate vote taken in both houses. These records also include the voting behavior for each individual MP. Here an example of one of these voting records:
 While the dominant role of the ethnic cleavage in Bosnian politics has been a constant theme and continuously emphasized for the last 25 years (to an extent which frequently blanks out other salient issues), I hadn’t seen any empirical record on MP’s individual voting behavior which could corroborate the cleavage’s prevalence in the legislative arena (one insightful exception is Birgit Bahtić-Kunrath’s 2011 paper).</description>
-    </item>
-    
-    <item>
-      <title>Bosnia: House of Peoples</title>
-      <link>/post/bosnia-house-of-peoples/</link>
-      <pubDate>Fri, 24 Jan 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/post/bosnia-house-of-peoples/</guid>
-      <description>Site might be best viewed on a computer, rather than mobile device.
-CONTEXTThis blog post is a continuation of the analysis of voting behavior in Bosnia’s parliament during the 2014 to 2018 legislative period. In a previous post, I looked primarily into the lower chamber, the House of Representatives. This post now deals with the upper chamber, the House of Peoples (HoP, dom naroda).</description>
     </item>
     
     <item>

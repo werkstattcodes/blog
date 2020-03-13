@@ -7,10 +7,29 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Mon, 02 Mar 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 12 Mar 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Covid-19/Corona Virus: Quick look at some data</title>
+      <link>/post/covid-19-corona-virus-quick-look-at-some-data/</link>
+      <pubDate>Thu, 12 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/covid-19-corona-virus-quick-look-at-some-data/</guid>
+      <description>COVID-19, or better known as the Corona virus, has arrived in earnest in Austria. Experts saw it coming for a while, and Austria’s government eventually geared up and introduced rather comprehensive measures to tackle the virus’ spread. All in all, enough reasons to have a quick look at some of the available data. To be clear, there are already a number of very comprehensive data analysis available, and I am not pretending to catch up with those.</description>
+    </item>
+    
+    <item>
+      <title>Bosnia: Voting behavior in the House of Peoples (2014-2018)</title>
+      <link>/post/bosnia-house-of-peoples/</link>
+      <pubDate>Tue, 03 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/bosnia-house-of-peoples/</guid>
+      <description>Site might be best viewed on a desktop computer, rather than mobile device.
+CONTEXTThis blog post is a continuation of the analysis of voting behavior in Bosnia’s parliament during the 2014 to 2018 legislative period. In a previous post, I looked primarily into the lower chamber, the House of Representatives. This post now deals with the upper chamber, the House of Peoples (HoP, dom naroda).</description>
+    </item>
     
     <item>
       <title>Segregation in Vienna&#39;s primary schools?</title>
@@ -22,15 +41,6 @@
     </item>
     
     <item>
-      <title>crosstalk test</title>
-      <link>/post/crosstalk-test/</link>
-      <pubDate>Mon, 24 Feb 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/post/crosstalk-test/</guid>
-      <description>heading 1heading 1.1heading 2unstrap &amp;lt;- function(x) {attr(x, &amp;quot;html_dependencies&amp;quot;) &amp;lt;-Filter(function(dependency) {dependency$name != &amp;quot;bootstrap&amp;quot;},attr(x, &amp;quot;html_dependencies&amp;quot;))x}df_main &amp;lt;- structure(list(pair_indicator = c(&amp;quot;902021-902071&amp;quot;, &amp;quot;902031-902071&amp;quot;,&amp;quot;902031-902091&amp;quot;, &amp;quot;902081-902101&amp;quot;, &amp;quot;902081-902241&amp;quot;, &amp;quot;902101-902241&amp;quot;), school_1_lat = c(48.2149026, 48.2221631, 48.2221631, 48.2205238,48.2205238, 48.223532), school_2_lat = c(48.2186668, 48.2186668,48.22407, 48.223532, 48.2231059, 48.2231059), school_1_long = c(16.3876769,16.3848147, 16.3848147, 16.4049726, 16.4049726, 16.402895), school_2_long = c(16.</description>
-    </item>
-    
-    <item>
       <title>Bosnia: Voting behavior of MPs in the House of Representatives</title>
       <link>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</link>
       <pubDate>Fri, 07 Feb 2020 00:00:00 +0000</pubDate>
@@ -38,16 +48,6 @@
       <guid>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</guid>
       <description>CONTEXTA while ago I noticed that the website of Bosnia’s parliament also provides the voting records for each separate vote taken in both houses. These records also include the voting behavior for each individual MP. Here an example of one of these voting records:
 While the dominant role of the ethnic cleavage in Bosnian politics has been a constant theme and continuously emphasized for the last 25 years (to an extent which frequently blanks out other salient issues), I hadn’t seen any empirical record on MP’s individual voting behavior which could corroborate the cleavage’s prevalence in the legislative arena (one insightful exception is Birgit Bahtić-Kunrath’s 2011 paper).</description>
-    </item>
-    
-    <item>
-      <title>Bosnia: House of Peoples</title>
-      <link>/post/bosnia-house-of-peoples/</link>
-      <pubDate>Fri, 24 Jan 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/post/bosnia-house-of-peoples/</guid>
-      <description>Site might be best viewed on a computer, rather than mobile device.
-CONTEXTThis blog post is a continuation of the analysis of voting behavior in Bosnia’s parliament during the 2014 to 2018 legislative period. In a previous post, I looked primarily into the lower chamber, the House of Representatives. This post now deals with the upper chamber, the House of Peoples (HoP, dom naroda).</description>
     </item>
     
     <item>
@@ -67,16 +67,6 @@ CONTEXTThis blog post is a continuation of the analysis of voting behavior in B
       
       <guid>/post/vorzugsstimmen/</guid>
       <description>ContextOn 29 September, Austria held its general elections to the national assembly (Nationalrat). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (the government formation train is finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate.</description>
-    </item>
-    
-    <item>
-      <title>Potential sizing issue when importing interactive plots (ggraph; htmlWidget)</title>
-      <link>/post/size-interactive-plots/</link>
-      <pubDate>Tue, 12 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/post/size-interactive-plots/</guid>
-      <description>This post documents a potential issue when it comes to sizing interactive images/htmlwidgets produced with the ggiraph and htmlwidgets packages. The goal is to import interactive graphs produced in other R(Studio) Projects into a blogdown post. I assume/hope there there is a relatively easy solution to it, but I haven’t yet figured it out.
-Create interactive plotFirst, let’s create an interactive plot. Here it has the dimensions 10 by 5 inches and is meant to have no padding.</description>
     </item>
     
     <item>
