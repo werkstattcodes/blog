@@ -23,10 +23,10 @@ draft: FALSE
 
 
 <p>COVID-19, or better known as the Corona virus, has arrived in earnest in Austria. Experts saw it coming for a while, and Austria’s government eventually geared up and introduced rather comprehensive measures to tackle the virus’ spread. All in all, enough reasons to have a quick look at some of the available data. To be clear, there are already a number of very comprehensive data analysis available, and I am not pretending to catch up with those. My primary intention is first and foremost to have a look at the situation in Austria (with R).</p>
-<p>I’ll be very brief due to lack of time (kids are at home, partner on home office duty…), but I guess most of the graphs are selfexplantory. If you think there is a glarring error etc., don’t hestiate and let me know (best via Twitter DM(<a href="https://twitter.com/zoowalk" class="uri">https://twitter.com/zoowalk</a>){target="_blank"})</p>
+<p>I’ll be very brief due to lack of time (kids are at home, partner on home office duty…), but I guess most of the graphs are self-explanatory. If you think there is a glaring error etc., don’t hesitate and let me know (best via Twitter DM(<a href="https://twitter.com/zoowalk" class="uri">https://twitter.com/zoowalk</a>){target="_blank"})</p>
 <div id="getting-data-on-the-covid-19" class="section level1">
 <h1>Getting data on the COVID-19</h1>
-<p>The data for this analysis is taken from Johns Hopkins COVID-19 data repository, which seems to be one of, if not the most frequenlty used data source on Covid-19. Have a look at their <a href="https://coronavirus.jhu.edu/" target="_blank">site</a> for more details.</p>
+<p>The data for this analysis is taken from Johns Hopkins COVID-19 data repository, which seems to be one of, if not the most frequently used data source on Covid-19. Have a look at their <a href="https://coronavirus.jhu.edu/" target="_blank">site</a> for more details.</p>
 <details closed>
 <p><summary>Click to see code to get data</summary>
 Get the raw data from the repository with the <code>readr</code> package, clean the names with <code>janitor</code>; then flip the data into a long format, and summarize to get country totals (as opposed to amounts for subregions). The <code>datatable</code> function from the <code>DT</code> package quickly produces a searchable html table.</p>
@@ -94,9 +94,9 @@ df_corona_long &lt;- df_corona_long %&gt;%
 <p><img src="/post/2020-03-11-covid-19-corona-virus-quick-look-at-some-data_files/figure-html/unnamed-chunk-5-1.png" width="1800" style="display: block; margin: auto;" /></p>
 <p>In my view, the graph shows quite clearly the staggering dynamic of the virus’ spread in Italy. On 20 February, there were only 3 confirmed cases. 10 days later, the number had already risen to 1694 (check the table above for the exact numbers). The graph also shows the flattening curve in China, an indication for the gradual slowdown of the dynamic. As for Austria, the absolute numbers are as of the time of writing still comparably modest, however, there is a clear, steep upward trajectory.</p>
 </div>
-<div id="comparing-austiras-and-italys-dynamics" class="section level1">
-<h1>Comparing Austira’s and Italy’s dynamics</h1>
-<p>To better contrast both countries’ dynamics, I’ll replace the dates on the x-axis with an index which indicates the number of days which have passed since the virus’ outbreak in each country. This raises the question when the disease actually breaks out. What is the adequate starting position to contrast the diseaese’s development? The presence of one single case? Or more? Taking the presence of only one case may easily be a distorting threshold since in one country the presence of one case might have been missed for some time. Consequently, the ensuing dynamic might appear steeper than in a country which did not miss the first case. I assume epidemiologists have clear concepts on this, but for my purpose I start the index from the <strong>day the threshold of 50 cases is crossed</strong>. In the cases of Italy and Austria, this threshold was crossed on the following dates:</p>
+<div id="comparing-austrias-and-italys-dynamics" class="section level1">
+<h1>Comparing Austria’s and Italy’s dynamics</h1>
+<p>To better contrast both countries’ dynamics, I’ll replace the dates on the x-axis with an index which indicates the number of days which have passed since the virus’ outbreak in each country. This raises the question when the disease actually breaks out. What is the adequate starting position to contrast the disease’s development? The presence of one single case? Or more? Taking the presence of only one case may easily be a distorting threshold since in one country the presence of one case might have been missed for some time. Consequently, the ensuing dynamic might appear steeper than in a country which did not miss the first case. I assume epidemiologists have clear concepts on this, but for my purpose I start the index from the <strong>day the threshold of 50 cases is crossed</strong>. In the cases of Italy and Austria, this threshold was crossed on the following dates:</p>
 <details closed>
 <p><summary>Click to see code to set threshold and create index</summary></p>
 <pre class="r"><code>df_AT_IT &lt;- df_corona_long %&gt;% 
@@ -199,7 +199,7 @@ To overlap the lines for Austria and Italy, we have to replace the dates of the 
 </div>
 <div id="correcting-infection-numbers-for-population-size" class="section level1">
 <h1>Correcting infection numbers for population size</h1>
-<p>Critically, one may ajust the number of confirmed cases with the population size of the coutnry. The graph below presents the modified result.</p>
+<p>Critically, one may adjust the number of confirmed cases with the population size of the country. The graph below presents the modified result.</p>
 <details closed>
 <p><summary>Click to see code for plot</summary>
 I retrieve Italy’s and Austria’s population data from the World Bank’s pertaining database, accessed via the <code>wbstats</code> package.</p>
@@ -284,7 +284,7 @@ pl_AT_IT_rel &lt;- df_AT_IT %&gt;%
         plot.caption = element_text(hjust=c(0, 0)),
         legend.title=element_blank())</code></pre>
 </details>
-<p>Correcting for the population size, Austria’s trajectory starts to look more worrying. While Italy had <strong>1</strong> persons infected with Covid-19 on the 7 day of the outbreak (if we take the aforemenitoned threshold), Austria only a considerably larger figure of <strong>3.</strong></p>
+<p>Correcting for the population size, Austria’s trajectory starts to look more worrying. While Italy had <strong>1</strong> persons infected with Covid-19 on the 7 day of the outbreak (if we take the aforementioned threshold), Austria only a considerably larger figure of <strong>3.</strong></p>
 <p><img src="/post/2020-03-11-covid-19-corona-virus-quick-look-at-some-data_files/figure-html/unnamed-chunk-12-1.png" width="1800" style="display: block; margin: auto;" /></p>
 </div>
 <div id="absolute-number-of-new-infections" class="section level1">
@@ -346,7 +346,7 @@ pl_AT_IT_rel &lt;- df_AT_IT %&gt;%
 </div>
 <div id="growth-rates" class="section level1">
 <h1>Growth rates</h1>
-<p>What if we look at the increase in realtive terms, as growth rates:</p>
+<p>What if we look at the increase in relative terms, as growth rates:</p>
 <details closed>
 <p><summary>Click to see code</summary></p>
 <pre class="r"><code># growth rates --------------------------------------------------------------

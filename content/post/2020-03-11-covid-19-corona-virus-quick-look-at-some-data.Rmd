@@ -13,7 +13,7 @@ draft: FALSE
 
 COVID-19, or better known as the Corona virus, has arrived in earnest in Austria. Experts saw it coming for a while, and Austria's government eventually geared up and introduced rather comprehensive measures to tackle the virus' spread. All in all, enough reasons to have a quick look at some of the available data. To be clear, there are already a number of very comprehensive data analysis available, and I am not pretending to catch up with those. My primary intention is first and foremost to have a look at the situation in Austria (with R).
 
-I'll be very brief due to lack of time (kids are at home, partner on home office duty...), but I guess most of the graphs are selfexplantory. If you think  there is a glarring error etc., don't hestiate and let me know (best via Twitter DM(https://twitter.com/zoowalk){target="_blank"})
+I'll be very brief due to lack of time (kids are at home, partner on home office duty...), but I guess most of the graphs are self-explanatory. If you think  there is a glaring error etc., don't hesitate and let me know (best via Twitter DM(https://twitter.com/zoowalk){target="_blank"})
 
 ```{r message=FALSE, include=FALSE}
 library(gtrendsR)
@@ -90,7 +90,7 @@ theme_rs <- function(){
 
 # Getting data on the COVID-19
 
-The data for this analysis is taken from Johns Hopkins COVID-19 data repository, which seems to be one of, if not the most frequenlty used data source on Covid-19. Have a look at their [site](https://coronavirus.jhu.edu/){target="_blank"} for more details.
+The data for this analysis is taken from Johns Hopkins COVID-19 data repository, which seems to be one of, if not the most frequently used data source on Covid-19. Have a look at their [site](https://coronavirus.jhu.edu/){target="_blank"} for more details.
 
 <details closed> 
 <summary>Click to see code to get data</summary>
@@ -171,13 +171,13 @@ plots_3countries
 
 In my view, the graph shows quite clearly the staggering dynamic of the virus' spread in Italy. On 20 February, there were only 3 confirmed cases. 10 days later, the number had already risen to 1694 (check the table above for the exact numbers). The graph also shows the flattening curve in China, an indication for the gradual slowdown of the dynamic. As for Austria, the absolute numbers are as of the time of writing still comparably modest, however, there is a clear, steep upward trajectory. 
 
-# Comparing Austira's and Italy's dynamics
+# Comparing Austria's and Italy's dynamics
 
 ```{r message=FALSE, include=FALSE}
 threshold_value <- 50
 ```
 
-To better contrast both countries' dynamics, I'll replace the dates on the x-axis with an index which indicates the number of days which have passed since the virus' outbreak in each country. This raises the question when the disease actually breaks out. What is the adequate starting position to contrast the diseaese's development? The presence of one single case? Or more? Taking the presence of only one case may easily be a distorting threshold since in one country the presence of one case might have been missed for some time. Consequently, the ensuing dynamic might appear steeper than in a country which did not miss the first case. I assume epidemiologists have clear concepts on this, but for my purpose I start the index from the **day the threshold of `r threshold_value` cases is crossed**. In the cases of Italy and Austria, this threshold was crossed on the following dates:
+To better contrast both countries' dynamics, I'll replace the dates on the x-axis with an index which indicates the number of days which have passed since the virus' outbreak in each country. This raises the question when the disease actually breaks out. What is the adequate starting position to contrast the disease's development? The presence of one single case? Or more? Taking the presence of only one case may easily be a distorting threshold since in one country the presence of one case might have been missed for some time. Consequently, the ensuing dynamic might appear steeper than in a country which did not miss the first case. I assume epidemiologists have clear concepts on this, but for my purpose I start the index from the **day the threshold of `r threshold_value` cases is crossed**. In the cases of Italy and Austria, this threshold was crossed on the following dates:
 
 <details closed> 
 <summary>Click to see code to set threshold and create index</summary>
@@ -295,7 +295,7 @@ pl_AT_IT
 
 # Correcting infection numbers for population size
 
-Critically, one may ajust the number of confirmed cases with the population size of the coutnry. The graph below presents the modified result.
+Critically, one may adjust the number of confirmed cases with the population size of the country. The graph below presents the modified result.
 
 <details closed> 
 <summary>Click to see code for plot</summary>
@@ -386,7 +386,7 @@ pl_AT_IT_rel <- df_AT_IT %>%
 
 ```
 </details>
-Correcting for the population size, Austria's trajectory starts to look more worrying. While Italy had **`r scales::comma(df_AT_IT %>% filter(country_region=="Italy" & day_index==max(df_AT_IT$day_index[df_AT_IT$country_region=="Austria"])) %>% pull(n_obs_rel) %>% tail(1))`** persons infected with Covid-19 on the `r scales::comma(df_AT_IT %>% filter(country_region=="Austria") %>% pull(day_index) %>% tail(1))` day of the outbreak (if we take the aforemenitoned threshold), Austria only a considerably larger figure of **`r scales::comma(df_AT_IT %>% filter(country_region=="Austria") %>% pull(n_obs_rel) %>% tail(1))`.**
+Correcting for the population size, Austria's trajectory starts to look more worrying. While Italy had **`r scales::comma(df_AT_IT %>% filter(country_region=="Italy" & day_index==max(df_AT_IT$day_index[df_AT_IT$country_region=="Austria"])) %>% pull(n_obs_rel) %>% tail(1))`** persons infected with Covid-19 on the `r scales::comma(df_AT_IT %>% filter(country_region=="Austria") %>% pull(day_index) %>% tail(1))` day of the outbreak (if we take the aforementioned threshold), Austria only a considerably larger figure of **`r scales::comma(df_AT_IT %>% filter(country_region=="Austria") %>% pull(n_obs_rel) %>% tail(1))`.**
 
 
 
@@ -468,7 +468,7 @@ df_new_infections
  
 # Growth rates 
  
-What if we look at the increase in realtive terms, as growth rates:
+What if we look at the increase in relative terms, as growth rates:
  
 <details closed> 
 <summary>Click to see code</summary>
