@@ -7,10 +7,37 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Mon, 02 Mar 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 12 Mar 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Corona virus</title>
+      <link>/tags/corona-virus/</link>
+      <pubDate>Thu, 12 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/corona-virus/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Google Trends</title>
+      <link>/tags/google-trends/</link>
+      <pubDate>Thu, 12 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/google-trends/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Bosnia</title>
+      <link>/tags/bosnia/</link>
+      <pubDate>Tue, 03 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/bosnia/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Austria</title>
@@ -27,24 +54,6 @@
       <pubDate>Mon, 02 Mar 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/plotly/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>crosstalk</title>
-      <link>/tags/crosstalk/</link>
-      <pubDate>Mon, 24 Feb 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/crosstalk/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Bosnia</title>
-      <link>/tags/bosnia/</link>
-      <pubDate>Fri, 07 Feb 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/bosnia/</guid>
       <description></description>
     </item>
     
@@ -90,15 +99,6 @@
       <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/tidyrpivot/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>ggiraph</title>
-      <link>/tags/ggiraph/</link>
-      <pubDate>Tue, 12 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/ggiraph/</guid>
       <description></description>
     </item>
     
