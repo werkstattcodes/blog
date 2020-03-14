@@ -11,6 +11,8 @@ description: ''
 draft: FALSE
 ---
 
+**Graphs updated on `r format(Sys.Date(), '%A, %d %b %Y')**.
+
 COVID-19, or better known as the Corona virus, has arrived in earnest in Austria. Experts saw it coming for a while, and Austria's government eventually geared up and introduced rather comprehensive measures to tackle the virus' spread. All in all, enough reasons to have a quick look at some of the available data. To be clear, there are already a number of very comprehensive data analysis available, and I am not pretending to catch up with those. My primary intention is first and foremost to have a look at the situation in Austria (with R).
 
 I'll be very brief due to lack of time (kids are at home, partner on home office duty...), but I guess most of the graphs are self-explanatory. If you think  there is a glaring error etc., don't hesitate and let me know (best via Twitter DM(https://twitter.com/zoowalk){target="_blank"})
@@ -228,7 +230,7 @@ pl_AT_IT <- df_AT_IT %>%
        Data as of <span style='color:white'>{format(max(df_AT_IT$date), '%A, %d %b %Y')}</span>."),
        caption=c("Data: John's Hopkins  COVID-19 Data Repository (github.com/CSSEGISandData/COVID-19)",
                  "\nGraph: Roland Schmidt | @zoowalk | https:://werk.statt.codes"),
-       x="# days since more then 10 confirmed cases",
+       x=glue("# days since more then {threshold_value} confirmed cases"),
        y="# confirmed cases")+
   scale_x_continuous(limits=c(1, NA),
                      breaks=c(1, seq(0, max(df_AT_IT$day_index), 5)),
@@ -330,7 +332,7 @@ pl_AT_IT_rel <- df_AT_IT %>%
        \nData as of <span style='color:white'>{format(max(df_AT_IT$date), '%A, %d %b %Y')}</span>."),
        caption=c("Data: John's Hopkins  COVID-19 Data Repository (github.com/CSSEGISandData/COVID-19)",
                  "\nGraph: Roland Schmidt | @zoowalk | https:://werk.statt.codes"),
-       x="# days since more then 10 confirmed cases",
+       x=glue("# days since more then {threshold_value} confirmed cases"),
        y="# confirmed cases per 100,000 inhabitants")+
   scale_x_continuous(limits=c(1, NA),
                      breaks=c(1, seq(0, max(df_AT_IT$day_index), 5)),
