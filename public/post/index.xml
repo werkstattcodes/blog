@@ -18,7 +18,7 @@
       <pubDate>Thu, 12 Mar 2020 00:00:00 +0000</pubDate>
       
       <guid>/post/covid-19-corona-virus-quick-look-at-some-data/</guid>
-      <description>Graphs updated on `r format(Sys.Date(), ‘%A, %d %b %Y’).
+      <description>Graphs updated on Saturday, 14 Mar 2020.
 COVID-19, or better known as the Corona virus, has arrived in earnest in Austria. Experts saw it coming for a while, and Austria’s government eventually geared up and introduced rather comprehensive measures to tackle the virus’ spread. All in all, enough reasons to have a quick look at some of the available data. To be clear, there are already a number of very comprehensive data analysis available, and I am not pretending to catch up with those.</description>
     </item>
     
