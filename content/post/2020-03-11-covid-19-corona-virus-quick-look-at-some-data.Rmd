@@ -289,7 +289,7 @@ pl_AT_IT <- df_AT_IT %>%
 ```
 </details>
 
-Overall, the graph below suggests that Austria is on a somewhat slower trajectory than Italy. Contrasting both countries' absolute numbers on the **latest index day (`r scales::comma(df_AT_IT %>% filter(country_region=="Austria") %>% pull(day_index) %>% tail(1))`th day as of `r format(df_AT_IT %>% filter(country_region=="Austria") %>% pull(date) %>% tail(1), "%d %B")`**, Italy featured already **`r scales::comma(df_AT_IT %>% filter(country_region=="Italy") %>% pull(n_obs) %>% tail(1))` cases**. In contrast, Austria featured **`r scales::comma(df_AT_IT %>% filter(country_region=="Austria") %>% pull(n_obs) %>% tail(1))`** confirmed cases. 
+Overall, the graph below suggests that Austria is on a somewhat slower trajectory than Italy. Contrasting both countries' absolute numbers on the **latest index day (`r scales::comma(df_AT_IT %>% filter(country_region=="Austria") %>% pull(day_index) %>% tail(1))`th day as of `r format(df_AT_IT %>% filter(country_region=="Austria") %>% pull(date) %>% tail(1), "%d %B")`**, Italy featured already **`r scales::comma(df_AT_IT %>% filter(country_region=="Italy" & day_index==max(df_AT_IT$day_index[df_AT_IT$country_region=="Austria"])) %>% pull(n_obs) %>% tail(1))` cases**. In contrast, Austria featured **`r scales::comma(df_AT_IT %>% filter(country_region=="Austria") %>% pull(n_obs) %>% tail(1))`** confirmed cases. 
 
 ```{r echo=FALSE, fig.height=6, fig.width=10, message=FALSE}
 pl_AT_IT
