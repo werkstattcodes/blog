@@ -11,7 +11,7 @@ description: ''
 draft: FALSE
 ---
 
-**Graphs updated on `r format(Sys.Date(), '%A, %d %b %Y')`**.
+**Graphs updated on `r format(Sys.Date(), '%A, %d %b %Y')`**
 
 COVID-19, or better known as the Corona virus, has arrived in earnest in Austria. Experts saw it coming for a while, and Austria's government eventually geared up and introduced rather comprehensive measures to tackle the virus' spread. All in all, enough reasons to have a quick look at some of the available data. To be clear, there are already a number of very comprehensive data analysis available, and I am not pretending to catch up with those. My primary intention is first and foremost to have a look at the situation in Austria (with R).
 
@@ -176,7 +176,7 @@ In my view, the graph shows quite clearly the staggering dynamic of the virus' s
 # Comparing Austria's and Italy's dynamics
 
 ```{r message=FALSE, include=FALSE}
-threshold_value <- 50
+threshold_value <- 100
 ```
 
 To better contrast both countries' dynamics, I'll replace the dates on the x-axis with an index which indicates the number of days which have passed since the virus' outbreak in each country. This raises the question when the disease actually breaks out. What is the adequate starting position to contrast the disease's development? The presence of one single case? Or more? Taking the presence of only one case may easily be a distorting threshold since in one country the presence of one case might have been missed for some time. Consequently, the ensuing dynamic might appear steeper than in a country which did not miss the first case. I assume epidemiologists have clear concepts on this, but for my purpose I start the index from the **day the threshold of `r threshold_value` cases is crossed**. In the cases of Italy and Austria, this threshold was crossed on the following dates:
