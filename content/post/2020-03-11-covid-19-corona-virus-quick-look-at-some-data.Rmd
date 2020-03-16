@@ -1,7 +1,7 @@
 ---
 title: 'Covid-19/Corona Virus: Quick look at some data'
 author: Roland
-date: '2020-03-12'
+date: '2020-03-16'
 slug: covid-19-corona-virus-quick-look-at-some-data
 categories: []
 tags:
@@ -427,14 +427,16 @@ df_new_infections <- df_AT_IT %>%
             aes(x=date,
                 y=max_new_infections*1.1,
                 color=country_region,
-                label=scales::comma(new_infections),
+                label=scales::comma(new_infections,
+                                    accuracy=1),
                 fill=country_region),
             stat="identity")+
   geom_text(data=. %>% filter(day_index %% 2 == 0 ),
             aes(x=date,
                y=max_new_infections*1.25,
                color=country_region,
-                label=scales::comma(new_infections),
+                label=scales::comma(new_infections,
+                                    accuracy=1),
                fill=country_region),
           stat="identity")+
   facet_wrap(vars(country_region),
