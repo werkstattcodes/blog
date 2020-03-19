@@ -220,6 +220,14 @@ pl_AT_IT <- df_AT_IT %>%
                pull(day_index) %>% 
                max(),
              color="white")+
+  # geom_text(x=df_AT_IT %>% 
+  #              filter(country_region=="Austria") %>% 
+  #              pull(day_index) %>% 
+  #              max(),
+  #           label=scales::lable_date(Sys.date()),
+  #           color="white",
+  #           angle=90,
+  #           hjust=0)+
   geom_line(aes(x=day_index,
                 y=n_obs,
                 color=country_region))+
@@ -790,8 +798,7 @@ df_combined_clean_x <- df_combined_clean %>%
 archive_long <- df_combined_clean_x %>% 
   select(date_d, date_t, contains("new")) %>% 
   filter(num_confirmed_new>0) %>% 
-  pivot_longer(-c(date_d, date_t),names_to="var", values_to="value") %>% 
-  mutate(value=round(value,2 ))
+  pivot_longer(-c(date_d, date_t),names_to="var", values_to="value") 
 ```
 </details>
 
@@ -868,7 +875,7 @@ pl_test_results_interval <- df_p1 %>%
        # "<span style='color:red'>Red segment</span>",
        # ": Number of confirmed infections since preceding publication of results. Data as of {format(latest_time, '%A, %d %b %Y - %H:%M hrs')}. "), 
        #                   120),
-       subtitle=glue("<span style='color:orange'>Total number</span> of tests since preceding publication of results.", "<br><span style='color:red'>Number of confirmed infections</span>:","since preceding publication of results. <br>Data as of {format(latest_time, '%A, %d %b %Y - %H:%M hrs')}. "),
+       subtitle=glue("<span style='color:darkorange')'>Total number</span> of tests since preceding publication of results.", "<br><span style='color:red'>Number of confirmed infections</span> ","since preceding publication of results. <br>Data as of {format(latest_time, '%A, %d %b %Y - %H:%M hrs')}. "),
        caption=my_caption)+
   geom_bar(aes(x=date_t,
                y=value,
@@ -887,51 +894,51 @@ pl_test_results_interval <- df_p1 %>%
   #           vjust=0.5,
   #           family="Roboto Condensed",
   #           hjust=1,
-  #           nudge_y = 50,
-  #           check_overlap = TRUE,
-  #           color="red")+
-  
-  # geom_text(data=. %>% 
-  #             arrange(date_t) %>% 
-  #             head(1),
-  #           aes(x=date_t-1,
-  #               y=day_max*1.05),
-  #           label="infection",
-  #           hjust=0,
-  #           color="red",
-  #           nudge_y = 50,
-  #           size=3,
-  #           check_overlap = TRUE)+
-  
-  # geom_text(data=. %>% 
-  #             filter(var=="num_healthy_new") %>% 
-  #             filter(value>0),
-  #           aes(x=date_t+.2,
-  #               y=day_max*1.1,
-  #               label=round(value, 0)),
-  #           size=3,
-  #           vjust=0.5,
-  #           nudge_y = 75,
-  #           hjust=1,
-  #           check_overlap = TRUE,
-  #           color="grey30")+
-  # 
+#           nudge_y = 50,
+#           check_overlap = TRUE,
+#           color="red")+
 
-  # labels healthy results
+# geom_text(data=. %>% 
+#             arrange(date_t) %>% 
+#             head(1),
+#           aes(x=date_t-1,
+#               y=day_max*1.05),
+#           label="infection",
+#           hjust=0,
+#           color="red",
+#           nudge_y = 50,
+#           size=3,
+#           check_overlap = TRUE)+
 
-    geom_text(data=. %>% 
-              filter(var=="num_healthy_new") %>% 
-              filter(value>0),
-            aes(x=date_t,
-                y=value,
-                label=round(value, 0)),
-            size=4,
-            angle=90,
-            family="Roboto Condensed",
-            nudge_y = -10,
-            hjust=1,
-            check_overlap = TRUE,
-            color="white")+
+# geom_text(data=. %>% 
+#             filter(var=="num_healthy_new") %>% 
+#             filter(value>0),
+#           aes(x=date_t+.2,
+#               y=day_max*1.1,
+#               label=round(value, 0)),
+#           size=3,
+#           vjust=0.5,
+#           nudge_y = 75,
+#           hjust=1,
+#           check_overlap = TRUE,
+#           color="grey30")+
+# 
+
+# labels healthy results
+
+geom_text(data=. %>% 
+            filter(var=="num_healthy_new") %>% 
+            filter(value>0),
+          aes(x=date_t,
+              y=value,
+              label=round(value, 0)),
+          size=4,
+          angle=90,
+          family="Roboto Condensed",
+          nudge_y = -10,
+          hjust=1,
+          check_overlap = TRUE,
+          color="white")+
   
   # geom_text(data=. %>% 
   #             arrange(date_t) %>% 
@@ -943,22 +950,22 @@ pl_test_results_interval <- df_p1 %>%
   #           nudge_y = 75,
   #           hjust=0,
   #           color="grey30",
-  #           check_overlap = TRUE)+
-  
-  #label total test numbers since last pub
+#           check_overlap = TRUE)+
 
-  geom_text(data=. %>%
-              select(date_t, day_total, day_max) %>% 
-              filter(day_total>0),
-            aes(x=date_t+.2,
-                y=day_max,
-                label=comma(day_total, accuarcy=1)),
-            size=4,
-            nudge_y = 300,
-            vjust=0.5,
-            hjust=.5,
-            color="orange",
-            check_overlap = TRUE)+
+#label total test numbers since last pub
+
+geom_text(data=. %>%
+            select(date_t, day_total, day_max) %>% 
+            filter(day_total>0),
+          aes(x=date_t+.2,
+              y=day_max,
+              label=comma(day_total, accuarcy=1)),
+          size=4,
+          nudge_y = 500,
+          vjust=0.5,
+          hjust=.5,
+          color="darkorange",
+          check_overlap = TRUE)+
   
   # geom_text(data=. %>% 
   #             arrange(date_t) %>% 
@@ -970,26 +977,26 @@ pl_test_results_interval <- df_p1 %>%
   #           nudge_y = 100,
   #           nudge_x =-0.5,
   #           size=3,
-  #           color="grey30",
-  #           check_overlap = TRUE)+
+#           color="grey30",
+#           check_overlap = TRUE)+
 
-  # label new infections (pos inside bar)
-  
+# label new infections (pos inside bar)
+
 geom_text(data=. %>% 
-              filter(var=="num_confirmed_new") %>%
-             # filter(value>64) %>% 
+            filter(var=="num_confirmed_new") %>%
+            # filter(value>64) %>% 
             distinct(),
-            aes(x=date_t,
-                y=day_total,
-                label=scales::number(value, accuracy=1)),
-            hjust=.5,
-            size=4,
-            family="Roboto Condensed",
-            color="red",
-            check_overlap = TRUE,
-            nudge_y=100,
-            angle=0)+
-
+          aes(x=date_t,
+              y=day_total,
+              label=scales::number(value, accuracy=1)),
+          hjust=.5,
+          size=4,
+          family="Roboto Condensed",
+          color="red",
+          check_overlap = TRUE,
+          nudge_y=150,
+          angle=0)+
+  
   # label new infections (pos outside bar)
   
   # geom_text(data=. %>% 
@@ -1000,23 +1007,23 @@ geom_text(data=. %>%
   #               y=day_total,
   #               label=scales::number(value, accuracy=1)),
   #           hjust=1,
-  #           size=4,
-  #           family="Roboto Condensed",
-  #           color="red",
-  #           check_overlap = TRUE,
-  #           angle=90,
-  #           nudge_y=70)+
-  
-  scale_y_continuous(expand=expansion(mult=c(0, 0.1)),
-                     minor_breaks=NULL,
-                     breaks=seq(0, 2000, 500))+
+#           size=4,
+#           family="Roboto Condensed",
+#           color="red",
+#           check_overlap = TRUE,
+#           angle=90,
+#           nudge_y=70)+
+
+scale_y_continuous(expand=expansion(mult=c(0, 0.1)),
+                   minor_breaks=NULL,
+                   breaks=seq(0, 2000, 500))+
   scale_x_datetime(breaks = df_p1$date_t,
-                   labels = date_format("%d %m\n%Hhrs",
+                   labels = date_format("%d/%m\n%Hhrs",
                                         tz = "UTC"))+
   scale_fill_manual(values=c("num_confirmed_new"="red",
                              "num_healthy_new"="grey40"),
-                       labels=c("num_confirmed_new"="infection",
-                                  "num_healthy_new"="no infection"))+
+                    labels=c("num_confirmed_new"="infection",
+                             "num_healthy_new"="no infection"))+
   theme_ipsum_rc()+
   theme(legend.position="top",
         axis.text.x = element_text(size=9),
@@ -1024,7 +1031,7 @@ geom_text(data=. %>%
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         axis.title.y = element_blank(),
-        plot.subtitle = element_markdown(),
+        plot.subtitle = element_markdown(color="grey30"),
         plot.caption=element_text(hjust=c(0), 
                                   color="grey30",
                                   family="Roboto Condensed"),
@@ -1033,7 +1040,6 @@ geom_text(data=. %>%
         legend.margin = margin(r=0, l=0, unit="cm"),
         legend.key.width=unit(0.5, unit="cm"),
         legend.key.height = unit(0.2, unit="cm"))
-  
 
 ```
 </details>
@@ -1072,11 +1078,11 @@ pl_test_results_interval_relative <- df_p2 %>%
   geom_text(data=archive_long %>% 
               filter(var=="rel_confirmed_new") %>% 
               filter(value>0),
-              aes(x=date_t,
+            aes(x=date_t,
                 y=.9,
                 label=percent(value, 
-                             scale=100,
-                             accuracy = 0.1)),
+                              scale=100,
+                              accuracy = 0.1)),
             size=4,
             vjust=0.5,
             hjust=0.5,
@@ -1088,9 +1094,8 @@ pl_test_results_interval_relative <- df_p2 %>%
                              "num_healthy_new"="grey40"),
                     labels=c("num_confirmed_new"="infection",
                              "num_healthy_new"="no infection"))+
-  scale_x_datetime(breaks = df_p1$date_t,
-                   labels = date_format("%d %m\n%Hhrs",
-                                        tz = "UTC"))+
+  scale_x_datetime(breaks = df_p2$date_t,
+                   labels = scales::label_date(format = c("%d/%m\n%Hhrs"), tz = "UTC"))+
   theme_ipsum_rc()+
   theme(legend.position="top",
         axis.title.x = element_blank(),
@@ -1098,6 +1103,7 @@ pl_test_results_interval_relative <- df_p2 %>%
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         axis.title.y = element_blank(),
+        plot.subtitle = element_markdown(color="grey30"),
         plot.caption=element_text(hjust=c(0), 
                                   color="grey30",
                                   family="Roboto Condensed"),
@@ -1108,6 +1114,7 @@ pl_test_results_interval_relative <- df_p2 %>%
         legend.box.margin = margin(l=0, unit="cm"),
         legend.key.width=unit(0.5, unit="cm"),
         legend.key.height = unit(0.2, unit="cm"))
+
 ```
 </details>
 
