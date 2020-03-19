@@ -542,7 +542,7 @@ pl_growth <- df_corona_long %>%
                 color=country_region,
                 fill=country_region),
             position=position_dodge(width=1),
-            size=4,
+            size=3,
             hjust=.5)+
       geom_text(data=. %>%  filter(country_region=="Austria"),
               aes(x=date,
@@ -554,7 +554,7 @@ pl_growth <- df_corona_long %>%
                 color=country_region,
                 fill=country_region),
             position=position_dodge(width=1),
-            size=4,
+            size=3,
             hjust=.5)+
   scale_y_continuous(labels=scales::label_percent(scale=100))+
   scale_fill_manual(values=country_color)+
@@ -640,8 +640,8 @@ pl_growth_index <- df_corona_long %>%
                 color=country_region,
                 fill=country_region),
             position=position_dodge(width=1),
-            size=4,
-            hjust=.5)+
+            size=3,
+            hjust=0)+
       geom_text(data=. %>%  filter(country_region=="Austria"),
               aes(x=day_index,
                 y=2.7,
@@ -652,7 +652,7 @@ pl_growth_index <- df_corona_long %>%
                 color=country_region,
                 fill=country_region),
             position=position_dodge(width=1),
-            size=4,
+            size=3,
             hjust=0)+
   
   scale_y_continuous(labels=scales::label_percent(scale=100))+
@@ -820,8 +820,8 @@ pl_test_results_accum <- df_combined_clean_x %>%
        caption=my_caption)+
   geom_bar(aes(x=date_d,
                y=value,
-               color=NULL,
                fill=var),
+           color=NA,
            stat="identity")+
   geom_text(data=. %>% 
               group_by(date_d) %>% 
