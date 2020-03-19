@@ -820,12 +820,24 @@ pl_test_results_accum <- df_combined_clean_x %>%
        caption=my_caption)+
   geom_bar(aes(x=date_d,
                y=value,
+               color=NULL,
                fill=var),
-           color=NA,
            stat="identity")+
+  geom_text(data=. %>% 
+              group_by(date_d) %>% 
+              summarise(day_sum=sum(value, na.rm=T)) %>% 
+              filter(date_d==max(date_d)),
+            aes(x=date_d,
+                label=scales::comma(day_sum),
+                y=day_sum),
+                hjust=.5,
+                color="grey30",
+                family="Roboto Condensed",
+            nudge_y=1000,
+            stat="identity")+
   scale_x_date(labels = scales::label_date_short(),
                breaks = scales::breaks_width(width="1 day"))+
-  scale_y_comma()+
+  scale_y_comma(expand=expansion(mult=c(0, 0.15)))+
   scale_fill_manual(values=c("num_confirmed"="red",
                              "num_healthy"="grey40"),
                     labels=c("num_confirmed"="infection",
@@ -845,8 +857,7 @@ pl_test_results_accum <- df_combined_clean_x %>%
         legend.title=element_blank(),
         legend.margin = margin(r=0, l=0, unit="cm"),
         legend.key.width=unit(0.5, unit="cm"),
-        legend.key.height = unit(0.2, unit="cm"))
-  
+        legend.key.height = unit(0.2, unit="cm"))  
   
 ```
 </details>

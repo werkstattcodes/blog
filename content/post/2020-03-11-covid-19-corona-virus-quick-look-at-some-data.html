@@ -638,12 +638,24 @@ pl_test_results_accum &lt;- df_combined_clean_x %&gt;%
        caption=my_caption)+
   geom_bar(aes(x=date_d,
                y=value,
+               color=NULL,
                fill=var),
-           color=NA,
            stat=&quot;identity&quot;)+
+  geom_text(data=. %&gt;% 
+              group_by(date_d) %&gt;% 
+              summarise(day_sum=sum(value, na.rm=T)) %&gt;% 
+              filter(date_d==max(date_d)),
+            aes(x=date_d,
+                label=scales::comma(day_sum),
+                y=day_sum),
+                hjust=.5,
+                color=&quot;grey30&quot;,
+                family=&quot;Roboto Condensed&quot;,
+            nudge_y=1000,
+            stat=&quot;identity&quot;)+
   scale_x_date(labels = scales::label_date_short(),
                breaks = scales::breaks_width(width=&quot;1 day&quot;))+
-  scale_y_comma()+
+  scale_y_comma(expand=expansion(mult=c(0, 0.15)))+
   scale_fill_manual(values=c(&quot;num_confirmed&quot;=&quot;red&quot;,
                              &quot;num_healthy&quot;=&quot;grey40&quot;),
                     labels=c(&quot;num_confirmed&quot;=&quot;infection&quot;,
@@ -663,7 +675,7 @@ pl_test_results_accum &lt;- df_combined_clean_x %&gt;%
         legend.title=element_blank(),
         legend.margin = margin(r=0, l=0, unit=&quot;cm&quot;),
         legend.key.width=unit(0.5, unit=&quot;cm&quot;),
-        legend.key.height = unit(0.2, unit=&quot;cm&quot;))</code></pre>
+        legend.key.height = unit(0.2, unit=&quot;cm&quot;))  </code></pre>
 </details>
 <p><img src="/post/2020-03-11-covid-19-corona-virus-quick-look-at-some-data_files/figure-html/unnamed-chunk-22-1.png" width="1800" style="display: block; margin: auto;" /></p>
 <details closed>
