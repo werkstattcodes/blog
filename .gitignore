@@ -38,6 +38,7 @@ rsconnect/
 # data
 *.rds
 *.csv
+*.Rmd
 
 # recommneded
 blogdown
