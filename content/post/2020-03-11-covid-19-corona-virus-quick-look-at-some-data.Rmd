@@ -37,6 +37,7 @@ library(glue)
 library(here)
 library(knitr)
 library(wbstats)
+library(rvest)
 
 
 ```
@@ -214,20 +215,25 @@ To overlap the lines for Austria and Italy, we have to replace the dates of the 
 
 ```{r}
 pl_AT_IT <- df_AT_IT %>% 
+  # filter(threshold_indicator>0) %>% 
+  # mutate(day_index=row_number()) %>% 
   ggplot()+
   geom_vline(xintercept=df_AT_IT %>% 
                filter(country_region=="Austria") %>% 
                pull(day_index) %>% 
                max(),
              color="white")+
-  # geom_text(x=df_AT_IT %>% 
-  #              filter(country_region=="Austria") %>% 
-  #              pull(day_index) %>% 
-  #              max(),
-  #           label=scales::lable_date(Sys.date()),
-  #           color="white",
-  #           angle=90,
-  #           hjust=0)+
+  geom_text(data=.  %>%
+               filter(country_region=="Austria") %>%
+              tail(1),
+            aes(x=day_index,
+                y=20000),
+            label = format(Sys.Date(), '%a, %d %b %Y'),
+            color ="white",
+            angle =90,
+            nudge_x =-1,
+            size=3,
+            hjust = 0)+
   geom_line(aes(x=day_index,
                 y=n_obs,
                 color=country_region))+
@@ -237,10 +243,9 @@ pl_AT_IT <- df_AT_IT %>%
                 y=n_obs,
                 color=country_region))+
   labs(title="Covid-19: Comparing dynamics in Austria and Italy",
-       subtitle=glue("Starting <span style='color:white'>from day when threshold of {threshold_value} cases was crossed </span>.
-       Data as of <span style='color:white'>{format(max(df_AT_IT$date), '%A, %d %b %Y')}</span>."),
+       subtitle=glue("Starting <span style='color:white'>from day when threshold of {threshold_value} cases was crossed </span>.<br>Data as of <span style='color:white'>{format(max(df_AT_IT$date), '%A, %d %b %Y')}</span>."),
        caption=c("Data: John's Hopkins  COVID-19 Data Repository (github.com/CSSEGISandData/COVID-19)",
-                 "\nGraph: Roland Schmidt | @zoowalk | https:://werk.statt.codes"),
+                 "\nGraph: Roland Schmidt| @zoowalk | https:://werk.statt.codes"),
        x=glue("# days since more then {threshold_value} confirmed cases"),
        y="# confirmed cases")+
   scale_x_continuous(limits=c(1, NA),
@@ -285,17 +290,15 @@ pl_AT_IT <- df_AT_IT %>%
             check_overlap = T,
             hjust=1,
             show.legend = F)+
-  scale_y_continuous(limits=c(10, NA),
+  scale_y_continuous(limits=c(1, NA),
                      minor_breaks = NULL,
-                     labels=scales::label_comma(),
-                     breaks=c(10, seq(1000, 12000, 2500)))+
+                     breaks=c(1, seq(1000, 12000, 2500)))+
   theme_ft_rc()+
   theme(legend.position = "none",
         #legend.justification = "left",
         plot.subtitle = element_markdown(),
         plot.caption = element_text(hjust=c(0, 0)),
         legend.title=element_blank())
-
 
 ```
 </details>
@@ -681,167 +684,236 @@ pl_growth_index
 
 # Test Results
 
-The Federal Ministry of Social Affairs, Health and Consumer Protection provides on its site regular updates on Covid-19. These include data on the total number of tests conducted, the total number of positive findings (infections), the number of person diseased, and the number of persons who recovered. You can find this info _[here]( https://www.sozialministerium.at/Informationen-zum-Coronavirus/Neuartiges-Coronavirus-(2019-nCov).html){target=”_blank’}_.
-When it comes to the number of tests conducted and the pertaining results, the information is however somewhat limited since it does not indicate how many tests were conducted at each day and what the pertaining results were (the numbers are only the overall totals).
-
-This is somewhat unfortunate since looking at the latest ‘batch’ or ‘wave’ of test results could provide a helpful indication on the disease’s development. E.g. how many percent of the last test batch were positive findings (presence of an infection)? How did this share develop over time? Furthermore, getting an idea of the absolute number of tests undertaken e.g. during a day would be also informative.
-
-The graphs below provide the answer to this question. A few clarifying notes. The bars/numbers are not tests per day, but the number of tests implemented since the Ministry’s preceding publication of the total number of tests.  This can be 24 hrs (15:00 hrs to 15:00 hrs), but doesn’t have to be. Therefore pay attention to the x-axis labels.
-
-To overcome the limitations of the data provided on the Ministry’s website, I made use of the [Wayback Internet Archive](https://archive.org/web/){target="_blank"} and Bob Rudis' convenient [wayback R package](https://github.com/hrbrmstr/wayback){target="_blank"}. The site provides a crawler which takes regular snapshots (‘mementos’) of a site. With these (although sometimes patchy) ‘snapshots’ it becomes possible to retrieve the data contained on the Ministry’s website since the outbreak of the disease. Calculating the differences between the total amounts provided in these snapshots allows me to get the data for each ‘batch’ of test (results). 
-
-<details closed> 
-<summary>Click to see code for getting the data</summary> 
-```{r eval=FALSE, include=TRUE}
-MoH_link <- "https://www.sozialministerium.at/Informationen-zum-Coronavirus/Neuartiges-Coronavirus-(2019-nCov).html"
-
-
-# get link to archives (mementos) -----------------------------------------
-library(wayback
-        )
-df_archive <- wayback::get_mementos(MoH_link)
-df_archive
-df_timemap <- get_timemap(df_archive$link[2])
-df_timemap
-
-df_archive_links <- df_timemap %>% 
-  filter(rel=="memento") %>% 
-  pull(link)
-
-
-# define function to download mementos ------------------------------------
-
-pb <- dplyr::progress_estimated(length(df_archive_links))
-
-
-fn_wayback <- function(x) {
-  
-  pb$tick()$print()
-  
-  x %>% 
-    read_html() %>% 
-    html_nodes("p.abstract") %>% 
-    html_text(., trim=T) %>% 
-    enframe(name=NULL,
-            value="text")
-  
-}
-
-# apply function to links to get content of mementos ----------------------
-
-archives <- df_archive_links %>% 
-  map_df(., fn_wayback)
-
-```
-</details>
-
 
 ```{r include=FALSE}
+orf_link <- "https://orf.at/corona/stories/3157533/"
 
-# load data ---------------------------------------------------------------
+orf_source <- read_html(orf_link) %>% 
+  rvest::html_nodes("#ss-storyContent > div.story-story > div.code > div") %>% 
+  rvest::html_attr("data-url")
 
-# df_combined <- read.csv2(here("blog_data", "Corona", "data_source_consolidated", "df_ministry.csv"))
+df_orf_content <- readr::read_csv(orf_source)
 
-consolidated_index <- list.files(path=here("blog_data", "Corona", "data_source_consolidated"), full.names = T) %>% 
-  file.info() %>% 
-  rownames_to_column(., var="filename") %>% 
-  mutate_at(vars(contains("time")), as.POSIXct)
+orf_timestamp_tests <- df_orf_content %>% 
+  filter(lead(gkz)=="Zeitlinie") %>% 
+  select(orf_timestamp=Bundesland) %>% 
+  mutate(orf_timestamp=lubridate::dmy_hm(orf_timestamp)) %>% 
+  pull(orf_timestamp)
+  
+df_orf <- df_orf_content %>% 
+  filter(str_detect(gkz, "Zeitlinie|confirmed|deaths|recovered|sick|tested")) 
 
-li_latest_consolidated <- consolidated_index %>% 
-  arrange(mtime) %>% 
-  tail(1) %>% 
-  pull(filename)
+names(df_orf) <- as.character(df_orf[1,])
 
-df_combined <- read.csv2(file=li_latest_consolidated) %>% 
-  select(text)
+df_orf_long <- df_orf %>% 
+  rename(status=Zeitlinie) %>% 
+  filter(status!="Zeitlinie") %>% 
+  #tidyr::replace_na(., 0)
+  pivot_longer(cols=-status, names_to="date", values_to="value") %>% 
+  mutate(date=lubridate::mdy(date),
+         value=as.numeric(value))
+
+class(df_orf_long$date)
+
+names(df_orf_long)
+
+df_data <- df_orf_long %>% 
+  group_by(status) %>% 
+  arrange(date, .by_group=T) %>% 
+  mutate(diff.day=value-lag(value),
+         diff.day.perc=value/lag(value)-1)
+
+# caption -----------------------------------------------------------------
+
+my_caption=c(glue::glue("Data: Sozialministerium; orf.at; as of {format(orf_timestamp_tests, '%A, %d %b %Y - %H:%M hrs')}"), "Graph: Roland Schmidt | @zoowalk | https://werk.statt.codes")
+
 
 ```
 
 <details closed> 
-<summary>Click to see code for anaylsis</summary> 
+<summary>Click to see code </summary> 
 ```{r}
 
-# clean raw content -------------------------------------------------------
+library(ggiraph)
 
-df_combined_clean <- df_combined %>% 
-  mutate(text=str_squish(text)) %>% 
-  mutate(date=str_extract(text, "[0-9]{1,2}\\.[0-9]{1,2}\\.[0-9]{4},[:space:][0-9]{1,2}\\:[0-9]{1,2}")) %>% 
-  mutate(date_t=lubridate::dmy_hm(date)) %>% 
-  mutate(date_d=lubridate::as_date(date_t)) %>% 
-  mutate(num_tests=str_extract(text, "(?<=Testungen\\:[:space:])[0-9.]*") %>% 
-           str_remove(., "\\.") %>% 
-           as.numeric) %>% 
-  mutate(num_confirmed=str_extract(text, "(?<=(Bestätigte Fälle\\:[:space:]))[0-9.]*") %>% 
-           str_remove(., "\\.") %>% 
-           as.numeric) %>%  
-  mutate(num_recovered=str_extract(text, "(?<=(Genesene Personen\\:[:space:]))[0-9.]*") %>%
-           str_remove(., "\\.") %>% 
-           as.numeric) %>% 
-  mutate(num_death=str_extract(text, "(?<=(Todesfälle\\:[:space:]))[0-9.]*")) %>% 
-  mutate_at(vars(contains("num_")), as.numeric) %>% 
-  mutate_at(vars(contains("num_")),funs(replace_na(., 0))) %>% 
-  mutate(num_healthy=num_tests-num_confirmed)
+pl_tests_v_confirmed <- df_data %>% 
+  filter(status %in% c("confirmed", "tested")) %>% 
+  pivot_wider(id_cols=c(date), names_from=status,
+              values_from=diff.day.perc) %>% 
+  mutate(indicator=case_when(confirmed > tested ~ "above",
+                             TRUE ~ as.character("not above"))) %>% 
+  ggplot()+
+  labs(title="Covid-19/Austria: \nDaily increase in testing vs Daily increase of confirmed cases",
+       subtitle="Each dot represents one day's % change in tests and cases.<br><span style=color:red>Above</span> diagonale line: confirmed <span style=color:red>cases increase faster</span> than number of tests<br><span style=color:black>Below</span> diagonale line: confirmed <span style=color:black>cases increase slower</span> than number of tests",
+       caption=paste(my_caption, collapse="\n"),
+       x="% increase of number of tests (day to day)",
+       y="% increase of confirmed Covid-19 cases (day to day)")+
+  geom_abline(slope = 1)+
+  ggiraph::geom_point_interactive(
+    aes(x=tested,
+        tooltip=date,
+        color=indicator,
+        y=confirmed),
+    stat="identity")+
+  scale_x_percent()+
+  scale_y_percent()+
+  scale_color_manual(values=c("above"="red", "not above"="black"))+
+  theme_ipsum_rc()+
+  theme(plot.subtitle = element_markdown(color="grey30"),
+        plot.title.position = "plot",
+        plot.caption.position = "plot",
+        plot.caption = element_text(hjust = c(0),
+                                    color="grey30"),
+        axis.title = element_text(color="grey30"),
+        legend.position = "none")+
+  coord_equal()
+    
 
-latest_time <- max(df_combined_clean$date_t)
-
-df_combined_clean_x <- df_combined_clean %>% 
-  group_by(date_d) %>% 
-  arrange(date_t, .by_group=T) %>% 
-  filter(row_number()==n()) %>% 
-  ungroup() %>% 
-  arrange(date_d) %>% 
-  mutate(num_tests_new=num_tests-lag(num_tests),
-         num_confirmed_new=num_confirmed-lag(num_confirmed),
-         num_healthy_new=num_tests_new-num_confirmed_new,
-         rel_confirmed_new=num_confirmed_new/num_tests_new)
-
-archive_long <- df_combined_clean_x %>% 
-  select(date_d, date_t, contains("new")) %>% 
-  filter(num_confirmed_new>0) %>% 
-  pivot_longer(-c(date_d, date_t),names_to="var", values_to="value") 
 ```
-</details>
+</details> 
+
+```{r echo=FALSE, fig.height=6, fig.width=10, message=FALSE}
+ggiraph::girafe(ggobj=pl_tests_v_confirmed,
+                width_svg=10,
+                height_svg=6)
+```
+
 
 <details closed> 
-<summary>Click to see code for plot</summary> 
-```{r pl_test_results_accum}
-my_caption=c("Data: Sozialministerium; Internet Archive Wayback Machine\nGraph: Roland Schmidt | @zoowalk | https://werk.statt.codes")
+<summary>Click to see code</summary> 
+```{r}
 
-pl_test_results_accum <- df_combined_clean_x %>% 
-  select(num_confirmed, num_healthy, date_t, date_d) %>% 
-  pivot_longer(cols=-c(date_t, date_d), names_to="var", values_to="value") %>%  
+pl_daily_results_rel<- df_data  %>% 
+  filter(str_detect(status, "confirmed|tested")) %>% 
+  select(status, diff.day, date) %>% 
+  pivot_wider(id_cols=date, values_from=diff.day, names_from=status) %>% 
+  mutate(healthy=tested-confirmed) %>% 
+  select(-tested) %>% 
+  pivot_longer(cols=-date, names_to="status", values_to="val") %>%
+  group_by(date) %>% 
+  mutate(tested=sum(val)) %>% 
+  filter(tested > 0) %>% 
+  ggplot()+
+  labs(title="Covid-19/Austria: Daily test results",
+       subtitle="<span style=color:red> % of confirmed cases per day.</s><span style=color:grey30> (Number of tests per day).</span> ",
+       caption=my_caption)+
+  geom_bar(aes(x=date,
+               fill=status,
+               y=val),
+           position="fill",
+           color=NA,
+           stat="identity") +
+  #geom_vline(aes(xintercept=as.Date("2020-03-17")-0.5)) %>% 
+  geom_text(data=. %>% 
+              filter(status=="confirmed") %>% 
+              filter(val > 0),
+           aes(x=date,
+               y=.9,
+               label=percent(val/tested, accuracy=0.1)),
+           color="white",
+           fontface = "bold",
+           family="Roboto Condensed",
+           angle=90,
+           check_overlap = T)+
+  geom_text(data=. %>% 
+              filter(lubridate::day(date) %% 2 == 0),
+            aes(x=date,
+                y=1.075,
+                label=paste0(
+                  "(",
+                  comma(tested),
+                  ")"
+                ),
+            ),
+            size=3.5,
+            color="grey30",
+            family="Roboto Condensed",
+            check_overlap = T)+
+  geom_text(data=. %>% 
+              filter(lubridate::day(date) %% 2 == 1),
+              aes(x=date,
+                y=1.05,
+                label=paste0(
+                  
+                  "(",
+                  comma(tested),
+                  ")"
+                ),
+              ),
+            size=3.5,
+            color="grey30",
+            family="Roboto Condensed",
+            check_overlap = T)+
+  #theme_ipsum_pub()+
+  theme_ipsum_rc()+
+  #theme_ft_rc()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.subtitle = element_markdown(),
+        plot.caption = element_text(hjust = c(0, 1), 
+                                    color="grey30"),
+        legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  scale_fill_manual(values=c("confirmed"="red",
+                             "healthy"="grey30"))+
+  #scale_fill_paletteer_d("ggsci::default_jama")+
+  scale_y_percent(expand=expansion(mult=c(0, 0.05)),
+                  breaks=seq(0,1,.25))+
+  scale_x_date(label=scales::label_date_short(),
+               breaks=scales::breaks_width(width="1 day"),
+               expand=expansion(mult=c(0, 0.001)))
+
+```
+</details> 
+
+```{r echo=FALSE, fig.height=6, fig.width=10, message=FALSE}
+pl_daily_results_rel
+```
+
+
+<details closed> 
+<summary>Click to see code</summary> 
+```{r}
+pl_tests_accumm<- df_data  %>% 
+  filter(str_detect(status, "confirmed|tested")) %>% 
+  select(status, value, date) %>% 
+  pivot_wider(id_cols=date, values_from=value, names_from=status) %>% 
+  mutate(healthy=tested-confirmed) %>% 
+  select(-tested) %>% 
+  pivot_longer(cols=-date, names_to="status", values_to="val") %>%
+  group_by(date) %>% 
+  mutate(tested=sum(val)) %>% 
+  filter(tested > 0) %>% 
   ggplot()+
   labs(title="Covid-19/Austria: Accumulated number of tests and results",
-       # subtitle=str_wrap(glue("Total bar height: Total number of tests since preceding publication of results.", 
-       # "<span style='color:red'>Red segment</span>",
-       # ": Number of confirmed infections since preceding publication of results. Data as of {format(latest_time, '%A, %d %b %Y - %H:%M hrs')}. "), 
-       #                   120),
-       subtitle=glue("Data as of {format(latest_time, '%A, %d %b %Y - %H:%M hrs')}. Data for 1 March missing."),
        caption=my_caption)+
-  geom_bar(aes(x=date_d,
-               y=value,
-               fill=var),
+  geom_bar(aes(x=date,
+               y=val,
+               fill=status),
            color=NA,
-           stat="identity")+
+           stat="identity",
+           position=position_stack())+
   geom_text(data=. %>% 
-              group_by(date_d) %>% 
-              summarise(day_sum=sum(value, na.rm=T)) %>% 
-              filter(date_d==max(date_d)),
-            aes(x=date_d,
+              group_by(date) %>% 
+              summarise(day_sum=sum(val, na.rm=T)) %>% 
+              filter(date==max(date)),
+            aes(x=date,
                 label=scales::comma(day_sum),
                 y=day_sum),
-                hjust=.5,
-                color="grey30",
-                family="Roboto Condensed",
+            hjust=.5,
+            color="grey30",
+            family="Roboto Condensed",
             nudge_y=1000,
             stat="identity")+
-  scale_x_date(labels = scales::label_date_short(),
-               breaks = scales::breaks_width(width="1 day"))+
+  scale_x_date(label=scales::label_date_short(),
+               breaks=scales::breaks_width(width="1 day"),
+               expand=expansion(mult=c(0, 0.001)))+
   scale_y_comma(expand=expansion(mult=c(0, 0.15)))+
-  scale_fill_manual(values=c("num_confirmed"="red",
-                             "num_healthy"="grey40"),
-                    labels=c("num_confirmed"="infection",
-                             "num_healthy"="no infection"))+
+  scale_fill_manual(values=c("confirmed"="red",
+                             "healthy"="grey40"),
+                    labels=c("confirmed"="infection",
+                             "healthy"="no infection"))+
   theme_ipsum_rc()+
   theme(legend.position="top",
         axis.text.x = element_text(size=9),
@@ -850,7 +922,7 @@ pl_test_results_accum <- df_combined_clean_x %>%
         panel.grid.minor.x = element_blank(),
         axis.title.y = element_blank(),
         plot.subtitle = element_markdown(),
-        plot.caption=element_text(hjust=c(0), 
+        plot.caption=element_text(hjust=c(0, 1), 
                                   color="grey30",
                                   family="Roboto Condensed"),
         legend.justification = "left",
@@ -858,277 +930,12 @@ pl_test_results_accum <- df_combined_clean_x %>%
         legend.margin = margin(r=0, l=0, unit="cm"),
         legend.key.width=unit(0.5, unit="cm"),
         legend.key.height = unit(0.2, unit="cm"))  
-  
+
+
 ```
-</details>
+</details> 
 
 ```{r echo=FALSE, fig.height=6, fig.width=10, message=FALSE}
-pl_test_results_accum
+pl_tests_accumm
 ```
 
-<details closed> 
-<summary>Click to see code for plot</summary> 
-```{r}
-
-df_p1<- archive_long %>% 
-  filter(var %in% c("num_confirmed_new",
-                     "num_healthy_new")) %>% 
-  group_by(date_t) %>% 
-  mutate(day_total=sum(value, na.rm=T)) %>% 
-  ungroup() %>% 
-  mutate(day_max=max(day_total, na.rm=T)) %>% 
-  filter(day_total > 0)
-
-pl_test_results_interval <- df_p1 %>%   
-  ggplot()+
-  labs(title="Covid-19/Austria: Test results per publication period",
-       # subtitle=str_wrap(glue("Total bar height: Total number of tests since preceding publication of results.", 
-       # "<span style='color:red'>Red segment</span>",
-       # ": Number of confirmed infections since preceding publication of results. Data as of {format(latest_time, '%A, %d %b %Y - %H:%M hrs')}. "), 
-       #                   120),
-       subtitle=glue("<span style='color:darkorange')'>Total number</span> of tests since preceding publication of results.", "<br><span style='color:red'>Number of confirmed infections</span> ","since preceding publication of results. <br>Data as of {format(latest_time, '%A, %d %b %Y - %H:%M hrs')}. "),
-       caption=my_caption)+
-  geom_bar(aes(x=date_t,
-               y=value,
-               fill=var),
-           color=NA,
-           stat="identity",
-           position=position_stack())+
-  
-  # geom_text(data=. %>% 
-  #             filter(var=="num_confirmed_new") %>% 
-  #             filter(value>0),
-  #           aes(x=date_t+.2,
-  #               y=day_max*1.05,
-  #               label=round(value, 0)),
-  #           size=3,
-  #           vjust=0.5,
-  #           family="Roboto Condensed",
-  #           hjust=1,
-#           nudge_y = 50,
-#           check_overlap = TRUE,
-#           color="red")+
-
-# geom_text(data=. %>% 
-#             arrange(date_t) %>% 
-#             head(1),
-#           aes(x=date_t-1,
-#               y=day_max*1.05),
-#           label="infection",
-#           hjust=0,
-#           color="red",
-#           nudge_y = 50,
-#           size=3,
-#           check_overlap = TRUE)+
-
-# geom_text(data=. %>% 
-#             filter(var=="num_healthy_new") %>% 
-#             filter(value>0),
-#           aes(x=date_t+.2,
-#               y=day_max*1.1,
-#               label=round(value, 0)),
-#           size=3,
-#           vjust=0.5,
-#           nudge_y = 75,
-#           hjust=1,
-#           check_overlap = TRUE,
-#           color="grey30")+
-# 
-
-# labels healthy results
-
-geom_text(data=. %>% 
-            filter(var=="num_healthy_new") %>% 
-            filter(value>0),
-          aes(x=date_t,
-              y=value,
-              label=round(value, 0)),
-          size=4,
-          angle=90,
-          family="Roboto Condensed",
-          nudge_y = -10,
-          hjust=1,
-          check_overlap = TRUE,
-          color="white")+
-  
-  # geom_text(data=. %>% 
-  #             arrange(date_t) %>% 
-  #             head(1),
-  #           aes(x=date_t-1,
-  #               y=day_max*1.1),
-  #           label="no infection",
-  #           size=3,
-  #           nudge_y = 75,
-  #           hjust=0,
-  #           color="grey30",
-#           check_overlap = TRUE)+
-
-#label total test numbers since last pub
-
-geom_text(data=. %>%
-            select(date_t, day_total, day_max) %>% 
-            filter(day_total>0),
-          aes(x=date_t+.2,
-              y=day_max,
-              label=comma(day_total, accuarcy=1)),
-          size=4,
-          nudge_y = 500,
-          vjust=0.5,
-          hjust=.5,
-          color="darkorange",
-          check_overlap = TRUE)+
-  
-  # geom_text(data=. %>% 
-  #             arrange(date_t) %>% 
-  #             head(1),
-  #           aes(x=date_t-1,
-  #               y=day_max*1.15),
-  #           label="daily total",
-  #           hjust=0,
-  #           nudge_y = 100,
-  #           nudge_x =-0.5,
-  #           size=3,
-#           color="grey30",
-#           check_overlap = TRUE)+
-
-# label new infections (pos inside bar)
-
-geom_text(data=. %>% 
-            filter(var=="num_confirmed_new") %>%
-            # filter(value>64) %>% 
-            distinct(),
-          aes(x=date_t,
-              y=day_total,
-              label=scales::number(value, accuracy=1)),
-          hjust=.5,
-          size=4,
-          family="Roboto Condensed",
-          color="red",
-          check_overlap = TRUE,
-          nudge_y=150,
-          angle=0)+
-  
-  # label new infections (pos outside bar)
-  
-  # geom_text(data=. %>% 
-  #             filter(var=="num_confirmed_new") %>%
-  #             filter(value<65 & value > 0) %>% 
-  #             distinct(),
-  #           aes(x=date_t,
-  #               y=day_total,
-  #               label=scales::number(value, accuracy=1)),
-  #           hjust=1,
-#           size=4,
-#           family="Roboto Condensed",
-#           color="red",
-#           check_overlap = TRUE,
-#           angle=90,
-#           nudge_y=70)+
-
-scale_y_continuous(expand=expansion(mult=c(0, 0.1)),
-                   minor_breaks=NULL,
-                   breaks=seq(0, 2000, 500))+
-  scale_x_datetime(breaks = df_p1$date_t,
-                   labels = date_format("%d/%m\n%Hhrs",
-                                        tz = "UTC"))+
-  scale_fill_manual(values=c("num_confirmed_new"="red",
-                             "num_healthy_new"="grey40"),
-                    labels=c("num_confirmed_new"="infection",
-                             "num_healthy_new"="no infection"))+
-  theme_ipsum_rc()+
-  theme(legend.position="top",
-        axis.text.x = element_text(size=9),
-        axis.title.x = element_blank(),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.subtitle = element_markdown(color="grey30"),
-        plot.caption=element_text(hjust=c(0), 
-                                  color="grey30",
-                                  family="Roboto Condensed"),
-        legend.justification = "left",
-        legend.title=element_blank(),
-        legend.margin = margin(r=0, l=0, unit="cm"),
-        legend.key.width=unit(0.5, unit="cm"),
-        legend.key.height = unit(0.2, unit="cm"))
-
-```
-</details>
-
-```{r echo=FALSE, fig.height=6, fig.width=10, message=FALSE}
-pl_test_results_interval
-```
-
-
-<details closed> 
-<summary>Click to see code</summary>
-```{r}
-
-# > p2 --------------------------------------------------------------------
-
-df_p2<- archive_long %>% 
-  filter(var %in% c("num_confirmed_new",
-                     "num_healthy_new")) %>% 
-  group_by(date_d) %>% 
-  mutate(day_total=sum(value, na.rm=T)) %>% 
-  mutate(day_max=sum(day_total, na.rm=T)) %>% 
-  ungroup() %>% 
-  filter()
-
-pl_test_results_interval_relative <- df_p2 %>% 
-  ggplot()+
-  labs(title="Covid-19/Austria: Test results per publication period in %",
-       subtitle="Numbers indicate share of confirmed cases among total number tested since last publication.",
-       caption=my_caption)+
-  geom_bar(aes(x=date_t,
-               y=value,
-               fill=var),
-           stat="identity",
-           color=NA,
-           position="fill")+
-  geom_text(data=archive_long %>% 
-              filter(var=="rel_confirmed_new") %>% 
-              filter(value>0),
-            aes(x=date_t,
-                y=.9,
-                label=percent(value, 
-                              scale=100,
-                              accuracy = 0.1)),
-            size=4,
-            vjust=0.5,
-            hjust=0.5,
-            nudge_y = -0.02,
-            angle=90,
-            color="white")+
-  scale_y_percent(expand=expansion(mult=c(0, 0.1)))+
-  scale_fill_manual(values=c("num_confirmed_new"="red",
-                             "num_healthy_new"="grey40"),
-                    labels=c("num_confirmed_new"="infection",
-                             "num_healthy_new"="no infection"))+
-  scale_x_datetime(breaks = df_p2$date_t,
-                   labels = scales::label_date(format = c("%d/%m\n%Hhrs"), tz = "UTC"))+
-  theme_ipsum_rc()+
-  theme(legend.position="top",
-        axis.title.x = element_blank(),
-        axis.text.x = element_text(size=9),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.subtitle = element_markdown(color="grey30"),
-        plot.caption=element_text(hjust=c(0), 
-                                  color="grey30",
-                                  family="Roboto Condensed"),
-        legend.justification = "left",
-        legend.title=element_blank(),
-        legend.margin = margin(r=0, l=0, unit="cm"),
-        legend.text.align = 0,
-        legend.box.margin = margin(l=0, unit="cm"),
-        legend.key.width=unit(0.5, unit="cm"),
-        legend.key.height = unit(0.2, unit="cm"))
-
-```
-</details>
-
-```{r echo=FALSE, fig.height=6, fig.width=10, message=FALSE}
-pl_test_results_interval_relative
-```
