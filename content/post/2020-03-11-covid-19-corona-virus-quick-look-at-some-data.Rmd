@@ -711,19 +711,18 @@ df_orf_long <- df_orf %>%
   rename(status=Zeitlinie) %>% 
   filter(status!="Zeitlinie") %>% 
   #tidyr::replace_na(., 0)
-  pivot_longer(cols=-status, names_to="date", values_to="value") %>% 
+  pivot_longer(cols=-status, names_to="date", values_to="value_accum") %>% 
   mutate(date=lubridate::mdy(date),
-         value=as.numeric(value))
-
-class(df_orf_long$date)
-
-names(df_orf_long)
+         value_accum=as.numeric(value_accum))
 
 df_data <- df_orf_long %>% 
   group_by(status) %>% 
   arrange(date, .by_group=T) %>% 
-  mutate(diff.day=value-lag(value),
-         diff.day.perc=value/lag(value)-1)
+  # mutate(diff.day=value-lag(value),
+  #        diff.day.perc=value/lag(value)-1)
+  mutate(value_day=value_accum-lag(value_accum),
+         value_day_diff_perc=value_day/lag(value_day)-1,
+         value_accum_diff_perc=(value_accum/lag(value_accum)-1))
 
 # caption -----------------------------------------------------------------
 
@@ -741,15 +740,15 @@ library(ggiraph)
 pl_tests_v_confirmed <- df_data %>% 
   filter(status %in% c("confirmed", "tested")) %>% 
   pivot_wider(id_cols=c(date), names_from=status,
-              values_from=diff.day.perc) %>% 
+              values_from=value_accum_diff_perc) %>% 
   mutate(indicator=case_when(confirmed > tested ~ "above",
                              TRUE ~ as.character("not above"))) %>% 
   ggplot()+
   labs(title="Covid-19/Austria: \nDaily increase in testing vs Daily increase of confirmed cases",
        subtitle="Each dot represents one day's % change in tests and cases.<br><span style=color:red>Above</span> diagonale line: confirmed <span style=color:red>cases increase faster</span> than number of tests<br><span style=color:black>Below</span> diagonale line: confirmed <span style=color:black>cases increase slower</span> than number of tests",
        caption=paste(my_caption, collapse="\n"),
-       x="% increase of number of tests (day to day)",
-       y="% increase of confirmed Covid-19 cases (day to day)")+
+       x="% increase of total number of tests (day to day)",
+       y="% increase of total number of confirmed Covid-19 cases (day to day)")+
   geom_abline(slope = 1)+
   ggiraph::geom_point_interactive(
     aes(x=tested,
@@ -757,19 +756,25 @@ pl_tests_v_confirmed <- df_data %>%
         color=indicator,
         y=confirmed),
     stat="identity")+
+  # geom_text_repel(data=. %>%  filter(date==max(df_data$date)),
+  #                 aes(x=tested,
+  #                     y=confirmed,
+  #                     color=indicator,
+  #                     label=date),
+  #                 stat="identity")+
   scale_x_percent()+
   scale_y_percent()+
   scale_color_manual(values=c("above"="red", "not above"="black"))+
   theme_ipsum_rc()+
   theme(plot.subtitle = element_markdown(color="grey30"),
         plot.title.position = "plot",
+        plot.margin = margin(l=0, unit="cm"),
         plot.caption.position = "plot",
         plot.caption = element_text(hjust = c(0),
                                     color="grey30"),
         axis.title = element_text(color="grey30"),
         legend.position = "none")+
   coord_equal()
-    
 
 ```
 </details> 
@@ -785,10 +790,10 @@ ggiraph::girafe(ggobj=pl_tests_v_confirmed,
 <summary>Click to see code</summary> 
 ```{r}
 
-pl_daily_results_rel<- df_data  %>% 
+pl_daily_results_rel<-  df_data  %>% 
   filter(str_detect(status, "confirmed|tested")) %>% 
-  select(status, diff.day, date) %>% 
-  pivot_wider(id_cols=date, values_from=diff.day, names_from=status) %>% 
+  select(status, value_day, date) %>% 
+  pivot_wider(id_cols=date, values_from=value_day, names_from=status) %>% 
   mutate(healthy=tested-confirmed) %>% 
   select(-tested) %>% 
   pivot_longer(cols=-date, names_to="status", values_to="val") %>%
@@ -866,6 +871,7 @@ pl_daily_results_rel<- df_data  %>%
                breaks=scales::breaks_width(width="1 day"),
                expand=expansion(mult=c(0, 0.001)))
 
+  
 ```
 </details> 
 
@@ -879,8 +885,8 @@ pl_daily_results_rel
 ```{r}
 pl_tests_accumm<- df_data  %>% 
   filter(str_detect(status, "confirmed|tested")) %>% 
-  select(status, value, date) %>% 
-  pivot_wider(id_cols=date, values_from=value, names_from=status) %>% 
+  select(status, value_accum, date) %>% 
+  pivot_wider(id_cols=date, values_from=value_accum, names_from=status) %>% 
   mutate(healthy=tested-confirmed) %>% 
   select(-tested) %>% 
   pivot_longer(cols=-date, names_to="status", values_to="val") %>%
@@ -948,26 +954,26 @@ library(ggrepel)
 
 pl_line <- df_data %>% 
   filter(status %in% c("confirmed", "tested")) %>% 
-  select(status, date, diff.day.perc, value) %>% 
+  select(status, date, value_accum_diff_perc) %>% 
   ggplot()+
   labs(title="Covid-19/Austria: Day-to-day % change of number of <span style='color:grey30'>tests</span> and <span style='color:red'>confirmed cases</span>",
        subtitle="",
        caption=my_caption,
-       y="% increase day to day")+
+       y="% increase of total number from day to day")+
   geom_line(aes(x=date,
-                y=diff.day.perc,
+                y=value_accum_diff_perc,
                 color=status),
             stat="identity")+
   geom_point(data=. %>%  filter(date==max(df_data$date)),
              aes(x=date,
-                y=diff.day.perc,
+                y=value_accum_diff_perc,
                 color=status),
             stat="identity")+
   geom_text_repel(data=. %>%  filter(date==max(df_data$date)),
             aes(x=date,
-                y=diff.day.perc,
+                y=value_accum_diff_perc,
                 color=status,
-                label=percent(diff.day.perc, accuracy=0.01)),
+                label=percent(value_accum_diff_perc, accuracy=0.01)),
             stat="identity",
            # linetype="dotted",
           #  segment.color = "black",
