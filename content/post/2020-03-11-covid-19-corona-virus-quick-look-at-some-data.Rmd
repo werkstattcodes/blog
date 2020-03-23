@@ -750,6 +750,25 @@ pl_tests_v_confirmed <- df_data %>%
        x="% increase of total number of tests (day to day)",
        y="% increase of total number of confirmed Covid-19 cases (day to day)")+
   geom_abline(slope = 1)+
+  
+  ggrepel::geom_text_repel(data=. %>% 
+                             filter(date==max(df_data$date)),
+                           aes(x=tested,
+                               y=confirmed,
+                               color=indicator,
+                               label=as.character(
+                                 format(date,
+                                        '%A, %d %b %Y'),                                        "")),
+                           stat="identity",
+                           segment.colour = "grey30",
+                           family="Roboto Condensed",
+                           #color=
+                           size=4,
+                           xlim=1,
+                           ylim=.5)+
+  
+  
+  
   ggiraph::geom_point_interactive(
     aes(x=tested,
         tooltip=date,
