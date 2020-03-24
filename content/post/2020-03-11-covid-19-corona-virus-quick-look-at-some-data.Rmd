@@ -38,6 +38,7 @@ library(here)
 library(knitr)
 library(wbstats)
 library(rvest)
+library(gganimate)
 
 
 ```
@@ -737,12 +738,16 @@ my_caption=c(glue::glue("Data: Sozialministerium; orf.at; as of {format(orf_time
 
 library(ggiraph)
 
-pl_tests_v_confirmed <- df_data %>% 
+df_tests_v_confirmed <- df_data %>% 
   filter(status %in% c("confirmed", "tested")) %>% 
   pivot_wider(id_cols=c(date), names_from=status,
               values_from=value_accum_diff_perc) %>% 
   mutate(indicator=case_when(confirmed > tested ~ "above",
-                             TRUE ~ as.character("not above"))) %>% 
+                             TRUE ~ as.character("not above"))) 
+
+
+##ggiraf version
+pl_tests_v_confirmed<- df_tests_v_confirmed %>% 
   ggplot()+
   labs(title="Covid-19/Austria: \nDaily increase in testing vs Daily increase of confirmed cases",
        subtitle="Each dot represents one day's % change in tests and cases.<br><span style=color:red>Above</span> diagonale line: confirmed <span style=color:red>cases increase faster</span> than number of tests<br><span style=color:black>Below</span> diagonale line: confirmed <span style=color:black>cases increase slower</span> than number of tests",
@@ -792,17 +797,106 @@ pl_tests_v_confirmed <- df_data %>%
         plot.caption = element_text(hjust = c(0),
                                     color="grey30"),
         axis.title = element_text(color="grey30"),
-        legend.position = "none")+
-  coord_equal()
+        legend.position = "none") #+
+  #coord_equal()
+
+#gganimate version
+
+df_new <- df_tests_v_confirmed %>% 
+  group_split(date) %>% 
+  accumulate(~ bind_rows(.x, .y)) %>% 
+  bind_rows(., .id="frame") %>% 
+  mutate(frame=as.numeric(frame)) %>% 
+  group_by(frame) %>% 
+  mutate(label=paste0(format(max(date), '%a, %d %b %Y'),
+                      "\n",
+                      "change confirmed: ", percent(last(confirmed, date), accuracy = .01,
+                                             scale=100),
+                     "\n",
+                      "change tested: ", percent(last(tested, date), accuracy = .01,
+                                          scale=100))) %>% 
+  mutate(size=case_when(date==last(date) ~ "current",
+                         TRUE ~ as.character("preceding")),
+         alpha=case_when(date==last(date) ~ "current",
+                         TRUE ~ as.character("preceding"))) %>% 
+  ungroup()
+
+
 
 ```
 </details> 
+
+
+
+
+
 
 ```{r echo=FALSE, fig.height=6, fig.width=10, message=FALSE}
 ggiraph::girafe(ggobj=pl_tests_v_confirmed,
                 width_svg=10,
                 height_svg=6)
 ```
+
+
+
+```{r eval=FALSE, fig.height=6, fig.width=10, message=FALSE, include=FALSE}
+pl_tests_v_confirmed_anim <- df_new %>% 
+  arrange(frame) %>% 
+  ggplot()+
+  labs(title="Covid-19/Austria: \nDaily increase in testing vs Daily increase of confirmed cases",
+       subtitle="Each dot represents one day's % change in tests and cases.<br><span style=color:red>Above</span> diagonale line: confirmed <span style=color:red>cases increase faster</span> than number of tests<br><span style=color:black>Below</span> diagonale line: confirmed <span style=color:black>cases increase slower</span> than number of tests",
+       caption=paste(my_caption, collapse="\n"),
+       x="% increase of total number of tests (day to day)",
+       y="% increase of total number of confirmed Covid-19 cases (day to day)")+
+  geom_abline(slope = 1)+
+#  labs(title='{closest_state}')+
+  geom_point(aes(x=tested,
+                 y=confirmed,
+                 # label=label,
+                 alpha=alpha,
+                 color=indicator,
+                 size=size))+
+  geom_text(aes(label=label),
+            x=1,
+            y=.76,
+            hjust=0,
+            size=5,
+            lineheight=0.7,
+            color="grey30",
+            family="Roboto Condensed",
+            check_overlap = T)+
+  scale_color_manual(values=c("above"="red",
+                              "not above"="black"))+
+  scale_alpha_manual(values=c("preceding"=.5,
+                              "current"=1))+
+  scale_size_manual(values=c("preceding"=2,
+                              "current"=3))+
+  scale_x_percent()+
+  scale_y_percent()+
+  theme_ipsum_rc()+
+  theme(plot.subtitle = element_markdown(color="grey30"),
+        plot.title.position = "plot",
+        plot.margin = margin(l=0, unit="cm"),
+        plot.caption.position = "plot",
+        plot.caption = element_text(hjust = c(0),
+                                    color="grey30"),
+        axis.title = element_text(color="grey30"),
+        panel.grid.minor.x=element_blank(),
+        panel.grid.minor.y=element_blank(),
+        legend.position = "none")+
+  #coord_equal()+
+  transition_states(frame, 
+                    transition_length = 1,
+                    state_length=3)
+
+
+
+
+
+pl_tests_v_confirmed_anim
+
+```
+
 
 
 <details closed> 
