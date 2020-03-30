@@ -451,7 +451,7 @@ df_new_infections <- df_AT_IT %>%
             stat="identity")+
   geom_text(data=. %>% filter(day_index %% 2 == 0 ),
             aes(x=date,
-               y=max_new_infections*1.25,
+               y=max_new_infections*1.3,
                color=country_region,
                 label=scales::comma(new_infections,
                                     accuracy=1),
@@ -941,7 +941,7 @@ pl_daily_results_rel<-  df_data  %>%
   geom_text(data=. %>% 
               filter(lubridate::day(date) %% 2 == 0),
             aes(x=date,
-                y=1.075,
+                y=1.11,
                 label=paste0(
                   "(",
                   comma(tested),
@@ -985,7 +985,7 @@ pl_daily_results_rel<-  df_data  %>%
                   breaks=seq(0,1,.25))+
   scale_x_date(label=scales::label_date_short(),
                breaks=scales::breaks_width(width="1 day"),
-               expand=expansion(mult=c(0, 0.001)))
+               expand=expansion(mult=c(0.01, 0.01)))
 
   
 ```
