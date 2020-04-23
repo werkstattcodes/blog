@@ -702,31 +702,41 @@ df_orf_content <- readr::read_csv(orf_source)
 
 orf_timestamp_tests <- df_orf_content %>% 
   filter(lead(gkz)=="Zeitlinie") %>% 
-  select(orf_timestamp=Bundesland) %>% 
-  mutate(orf_timestamp=lubridate::dmy_hm(orf_timestamp)) %>% 
+  select(Bundesland) %>% 
+  mutate(orf_timestamp=lubridate::ymd_hms(Bundesland)) %>% 
   pull(orf_timestamp)
   
 df_orf <- df_orf_content %>% 
   filter(str_detect(gkz, "Zeitlinie|confirmed|deaths|recovered|sick|tested")) 
 
-names(df_orf) <- as.character(df_orf[1,])
+#names(df_orf) <- as.character(df_orf[1,])
+
+# df_orf_long <- df_orf %>% 
+#   rename(status=Zeitlinie) %>% 
+#   filter(status!="Zeitlinie") %>% 
+#   #tidyr::replace_na(., 0)
+#   pivot_longer(cols=-status, names_to="date", values_to="value_accum") %>% 
+#   mutate(date=lubridate::mdy(date),
+#          value_accum=as.numeric(value_accum))
 
 df_orf_long <- df_orf %>% 
-  rename(status=Zeitlinie) %>% 
-  filter(status!="Zeitlinie") %>% 
-  #tidyr::replace_na(., 0)
-  pivot_longer(cols=-status, names_to="date", values_to="value_accum") %>% 
-  mutate(date=lubridate::mdy(date),
-         value_accum=as.numeric(value_accum))
+  mutate(gkz=case_when(gkz=="Zeitlinie" ~ "status",
+                       TRUE ~ as.character(gkz))) %>% 
+  janitor::row_to_names(., 1) %>% 
+  pivot_longer(cols=-status,
+               names_to = "date",
+               values_to= "value") %>% 
+  mutate(date=lubridate::ymd(date),
+         value=as.numeric(value))
+
 
 df_data <- df_orf_long %>% 
   group_by(status) %>% 
   arrange(date, .by_group=T) %>% 
-  # mutate(diff.day=value-lag(value),
-  #        diff.day.perc=value/lag(value)-1)
-  mutate(value_day=value_accum-lag(value_accum),
+  mutate(value_day=value-lag(value),
          value_day_diff_perc=value_day/lag(value_day)-1,
-         value_accum_diff_perc=(value_accum/lag(value_accum)-1))
+         value_accum_diff_perc=(value/lag(value)-1))
+
 
 # caption -----------------------------------------------------------------
 
@@ -747,7 +757,6 @@ df_tests_v_confirmed <- df_data %>%
               values_from=value_accum_diff_perc) %>% 
   mutate(indicator=case_when(confirmed > tested ~ "above",
                              TRUE ~ as.character("not above"))) 
-
 
 ##ggiraf version
 pl_tests_v_confirmed<- df_tests_v_confirmed %>% 
@@ -1001,8 +1010,8 @@ pl_daily_results_rel
 ```{r}
 pl_tests_accumm<- df_data  %>% 
   filter(str_detect(status, "confirmed|tested")) %>% 
-  select(status, value_accum, date) %>% 
-  pivot_wider(id_cols=date, values_from=value_accum, names_from=status) %>% 
+  select(status, value, date) %>% 
+  pivot_wider(id_cols=date, values_from=value, names_from=status) %>% 
   mutate(healthy=tested-confirmed) %>% 
   select(-tested) %>% 
   pivot_longer(cols=-date, names_to="status", values_to="val") %>%
