@@ -1,6 +1,5 @@
 ---
-title: 'Google''s Mobility reports: changes to mobility patterns during Covid-19 lock-down
-  in Austria'
+title: 'Google''s Mobility reports: changes to mobility patterns during Covid-19 lock-down in Austria'
 author: rs
 date: '2020-04-28'
 slug: google-s-mobility-reportsmd
@@ -8,7 +7,7 @@ categories: []
 tags:
   - Corona virus
 description: ''
-draft: true
+draft: false
 ---
 
 ```{r message=FALSE, include=FALSE}
