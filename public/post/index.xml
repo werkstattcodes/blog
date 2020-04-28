@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Thu, 23 Apr 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 28 Apr 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Google&#39;s Mobility reports: changes to mobility patterns during Covid-19 lock-down in Austria</title>
+      <link>/post/google-s-mobility-reportsmd/</link>
+      <pubDate>Tue, 28 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/google-s-mobility-reportsmd/</guid>
+      <description>CONTEXTHere’s a quick post related to Covid-19, but don’t be afraid, it won’t be another infection et al visualization (see here, but also here). Google and Apple recently released mobility reports which provide some insights on how the lockdown to curtail the epidemic’s spread affected individuals’ mobility patterns. While Apple’s reports draw on to routing requests to its Apple Map service, Google’s mobility reports highlight how people’s (= mobile device owner who activated their geo-location) presence on specific type of places changed relatively to a baseline period preceding the outbreak of the crisis and the introduction of the lockdown.</description>
+    </item>
     
     <item>
       <title>Covid-19/Corona Virus in Austria: Updates on data</title>

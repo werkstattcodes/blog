@@ -3,7 +3,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-family: Open Sans; /*added*/
-  background-color: #ecf0f7;
+  background-color: #FFFFFF; /*#ecf0f7; lightblue*/
   /*color: #B0B0B0;*/
 }
 
@@ -29,12 +29,13 @@ pre {
   border-radius: 5px;  
 }
 
+/*for code chunks*/
 pre,
 code {
   font-family: monocode, monospace;
   -webkit-font-smoothings: antialiased;
   -moz-osx-font-smoothing: grayscale;
-   font-size: 100%;
+   font-size: 90%;
 }
 
 h1  {
@@ -111,6 +112,7 @@ h6 {
 	font-size: 100%;
 	/*font-color:orange;*/
 	text-decoration:none;
+	font-style: bold;
 	padding: 20px 0px 0px 1px;	
 }
 
@@ -177,8 +179,8 @@ scrollable-element {
 }
 
 summary {
-	color: firebrick;
-	font-size: 100%;
+	color: gray;
+	font-size: 80%;
 }
 
 

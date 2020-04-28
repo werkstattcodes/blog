@@ -1,0 +1,299 @@
+---
+title: 'Google''s Mobility reports: changes to mobility patterns during Covid-19 lock-down
+  in Austria'
+author: rs
+date: '2020-04-28'
+slug: google-s-mobility-reportsmd
+categories: []
+tags:
+  - Corona virus
+description: ''
+draft: true
+---
+
+
+
+<div id="context" class="section level1">
+<h1>CONTEXT</h1>
+<p>Here’s a quick post related to Covid-19, but don’t be afraid, it won’t be another infection et al visualization (see <a href="https://werk.statt.codes/post/covid-19-corona-virus-quick-look-at-some-data/" target="_blank">here</a>, but also <a href="https://www.williamrchase.com/post/why-i-m-not-making-covid19-visualizations-and-why-you-probably-shouldn-t-either/" target="_blank">here</a>). Google and Apple recently released mobility reports which provide some insights on how the lockdown to curtail the epidemic’s spread affected individuals’ mobility patterns. While <a href="https://www.apple.com/covid19/mobility" target="_blank">Apple’s reports</a> draw on to routing requests to its Apple Map service, Google’s mobility reports highlight how people’s (= mobile device owner who activated their geo-location) presence on specific type of places changed relatively to a baseline period preceding the outbreak of the crisis and the introduction of the lockdown. You can find more details about the dataset <a href="https://www.google.com/covid19/mobility/" target="”_blank”">here</a>.</p>
+<p>The dataset has been quickly picked up by numerous media outlets and data analysts, I nevertheless thought it might be interesting to have a specific look at the data for Austria. Again, this is predominately an exercise in number crunching and not meant to suggest any specific insights of an epidemiological nature etc. I leave this to the actual experts.</p>
+<p>On a more technical level, with this post I also want to highlight the wonderful <code>geofacet</code> package by Ryan Hafen (<a href="https://hafen.github.io/geofacet/" target="”_blank”">link</a>). The package, which I used already in a <a href="https://werk.statt.codes/post/vorzugsstimmen/#candidates-preference-votes-and-electoral-number" target="_blank">previous post</a>, is an extension to ggplot2, and allows you to arrange a plot’s facets to reflect the position of geographical units on a map. While the facets’ location is a simplification and will hardly reflect the precise and actual size of e.g. a federal state, the approach provides a lucid way of presenting data for different geographical areas.</p>
+<p>As always, the entire code for this analysis is available on my github account <a href="https://github.com/werkstattcodes" target="_blank">here</a>. If you see any glaring error etc, or if something is unclear, feel free to let me know, best via a direct message at <a href="https://twitter.com/zoowalk" target="_blank">twitter</a>.</p>
+</div>
+<div id="import-data" class="section level1">
+<h1>IMPORT DATA</h1>
+<p>But first, let’s import the data. Initially, Google had published only summary graphs (in pdfs) and not the underlying data (what prompted to some very elegant data extraction <a href="https://joachim-gassen.github.io/2020/04/scrape-google-covid19-cmr-data/" target="_blank">exercise</a>). But gladly, by now, a csv-file with all data is available on the website.</p>
+<details open>
+<p><summary>Click to hide code</summary></p>
+<p>A few things to highlight: When importing data, the <code>readr</code> package generally tries to ‘guess’ the data type (character, double etc.) by inferring it from the first 1000 lines of the imported data. In some instances, this might not be sufficient or misleading. The <strong>col_types argument</strong> allows to manually specify each column, with <strong>first characters as convenient abbreviations</strong> (c = character, D = date, d = double etc). For details see <a href="https://readr.tidyverse.org/articles/readr.html#column-specification" target="_blank">here</a>.
+Dplyr 1.0 will provide an option to define the location of a newly created column with the .after/.before argument.</p>
+<pre class="r"><code># import csv --------------------------------------------------------------
+file_link &lt;- &quot;https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv&quot;
+
+df_global &lt;- readr::read_csv(file=file_link, col_types = &quot;ccccDdddddd&quot;)
+
+df_AT &lt;- df_global %&gt;% 
+  filter(country_region_code==&quot;AT&quot;) %&gt;% 
+  mutate(sub_region_1=case_when(is.na(sub_region_1) ~ &quot;State level&quot;,
+                   TRUE ~ as.character(sub_region_1)))
+
+df_AT_long &lt;- df_AT %&gt;% 
+  pivot_longer(cols=contains(&quot;baseline&quot;),
+                      names_to=&quot;type&quot;,
+                      values_to=&quot;value&quot;) %&gt;% 
+  mutate(week.day=lubridate::wday(date, label=T), .after=date) %&gt;% 
+  mutate(sub_region_1=forcats::as_factor(sub_region_1))
+
+data_as_of &lt;- max(df_AT_long$date, na.rm = T)
+
+#ad description of place types from Google&#39;s documentation
+
+df_AT_long &lt;- df_AT_long %&gt;% 
+  mutate(place.description=case_when(str_detect(type, &quot;retail&quot;) ~ &quot;‘places like restaurants, cafes, shopping centers, theme parks, museums, libraries, and movie theaters.’&quot;,
+                                     str_detect(type, &quot;grocery&quot;) ~ &quot;’places like grocery markets, food warehouses, farmers markets, specialty food shops, drug stores, and pharmacies.’&quot;,
+                                     str_detect(type, &quot;park&quot;) ~ &quot;‘places like local parks, national parks, public beaches, marinas, dog parks, plazas, and public gardens.’&quot;,
+                                     str_detect(type, &quot;transit&quot;) ~ &quot;‘places like public transport hubs such as subway, bus, and train stations.’&quot;,
+                                     str_detect(type, &quot;work&quot;) ~ &quot;‘places of work’&quot;,
+                                     str_detect(type, &quot;residential&quot;) ~ &quot;‘places of residence’&quot;,
+                                     TRUE ~ as.character(&quot;missing&quot;)))</code></pre>
+</details>
+<p>The mobility reports contain data on the following types of places:</p>
+<pre><code>## [1] &quot;retail_and_recreation_percent_change_from_baseline&quot; &quot;grocery_and_pharmacy_percent_change_from_baseline&quot;  &quot;parks_percent_change_from_baseline&quot;                
+## [4] &quot;transit_stations_percent_change_from_baseline&quot;      &quot;workplaces_percent_change_from_baseline&quot;            &quot;residential_percent_change_from_baseline&quot;</code></pre>
+<details open>
+<p>To distinguish mobility patterns prior and during the lockdown we need to define the relevant dates.
+<summary>Click to hide code</summary></p>
+<pre class="r"><code># set dates ---------------------------------------------------------------
+date.start.lockdown &lt;- as.Date(&quot;2020-03-16&quot;)
+date.opening.shops &lt;- as.Date(&quot;2020-04-14&quot;)
+
+df_dates &lt;- tibble(date.start.lockdown=date.start.lockdown,
+                   date.opening.shops=date.opening.shops) %&gt;% 
+  pivot_longer(cols=everything(),
+               names_to = &quot;event&quot;,
+               values_to=&quot;date&quot;)</code></pre>
+</details>
+</div>
+<div id="geofacet-grid" class="section level1">
+<h1>GEOFACET GRID</h1>
+<p>For <code>geofacet</code> to be able to position ggplot’s facets in (approximate) accordance with units’ actual geographical location, it requires a grid which specifies each facet’s relative location. The package comes already with a number of predefined grids, and users can upload newly made grids to the package’s github. For the present case, I created a new one defining the location of Austria’s nine federal states. As suggested by the package’s maintainer, the code are ISO-3166-2 codes. The new grid is now uploaded to geofacet’s github and can be called by other users by the name AUT_states_grid.</p>
+<details open>
+<p><summary>Click to see code</summary></p>
+<pre class="r"><code>AUT_states_grid &lt;- data.frame(
+  code = c(&quot;4&quot;, &quot;3&quot;, &quot;9&quot;, &quot;8&quot;, &quot;7&quot;, &quot;5&quot;, &quot;6&quot;, &quot;1&quot;, &quot;2&quot;),
+  name_en=c(&quot;Upper Austria&quot;, &quot;Lower Austria&quot;, &quot;Vienna&quot;, &quot;Vorarlberg&quot;, &quot;Tyrol&quot;, &quot;Salzburg&quot;, &quot;Styria&quot;, &quot;Burgenland&quot;, &quot;Carinthia&quot;),
+  row = c(1, 1, 1, 2, 2, 2, 2, 2, 3),
+  col = c(3, 4, 5, 1, 2, 3, 4, 5, 4))</code></pre>
+</details>
+<pre class="r"><code>AUT_states_grid</code></pre>
+<pre><code>##   code       name_en row col
+## 1    4 Upper Austria   1   3
+## 2    3 Lower Austria   1   4
+## 3    9        Vienna   1   5
+## 4    8    Vorarlberg   2   1
+## 5    7         Tyrol   2   2
+## 6    5      Salzburg   2   3
+## 7    6        Styria   2   4
+## 8    1    Burgenland   2   5
+## 9    2     Carinthia   3   4</code></pre>
+</div>
+<div id="map-of-mobility-patters-in-parks" class="section level1">
+<h1>MAP OF MOBILITY PATTERS IN PARKS</h1>
+<p>As mentioned above, the mobility reports contain data on specific types of places. Let’s plot the dynamics for one of them: Parks.</p>
+<details closed>
+<p><summary>Click to see code</summary></p>
+<pre class="r"><code>txt_subtitle &lt;- glue::glue(&quot;Changes for each day are compared to a baseline value for that day of the week: The baseline is the median value, for the corresponding day of the week, during the 5-week period Jan 3–Feb 6, 2020. For details see https://www.google.com/covid19/mobility/. Data as of {data_as_of}.&quot;)
+
+date_shutdown &lt;- as.Date(&quot;2020-03-16&quot;)
+
+df_AT_long_type &lt;- df_AT_long %&gt;% 
+  filter(str_detect(type, &quot;parks&quot;)) %&gt;% 
+  filter(!str_detect(sub_region_1, &quot;State&quot;)) 
+  
+pl_map &lt;- df_AT_long_type %&gt;% 
+  ggplot()+
+  labs(title=paste(&quot;Changes in Mobility during Covid-19 crisis:&quot;,                  str_to_upper(str_remove_all(unique(df_AT_long_type$type), regex(&quot;_percent.*$&quot;)))),
+       subtitle=str_wrap(txt_subtitle, 100),
+       caption=c(&quot;data: Google Mobility Report&quot;, &quot;graph: Roland Schmidt | @zoowalk| https://werk.statt.codes/&quot;))+
+  geom_hline(yintercept=0,
+             color=&quot;grey20&quot;)+
+  geom_line(data=df_AT_long %&gt;% 
+              filter(str_detect(type, &quot;parks&quot;)) %&gt;% 
+              filter(!str_detect(sub_region_1, &quot;State&quot;)) %&gt;% 
+              rename(all_regions=sub_region_1),
+            aes(x=date,
+                y=value,
+                group=all_regions),
+            color=&quot;grey70&quot;,
+            show.legend=F,
+            stat=&quot;identity&quot;) +
+  geom_line(aes(x=date,
+                y=value,
+                color=sub_region_1),
+            show.legend=F,
+            size=1)+
+  geom_vline(data=df_dates,
+             aes(xintercept=date,
+                 linetype=event),
+             color=&quot;red&quot;)+
+  scale_linetype_manual(values=c(date.opening.shops=&quot;dotted&quot;,
+                                 date.start.lockdown=&quot;solid&quot;),
+                        labels=c(date.opening.shops=&quot;shops partly open&quot;,
+                                 date.start.lockdown=&quot;start lockdown&quot;))+
+  theme_ipsum_rc()+
+  scale_x_date(labels = scales::label_date_short(),
+               expand=expansion(mult=c(0, 0.15)),
+               breaks = c(seq.Date(min(df_AT_long$date), 
+                                   max(df_AT_long$date), 
+                                   by=&quot;2 week&quot;))) +
+  scale_y_continuous(labels=scales::label_percent(accuracy = 1,
+                                                  scale=1),
+                     limits=c(-100, 100))+
+  scale_color_paletteer_d(&quot;ggsci::default_uchicago&quot;)+
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(size = 9),
+    axis.title.y=element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    strip.text.y = element_text(angle = 0, vjust = 1),
+    legend.position = &quot;bottom&quot;,
+    legend.justification = &quot;right&quot;,
+    legend.key.size=unit(0.5, &quot;cm&quot;),
+    legend.key.height = unit(0.5, &quot;cm&quot;),
+    legend.title = element_blank(),
+    legend.text = element_text(size=10),
+    # plot.title = element_text(size = 12),
+    panel.spacing.x = unit(0.2, &quot;cm&quot;),
+    plot.margin=margin(l=0, r=0, unit=&quot;cm&quot;),
+    plot.title.position = &quot;plot&quot;,
+    plot.subtitle = element_text(size=12, color=&quot;grey30&quot;),
+    plot.caption.position = &quot;plot&quot;,
+    plot.caption = element_text(hjust = c(0, 1), color = &quot;grey30&quot;),
+    # plot.margin = margin(0, r = 0.2, unit = &quot;cm&quot;)
+  )+
+  facet_geo(~sub_region_1, grid = AUT_states_grid)+
+  guides(linetype = guide_legend(override.aes = list(colour = &quot;red&quot;,
+                                                     direction=&quot;vertical&quot;),
+                                 reverse = T),
+         colour = &quot;none&quot;)</code></pre>
+</details>
+<p><img src="/post/2020-04-24-google-s-mobility-reportsmd_files/figure-html/unnamed-chunk-8-1.png" width="1260" style="display: block; margin: auto;" /></p>
+<p>Before diving into the interpretation let’s recall what the displayed values actually mean. In Google’s <a href="https://www.google.com/covid19/mobility/data_documentation.html?hl=en" target="_blank">own words</a> <em>‘the data show how visits and lengths of stay at different places change compared to a baseline. Changes for each day are compared to a baseline value for that day of the week. The baseline is the median value, for the corresponding day of the week, during the 5-week period Jan 3–Feb 6, 2020. The changes are based on data from users who have opted-in to Location History for their Google Account, so the data represents a sample of users.’</em></p>
+<p>So with this in mind, let’s look at the graph which depicts the presence in parks. The colored line is the values for the state, grey lines are the values for all other states for the sake of contrast.</p>
+<p>I think it’s pretty clear that either slightly before or from the introduction of the lockdown onward, individuals’ presence in parks decreased considerably. At a closer look, a few variations appear.</p>
+<p>When it comes to the <em>period before the lockdown</em>, the values for Vorarlberg, Tyrol, Salzburg and Carinthia started decreasing from a relative high level already prior to the lockdown. I don’t have any definite answer for that, but I could imagine that mid-February the skiing season had a final peak with schools (e.g. in Germany) having a term break and tourists flocking in strong numbers to the slopes (compared to the baseline). Subsequently, with the skiing season coming to a gradual end, the high numbers started to decrease. But again, whether this dynamic had an impact on parks is purely speculative. In contrast, in most of the other states, the presence level in parks was rather stable prior to the lockdown.</p>
+<p>By and large, the lockdown on 16 March lead to a clearly visible reduction in parks. Oddly, there seems to have been some delay in lockdown’s impact in Lower Austria and Burgenland.</p>
+<p>There is also some variation when it comes to the <em>dynamics during the lockdown</em>. While the presence in parks stayed in most states on a comparably low level, Lower Austria, Burgenland and Upper Austria gradually ‘rebounded’ and the individuals’ presence in parks increased again to pre-lockdown levels. Also in Vienna, the presence in parks grew, albeit slower and so far not beyond the baseline level. I don’t have any explanation for that, but could imagine that it has something to do with individuals’ options to leave their flat to get some fresh air. While in more urban states, parks are the probably the destination of choice, more rural states offer a variety of other ‘escapes’. But that’s only me speculating here.</p>
+</div>
+<div id="boxplot-on-all-types-of-places" class="section level1">
+<h1>BOXPLOT ON ALL TYPES OF PLACES</h1>
+<p>Finally, to better distill the changes between before and during the lockdown as well as between the federal states, the plots below present (half) a boxplot summarizing the relative changes of mobility patterns for <strong>all types of places</strong> provided in Google’s mobility reports. To supplement the boxplot, I also plot the actual values for each day (= each dot) which represent the relative change of each day to the corresponding weekday in the baseline period. The package <code>gghalves</code> allows for combining ‘half’ plots of two types. Iterating the ggplot command over all types of places covered by Google’s mobility reports gives us one map per place type.</p>
+<p>To see whether weekends are in any way different, I marked them in red.</p>
+<details closed>
+<p><summary>Click to see code</summary></p>
+<pre class="r"><code># boxplot before after ----------------------------------------------------
+
+df_AT_long &lt;- df_AT_long %&gt;% 
+  mutate(lockdown.indicator=case_when(date&gt;=date.start.lockdown ~ &quot;lockdown&quot;,
+                                      date&lt;date.start.lockdown ~ &quot;before lockdown&quot;)) %&gt;% 
+  mutate(weekend.indicator=case_when(week.day %in% c(&quot;Sat&quot;, &quot;Sun&quot;) ~ &quot;weekend&quot;,
+                                     TRUE ~ as.character(&quot;not weekend&quot;))) #%&gt;% 
+  
+fn_map &lt;- function(df, my_type) {
+  
+  df %&gt;% 
+  filter(str_detect(type, my_type)) %&gt;% 
+  filter(!str_detect(sub_region_1, &quot;State&quot;)) %&gt;% {
+    ggplot(., aes(x=lockdown.indicator,
+                  y=value))+
+      labs(title=paste(&quot;Changes in Mobility during Covid-19 crisis:&quot;, 
+                       str_to_upper(str_remove_all(unique(.$type), regex(&quot;_percent.*$&quot;)) %&gt;% str_replace_all(., &quot;_&quot;, &quot; &quot;))),
+           # subtitle=str_wrap(txt_subtitle, 100),
+           # subtitle=str_wrap(paste(txt_subtitle, &quot;\n&quot;, unique(.$tpye), &quot;are defined as&quot;, unique(.$place.description)), 100),
+           
+                      subtitle=str_c(str_wrap(txt_subtitle, 110), 
+                          &quot;\n\n&quot;, 
+                          str_wrap(paste(str_to_sentence(str_remove_all(unique(.$type), regex(&quot;_percent.*$&quot;))) %&gt;% str_replace_all(., &quot;_&quot;, &quot; &quot;),  
+                                   &quot;are defined as&quot;, 
+                                   unique(.$place.description)), 110)),
+
+           
+           caption=c(&quot;data: Google Mobility Report&quot;, 
+                          &quot;graph: Roland Schmidt | @zoowalk | http://werk.statt.codes&quot;))+
+      gghalves::geom_half_boxplot(side=&quot;l&quot;,
+                                  aes(color=NULL),
+                                  outlier.shape = NA,
+                                  # nudge=0.2,
+                                  show.legend = F)+
+      gghalves::geom_half_point_panel(aes(color=weekend.indicator),
+                                side=&quot;r&quot;,
+                                range_scale = 0.75,
+                                size=0.4,
+                                show.legend = T,
+                                # nudge=0.2,
+                                transformation=position_jitter(width=0.8))+
+      scale_x_discrete(labels=c(&quot;before lockdown&quot;=&quot;before&quot;, &quot;lockdown&quot;=&quot;during&quot;))+
+      scale_color_paletteer_d(&quot;ggsci::default_jama&quot;)+
+      scale_y_continuous(limits=c(-100, 100),
+                         labels = scales::label_percent(scale = 1),
+                         minor_breaks = NULL)+
+      facet_geo(~sub_region_1, grid = AUT_states_grid)+
+      theme_ipsum_rc()+
+  scale_color_paletteer_d(&quot;ggsci::default_uchicago&quot;)+
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(size = 9),
+    axis.title.y=element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    strip.text.y = element_text(angle = 0, vjust = 1),
+    legend.position = &quot;top&quot;,
+    legend.justification = &quot;left&quot;,
+    legend.key.size=unit(0.5, &quot;cm&quot;),
+    legend.key.height = unit(0.5, &quot;cm&quot;),
+    legend.title = element_blank(),
+    legend.text = element_text(size=10),
+    panel.spacing.x = unit(0.2, &quot;cm&quot;),
+    plot.margin=margin(l=0, r=0, unit=&quot;cm&quot;),
+    plot.title.position = &quot;plot&quot;,
+    plot.caption.position = &quot;plot&quot;,
+    plot.subtitle=element_text(size=11, color=&quot;grey30&quot;),
+    plot.caption = element_text(hjust = c(0, 1), color = &quot;grey30&quot;))+
+  facet_geo(~sub_region_1, grid = AUT_states_grid,
+            labeller=as_labeller(function(x) str_remove_all(x, regex(&quot;_percent.*$&quot;)) %&gt;%
+                                   str_replace_all(., &quot;_&quot;, &quot; &quot;)))+
+      guides(color=guide_legend(override.aes=list(size=3)))}
+}
+
+pl_list &lt;- unique(df_AT_long$type) %&gt;% 
+  map(., ~fn_map(df=df_AT_long, my_type=.x))</code></pre>
+</details>
+<div id="retail-and-recreation" class="section level2">
+<h2>Retail and Recreation</h2>
+<p><img src="/post/2020-04-24-google-s-mobility-reportsmd_files/figure-html/unnamed-chunk-10-1.png" width="1260" style="display: block; margin: auto;" /></p>
+</div>
+<div id="grocery-and-pharmacy" class="section level2">
+<h2>Grocery and Pharmacy</h2>
+<p><img src="/post/2020-04-24-google-s-mobility-reportsmd_files/figure-html/unnamed-chunk-11-1.png" width="1260" style="display: block; margin: auto;" /></p>
+</div>
+<div id="parks" class="section level2">
+<h2>Parks</h2>
+<p><img src="/post/2020-04-24-google-s-mobility-reportsmd_files/figure-html/unnamed-chunk-12-1.png" width="1260" style="display: block; margin: auto;" /></p>
+</div>
+<div id="transit-stations" class="section level2">
+<h2>Transit stations</h2>
+<p><img src="/post/2020-04-24-google-s-mobility-reportsmd_files/figure-html/unnamed-chunk-13-1.png" width="1260" style="display: block; margin: auto;" /></p>
+</div>
+<div id="workplaces" class="section level2">
+<h2>Workplaces</h2>
+<p><img src="/post/2020-04-24-google-s-mobility-reportsmd_files/figure-html/unnamed-chunk-14-1.png" width="1260" style="display: block; margin: auto;" /></p>
+</div>
+<div id="residential" class="section level2">
+<h2>Residential</h2>
+<p><img src="/post/2020-04-24-google-s-mobility-reportsmd_files/figure-html/unnamed-chunk-15-1.png" width="1260" style="display: block; margin: auto;" /></p>
+<p>Again, I’ll refrain from what might become far-fetched interpretations, but what is noteworthy is the overwhelmingly narrow spread of values during the lockdown with the exception of parks. I was a bit puzzled by the relatively weak increase of stays in residential areas compared to the baseline period. Not sure what to make of this.</p>
+</div>
+</div>
