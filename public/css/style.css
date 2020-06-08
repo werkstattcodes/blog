@@ -7,9 +7,21 @@ body {
   /*color: #B0B0B0;*/
 }
 
-p {text-align: left;
-   /* line-height: 100%;*/
+p {text-align: justify;
+ /*font-family: Open Sans; /*added*/
+ font-size: 110%;
+ line-height: 1.8;
+ 
+
+ /*color: #FF0000; /* line-height: 100%;*/
 }
+
+/*footnotes*/
+ol {
+font-size: 80%;
+line-height: 0.5;
+}
+
 
 code {
   padding: 2px 4px;
@@ -26,7 +38,7 @@ pre {
   word-break: break-all;
   word-wrap: break-word;
   border: .0px solid #ccc; /* border for code snippets  */
-  border-radius: 5px;  
+  border-radius: 5px;   
 }
 
 /*for code chunks*/
@@ -134,12 +146,27 @@ a.icon:hover {
     text-decoration: none;
 }
 
-a:link {
+/*a:link {
     text-decoration:none;
-    color:black
+    color: black;
+}*/
+
+a:visited {
+    text-decoration:none;
+    color: black;
 }
 
-section a:hover:not(toc-h1):not(toc-h2):not(toc-h3) {
+/*define links in text*/
+section a:link:not(toc-h1):not(toc-h2):not(toc-h3) {
+    /*color: var(--accent) !important;*/
+    color: #475D81;
+    /* background-color: #475D81; /*#29AB87;*/
+    font-style: normal;
+
+}
+
+
+section a:hover:not(toc-h1):not(toc-h2):not(toc-h3):not(f5) {
     /*color: var(--accent) !important;*/
     color: white;
     background-color: #475D81; /*#29AB87;*/
@@ -205,7 +232,9 @@ details{
 	   /* line-height: 100%;*/
           }
 
-
+	#sidebar {
+            display:none;
+	  }
   }
 
 
