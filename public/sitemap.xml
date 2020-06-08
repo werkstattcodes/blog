@@ -3,12 +3,27 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/tags/austria/</loc>
+    <lastmod>2020-05-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/climate/</loc>
+    <lastmod>2020-05-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/tags/corona-virus/</loc>
     <lastmod>2020-05-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/post/</loc>
+    <lastmod>2020-05-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/shiny/</loc>
     <lastmod>2020-05-05T00:00:00+00:00</lastmod>
   </url>
   
@@ -45,11 +60,6 @@
   <url>
     <loc>/post/bosnia-house-of-peoples/</loc>
     <lastmod>2020-03-03T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/austria/</loc>
-    <lastmod>2020-03-02T00:00:00+00:00</lastmod>
   </url>
   
   <url>
