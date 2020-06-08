@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Tue, 09 Jun 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 08 Jun 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
@@ -15,7 +15,7 @@
     <item>
       <title>Update on Google mobility reports on Austria</title>
       <link>/post/update-on-mobility-patterns/</link>
-      <pubDate>Tue, 09 Jun 2020 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>/post/update-on-mobility-patterns/</guid>
       <description>ContextThis is a short update on my previous post dealing with Google’s mobility reports on Austria. Since the last post was published, the (at least preliminary) peak of the epidemic has passed, restrictions are lifted one after the other , and the country is gradually ‘re-booted’. Against this background, I thought it might be instructive to see how this is reflected in Google’s mobility reports.
