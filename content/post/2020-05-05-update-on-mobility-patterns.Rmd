@@ -7,7 +7,7 @@ categories: []
 tags:
   - Corona virus
 description: ''
-draft: true
+draft: false
 runtime: shiny
 ---
 
