@@ -9,23 +9,22 @@ tags:
   - shiny
 slug: update-on-mobility-patterns
 draft: FALSE
-runtime: shiny
 ---
 
 
 
-<div id="section-context" class="section level1">
+<div id="context" class="section level1">
 <h1>Context</h1>
 <p>This is a short update on my <a href="https://werk.statt.codes/post/google-s-mobility-reportsmd/">previous post</a> dealing with Google’s mobility reports on Austria. Since the last post was published, the (at least preliminary) peak of the epidemic has passed, restrictions are lifted one after the other , and the country is gradually ‘re-booted’. Against this background, I thought it might be instructive to see how this is reflected in Google’s mobility reports.</p>
 <p>To recap, Google’s mobility reports present data on the change of numbers of individuals staying at particular types of places (e.g. parks, groceries, transit stations etc) by using the pertaining data of Android’s location history (which users knowingly or unknowingly have activated). An exception is the location type ‘residential’ which captures the change of duration of people’s stays. Changes are calculated by <em>contrasting each weekday’s value with the median value of the same weekdays from a pre-Covid19 baseline period</em>. For details see Google’s pertaining <a href="https://support.google.com/covid19-mobility?hl=en#topic=9822927" target="_blank">info</a>.</p>
-<div id="section-r-code-and-shiny" class="section level2">
+<div id="r-code-and-shiny" class="section level2">
 <h2>R Code and Shiny</h2>
 <p>Most of the relevant R code for this post is folded in chunks in the text. The repo including with the full code for this post is available at my <a href="https://github.com/werkstattcodes" target="_blank">github</a>.
 This post is also my first use of RStudio’s powerful <code>shiny</code> package, which allows you to produce e.g. responsive graphs. Have a look at <a href="https://shiny.rstudio.com/tutorial/" target="_blank">this</a>, <a href="http://zevross.com/blog/2016/04/19/r-powered-web-applications-with-shiny-a-tutorial-and-cheat-sheet-with-40-example-apps/" target="_blank">this</a> and <a href="https://deanattali.com/blog/building-shiny-apps-tutorial/#implement-server-logic-to-create-outputs" target="_blank">this</a> tutorial to get going.</p>
 <p>As always, if there’s any glaring error etc. pls don’t hesitate and let me know via Twitter <a href="https://twitter.com/zoowalk" target="_blank">dm</a>.</p>
 </div>
 </div>
-<div id="section-setup" class="section level1">
+<div id="setup" class="section level1">
 <h1>Setup</h1>
 <details closed>
 <p><summary>Load packages</summary></p>
@@ -140,7 +139,7 @@ df_holidays &lt;- jsonlite::fromJSON(&quot;https://date.nager.at/api/v2/publicho
   mutate(date=lubridate::ymd(date))</code></pre>
 </details>
 </div>
-<div id="section-get-and-rearrange-data" class="section level1">
+<div id="get-and-rearrange-data" class="section level1">
 <h1>Get and rearrange data</h1>
 <details closed>
 <p><summary>Import data from Google and rearrange </summary></p>
@@ -176,7 +175,7 @@ df_AT_long &lt;- df_AT_long %&gt;%
            str_to_title(.))</code></pre>
 </details>
 </div>
-<div id="section-regional-differences" class="section level1">
+<div id="regional-differences" class="section level1">
 <h1>Regional differences</h1>
 <p>Below a shiny app which allows you to select the type of place and get the corresponding results displayed. Since this blogdown site is rendered with Hugo and hence a static website, shiny can’t be run ‘directly within’ the site. To overcome this, shiny apps are hosted externally and subsequently embedded via an iframe. the code for the app is available <a href="https://github.com/werkstattcodes/Shiny_Corona_Mobility_Reports" target="_blank">here</a>.</p>
 <pre class="r"><code>#&lt;iframe height=&quot;1000&quot; width=&quot;100%&quot; frameborder=&quot;no&quot;  src=&quot;https://werkstattcodes.shinyapps.io/Shiny_Corona_Mobility_Reports/&quot;&gt; &lt;/iframe&gt;</code></pre>
@@ -185,16 +184,16 @@ df_AT_long &lt;- df_AT_long %&gt;%
 </iframe>
 <p><br>
 Each dot represents a day. The location on the y-axis represent the % change relative to the median value for the same weekdays during the baseline period from 3 January to 6 February (= before Covid19 related restrictions were implemented). The color indicates whether it’s a business, weekend or holiday. The difference is insofar of relevance, since individuals’ mobility patterns are different during business, weekend and holidays and Covid19 restrictions hence have different consequences. The vertical lines indicated dates pertaining to the introduction and gradual withdrawal of the lockdown.</p>
-<div id="section-interpretation" class="section level2">
+<div id="interpretation" class="section level2">
 <h2>Interpretation</h2>
-<div id="section-grocery-and-pharmacy" class="section level3">
+<div id="grocery-and-pharmacy" class="section level3">
 <h3>Grocery and Pharmacy</h3>
 <p>Groceries and pharmacies have experienced a strong recovery if compared to other types of places. With the exception of Tyrol and Salzburg (absence of tourists?), values have returned to or slightly exceed pre-Corona values now. After all, you somehow have to get your food and medicine. The reopening of all shops on 4 May seems to have triggered a particularly strong jump in the numbers.</p>
 </div>
-<div id="section-parks" class="section level3">
+<div id="parks" class="section level3">
 <h3>Parks</h3>
 <p>Mobility patterns for parks are particularly strongly fluctuating. By Google’s <a href="https://support.google.com/covid19-mobility/answer/9825414?hl=en&amp;ref_topic=9822927" target="_blank">own account</a>, numbers for ‘visitors to parks are heavily influenced by the weather’. Acting on the maxim to never let a distraction go unused, let’s contrast temperature data with mobility patterns for parks.</p>
-<p>To account for temperature, I draw on the <code>rnoaa</code> <a href="https://docs.ropensci.org/rnoaa/" target="_blank">package</a> which facilitates access to the comprehensive dataset of the US National Oceanic and Atmospheric Administration (unfortuantely though, it doesn’t provide data for all nine Austrian states.<a href="#section-fn1" class="footnote-ref" id="section-fnref1"><sup>1</sup></a>)</p>
+<p>To account for temperature, I draw on the <code>rnoaa</code> <a href="https://docs.ropensci.org/rnoaa/" target="_blank">package</a> which facilitates access to the comprehensive dataset of the US National Oceanic and Atmospheric Administration (unfortuantely though, it doesn’t provide data for all nine Austrian states.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>)</p>
 <details closed>
 <p><summary>Get weather data, merge datasets</summary></p>
 <pre class="r"><code>library(rnoaa)
@@ -278,28 +277,28 @@ plot_temp &lt;- df_temp_mobility %&gt;%
 <p><img src="/post/2020-05-05-update-on-mobility-patterns_files/figure-html/unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto auto auto 0;" /></p>
 <p>Admittedly, this is an oversimplification, and I’ll only focus here on business days. But what the graph shows is that numbers in parks dropped following the lockdown as long as temperatures remained relatively low. However, once temperature started to rise, numbers increased and exceeded pre-Covid19 levels (base line period). The latter is not surprising, considering that the base line period runs 3 January to 6 February, hence much colder days.</p>
 </div>
-<div id="section-residential" class="section level3">
+<div id="residential" class="section level3">
 <h3>Residential</h3>
 <p>A critical difference of the residential category is its unit of measurement. While the other categories measure changes in total visitors, the residential category shows a <em>‘change in duration’</em>. According to Google’s <a href="https://support.google.com/covid19-mobility/answer/9825414?hl=en&amp;ref_topic=9822927" targe="_blank">documentation</a> of its mobility report ‘because people already spend so much of the day at places of residence (even on workdays), the capacity for change isn’t so large.’ Even at the early stages of the lockdown, when individuals were most compliant and cautious, the pertaining values ‘only’ increased by roughly 25 %. Unsurprisingly, these changes were stronger for business days than for weekends. Gradually, even before any formal restrictions were lifted, the duration of presence has been declining. By the end of May, the pertaining values are between six and nine percent above pre-Covid19 levels.</p>
 <p>This dynamic fits pretty well with my own, completely personal observations. While most people in our neighborhood initially left their home in very few instances, people got eventually more relaxed, spend time outside, or even returned to their workplace. The remaining gap at the end of May is likely to be also indicative for the increased use of home-office/remote work and the thousands of newly unemployed.</p>
 </div>
-<div id="section-workplace" class="section level3">
+<div id="workplace" class="section level3">
 <h3>Workplace</h3>
 <p>The data for the workplace category is imho quite impressive since it shows in someway the scale of Covid19’s economic impact. Even by the end of May, at a point in time when many restrictions were already lifted, the number of persons at their workplaces is still around 30 % lower than during pre-Covid19 levels.</p>
 <p>A detail what is striking is the East-West difference when it comes to the dynamic during <em>weekends</em>. In the eastern states, numbers of weekends started to increase relatively early and in clear contrast to business days. Or to put it differently, the difference of the number of persons at their workplace at weekends before COVID and during the lockdown was higher in the west than in the east. Again, I can only speculate, but I wouldn’t surprised if tourism plays a significant part in the explanations. In areas with particularly strong tourism during the base line period (=winter, particularly Tyrol and Salzburg), work during the weekend is far much common than in other areas of Austria. Shops can open also on Sundays; hotels etc obviously as well.</p>
 </div>
-<div id="section-retail-and-recreation" class="section level3">
+<div id="retail-and-recreation" class="section level3">
 <h3>Retail and Recreation</h3>
 <p>Places related to retail and recreation experienced a remarkable sudden drop following the introduction of the lockdown on 14 March. Subsequently, and at a closer look, values increased almost ‘stepwise’, following the re-opening of small shops on 14 April, the opening of all other shops on 4 May and more recently the opening of restaurants and school on 18 May.
 What stands out is the particularly strong gap in Tyrol and Salzburg. I can only speculate, but I could imagine that this has something to do with both state’s strong tourism industry and the absence of tourists also after the removal of various restrictions.</p>
 </div>
-<div id="section-transit-station" class="section level3">
+<div id="transit-station" class="section level3">
 <h3>Transit station</h3>
 <p>As with most other results, the data on transit stations also reveals a steady increase, starting with the end of March. However, despite this growth there is still a considerable gap to the pre-Covid19 lockdown level. As of end of May, values are still down, ranging between -45% (Tyrol) and -16% (Carinthia). As for Vienna (-32 %), the low number ties in well with recent <a href="https://wien.orf.at/stories/3051627/" target="_blank">news reporting</a> on the city’s public transport system.</p>
 <p>I am not sure why the numbers related to Burgenland are missing from mid-April onward. Burgenland would be a state which - as far as I can tell - features particularly strong numbers of commuters (to Vienna). According to Google, its reports can contain gaps when the data doesn’t meet the quality and privacy threshold (i.e. not enough data to ensure anonymity; see <a href="" target="_blank">here</a>). As for the latter, I would be surprised if the number of commuters dropped to such a low level that revealing the pertaining numbers would facilitate identifying individual Android users. Furthermore, the numbers only started to be missing from mid-April onward, hence from a point in time when the number of persons present on transit stations was likely to increase.</p>
 </div>
 </div>
-<div id="section-recap" class="section level2">
+<div id="recap" class="section level2">
 <h2>Recap</h2>
 <p>Overall, I find Google’s mobility reports quite informative about where people spend their time in the course of this epidemic and the interplay with various restrictions. While the data show that ‘normality’ has almost returned in some areas (grocery), it’s still impressive how fundamental the impact remains in others (workplace, transport).</p>
 </div>
@@ -307,6 +306,6 @@ What stands out is the particularly strong gap in Tyrol and Salzburg. I can only
 <div class="footnotes">
 <hr />
 <ol>
-<li id="section-fn1"><p>As a proxy for the weather I used the weather data for each state’s captial.<a href="#section-fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn1"><p>As a proxy for the weather I used the weather data for each state’s captial.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>

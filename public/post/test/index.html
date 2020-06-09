@@ -13,13 +13,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
-<meta name="keywords" content="plot,
+<meta name="keywords" content="Austria,
+climate,
+Corona virus,
+shiny,
 ">
 
 
 <meta property="og:type" content="article" />
 <meta property="og:description" content="" />
-<meta property="og:title" content="test2" />
+<meta property="og:title" content="test" />
 <meta property="og:site_name" content="werk.statt.codes" />
 <meta property="og:image" content="" />
 <meta property="og:image:type" content="image/jpeg" />
@@ -27,12 +30,15 @@
 <meta property="og:image:height" content="" />
 <meta property="og:url" content="/post/test/" />
 <meta property="og:locale" content="en-us" />
-<meta property="article:published_time" content="2019-10-14
-" /> <meta property="article:modified_time" content="2019-10-14
+<meta property="article:published_time" content="2020-06-08
+" /> <meta property="article:modified_time" content="2020-06-08
 " />
 
 
-<meta property="article:tag" content="plot" />
+<meta property="article:tag" content="Austria" />
+<meta property="article:tag" content="climate" />
+<meta property="article:tag" content="Corona virus" />
+<meta property="article:tag" content="shiny" />
 
 
 
@@ -42,17 +48,18 @@
 <meta name="twitter:creator" content="@zoowalk" />
 <meta
   name="twitter:title"
-  content="test2 | werk.statt.codes"
+  content="test | werk.statt.codes"
 />
 <meta
   name="twitter:description"
-  content="test|"
+  content="ContextThis is a short update on my previous post dealing with Google’s mobility reports on Austria. Since the last post was published, the (at least preliminary) peak of the epidemic has passed, restrictions are lifted one after the other , and the country is gradually ‘re-booted’. Against this background, I thought it might be instructive to see how this is reflected in Google’s mobility reports.
+To recap, Google’s mobility reports present data on the change of numbers of individuals staying at particular types of places (e.|"
 />
 <meta name="twitter:image:src" content="" />
 <meta name="twitter:domain" content="/post/test/" />
 
 
-    <title>test2</title>
+    <title>test</title>
     <link rel="canonical" href="/post/test/" />
 
 
@@ -66,7 +73,9 @@
 
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/styles/vs.css"
+  href="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/styles/zenburn.css"
+ /*href="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/styles/solarized-dark.css"*/
+
 />
 
 
@@ -103,36 +112,330 @@ if (!doNotTrack) {
   itemscope
   itemtype="http://schema.org/Article">
 
-  <a href="/" class="b bw1 pb1 no-underline gray">werk.statt.codes</a>
+<div id="trail">
+  <a href="/" class="b bw0 pb0 no-underline gray">werk.statt.codes</a>
   <span class="b gray"> / </span>
-  <a href="/post" class="b pb1 bw1 no-underline gray">blog</a>
+  <a href="/post" class="b pb0 bw0 no-underline gray">blog</a>
   <span class="b gray"> / </span>
-  <a class="b bb bw1 pb1 no-underline black">test2</a>
+  <a class="b bw0 pb0 no-underline black">test</a>
+</div>
 
-  <section id="main" class="mt5">
-    <a class="b bw1 pb1 no-underline black ttu">test2</a><br>
-    <span class="f6 gray">October 14, 2019</span>
+  <section id="main" class="mt3 mb2">
+    <a class="b bw1 pb0 no-underline ttu white bg-gray"> test</a><br>
+    <span class="f6 gray">June 8, 2020</span>
 
       <article itemprop="articleBody" id="content" class="w-90 lh-copy">
         
 
 
-<p>test</p>
+<div id="context" class="section level1">
+<h1>Context</h1>
+<p>This is a short update on my <a href="https://werk.statt.codes/post/google-s-mobility-reportsmd/">previous post</a> dealing with Google’s mobility reports on Austria. Since the last post was published, the (at least preliminary) peak of the epidemic has passed, restrictions are lifted one after the other , and the country is gradually ‘re-booted’. Against this background, I thought it might be instructive to see how this is reflected in Google’s mobility reports.</p>
+<p>To recap, Google’s mobility reports present data on the change of numbers of individuals staying at particular types of places (e.g. parks, groceries, transit stations etc) by using the pertaining data of Android’s location history (which users knowingly or unknowingly have activated). An exception is the location type ‘residential’ which captures the change of duration of people’s stays. Changes are calculated by <em>contrasting each weekday’s value with the median value of the same weekdays from a pre-Covid19 baseline period</em>. For details see Google’s pertaining <a href="https://support.google.com/covid19-mobility?hl=en#topic=9822927" target="_blank">info</a>.</p>
+<div id="r-code-and-shiny" class="section level2">
+<h2>R Code and Shiny</h2>
+<p>Most of the relevant R code for this post is folded in chunks in the text. The repo including with the full code for this post is available at my <a href="https://github.com/werkstattcodes" target="_blank">github</a>.
+This post is also my first use of RStudio’s powerful <code>shiny</code> package, which allows you to produce e.g. responsive graphs. Have a look at <a href="https://shiny.rstudio.com/tutorial/" target="_blank">this</a>, <a href="http://zevross.com/blog/2016/04/19/r-powered-web-applications-with-shiny-a-tutorial-and-cheat-sheet-with-40-example-apps/" target="_blank">this</a> and <a href="https://deanattali.com/blog/building-shiny-apps-tutorial/#implement-server-logic-to-create-outputs" target="_blank">this</a> tutorial to get going.</p>
+<p>As always, if there’s any glaring error etc. pls don’t hesitate and let me know via Twitter <a href="https://twitter.com/zoowalk" target="_blank">dm</a>.</p>
+</div>
+</div>
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<details closed>
+<p><summary>Load packages</summary></p>
+<pre class="r"><code>library(tidyverse)
+library(here)
+library(extrafont)
+loadfonts(device = &quot;win&quot;, quiet = T)
+library(hrbrthemes)
+hrbrthemes::update_geom_font_defaults(family=&quot;Roboto Condensed&quot;)
+# hrbrthemes::update_geom_font_defaults(family=&quot;Plex Sans&quot;)
+library(scales)
+library(grid)
+library(knitr)
+library(geofacet)
+library(paletteer)
+library(ggtext)
+library(glue)
+library(gt)</code></pre>
+</details>
+<details closed>
+<p><summary>Define rmarkdown options</summary></p>
+<pre class="r"><code>knit_hooks$set(wrap = function(before, options, envir){
+  if (before){
+    paste0(&#39;&lt;&#39;, options$wrap, &#39;&gt;&#39;)
+  } else {
+    paste0(&#39;&lt;/&#39;, options$wrap, &#39;&gt;&#39;)
+  }
+})
+
+knitr::opts_chunk$set(
+    echo = TRUE,
+    fig.align = &quot;left&quot;,
+    # fig.height = 5,
+    # fig.width = 7,
+    out.width = &quot;100%&quot;,
+    message = FALSE,
+    warning = FALSE,
+    dpi = 300
+)
+
+options(width=180, dplyr.width = 150)</code></pre>
+</details>
+<details closed>
+<p><summary>Define plot theme</summary></p>
+<pre class="r"><code>theme_post &lt;- function(){ 
+  hrbrthemes::theme_ipsum_rc() +
+  theme(
+    plot.margin=margin(l=0, unit=&quot;cm&quot;),
+    plot.title = element_markdown(color=&quot;grey20&quot;,
+                                  face=&quot;bold&quot;,
+                                  margin=margin(l=0, unit=&quot;cm&quot;),
+                                  size=13),
+    plot.title.position = &quot;plot&quot;,
+    plot.subtitle = element_text(color=&quot;grey50&quot;,
+                                 margin=margin(t=0.1, b=0.3, unit=&quot;cm&quot;),
+                                 size=9),
+    plot.caption = element_text(color = &quot;grey50&quot;, 
+                                size=7,
+                                hjust=c(0, 1)),
+    plot.caption.position = &quot;panel&quot;,
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(size = 9),
+    axis.title.y=element_blank(),
+    axis.text.y = element_text(size = 9),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.spacing = unit(0.25, &quot;cm&quot;),
+    panel.spacing.y = unit(0.25, &quot;cm&quot;),
+    strip.text = element_text(angle = 0,
+                              size= 9,
+                              vjust = 1,
+                              face=&quot;bold&quot;),
+    legend.title = element_text(color=&quot;grey30&quot;,
+                                face=&quot;bold&quot;,
+                                vjust=1,
+                                size=7),
+    legend.text = element_text(size=7, 
+                               color=&quot;grey30&quot;),
+    legend.justification = &quot;left&quot;,
+    legend.box = &quot;horizontal&quot;,  #arrangement of multiple legends
+    legend.direction = &quot;vertical&quot;,
+    legend.margin = margin(l=0, t=0, unit=&quot;cm&quot;),
+    legend.spacing.y = unit(0.07, units=&quot;cm&quot;),
+    legend.text.align = 0,
+    legend.box.just = &quot;top&quot;,
+    legend.key.height = unit(0.2, &quot;line&quot;),
+    legend.key.width = unit(0.5, &quot;line&quot;),
+    text=element_text(size=5))
+  }</code></pre>
+</details>
+<details closed>
+<p><summary>Define weekend and holiday dates</summary></p>
+<pre class="r"><code># set dates ---------------------------------------------------------------
+
+#dates on lockdown
+date.start.lockdown &lt;- tibble(date=as.Date(&quot;2020-03-14&quot;), event=&quot;start of lockdown&quot;)
+date.opening.shops.small &lt;- tibble(date=as.Date(&quot;2020-04-14&quot;), event=&quot;small shops reopen&quot;)
+date.opening.shops.all &lt;- tibble(date=as.Date(&quot;2020-05-04&quot;), event=&quot;all shops reopen&quot;)
+date.schools &lt;- tibble(date=as.Date(&quot;2020-05-18&quot;), event=&quot;schools reopen&quot;)
+date.restaurants &lt;- tibble(date=as.Date(&quot;2020-05-15&quot;), event=&quot;restaurants reopen&quot;)
+
+df_dates &lt;- bind_rows(date.start.lockdown, date.opening.shops.all, date.opening.shops.small,
+                      date.schools, date.restaurants) %&gt;%
+  mutate(label=paste0(event, &quot; (&quot;, format(date, &quot;%d %b&quot;), &quot;)&quot;)) %&gt;% 
+  mutate(label.2=paste0(format(date, &quot;%d %b&quot;), &quot;, &quot;, event)) %&gt;% 
+  arrange(date) %&gt;% 
+  mutate(label=fct_inorder(label))
+
+#dates on holidays in Austria
+df_holidays &lt;- jsonlite::fromJSON(&quot;https://date.nager.at/api/v2/publicholidays/2020/AT &quot;) %&gt;% 
+  mutate(date=lubridate::ymd(date))</code></pre>
+</details>
+</div>
+<div id="get-and-rearrange-data" class="section level1">
+<h1>Get and rearrange data</h1>
+<details closed>
+<p><summary>Import data from Google and rearrange </summary></p>
+<pre class="r"><code># import csv --------------------------------------------------------------
+file_link &lt;- &quot;https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv&quot;
+
+df_global &lt;- readr::read_csv(file=file_link, col_types = &quot;ccccDdddddd&quot;)
+
+df_AT &lt;- df_global %&gt;% 
+  filter(country_region_code==&quot;AT&quot;) %&gt;% 
+  mutate(sub_region_1=case_when(is.na(sub_region_1) ~ &quot;State level&quot;,
+                   TRUE ~ as.character(sub_region_1)))
+
+df_AT_long &lt;- df_AT %&gt;% 
+  pivot_longer(cols=contains(&quot;baseline&quot;),
+                      names_to=&quot;type&quot;,
+                      values_to=&quot;value&quot;) %&gt;% 
+  mutate(week.day=lubridate::wday(date, label=T), .after=date) %&gt;% 
+  mutate(sub_region_1=forcats::as_factor(sub_region_1))
+
+df_AT_long &lt;- df_AT_long %&gt;% 
+  mutate(place.description=case_when(str_detect(type, &quot;retail&quot;) ~ &quot;‘places like restaurants, cafes, shopping centers, theme parks, museums, libraries, and movie theaters.’&quot;,
+                                     str_detect(type, &quot;grocery&quot;) ~ &quot;’places like grocery markets, food warehouses, farmers markets, specialty food shops, drug stores, and pharmacies.’&quot;,
+                                     str_detect(type, &quot;park&quot;) ~ &quot;‘places like local parks, national parks, public beaches, marinas, dog parks, plazas, and public gardens.’&quot;,
+                                     str_detect(type, &quot;transit&quot;) ~ &quot;‘places like public transport hubs such as subway, bus, and train stations.’&quot;,
+                                     str_detect(type, &quot;work&quot;) ~ &quot;‘places of work’&quot;,
+                                     str_detect(type, &quot;residential&quot;) ~ &quot;‘places of residence’&quot;,
+                                     TRUE ~ as.character(&quot;missing&quot;))) %&gt;% 
+  mutate(day.indicator=case_when(week.day %in% c(&quot;Sat&quot;, &quot;Sun&quot;) ~ &quot;weekend&quot;,
+                                     date %in% df_holidays$date ~ &quot;public holiday&quot;,
+                                     TRUE ~ as.character(&quot;business day&quot;))) %&gt;% 
+  mutate(type=str_remove(type, &quot;_percent.*$&quot;) %&gt;% str_replace_all(., &quot;_&quot;, &quot; &quot;) %&gt;% 
+           str_to_title(.))</code></pre>
+</details>
+</div>
+<div id="regional-differences" class="section level1">
+<h1>Regional differences</h1>
+<p>Below a shiny app which allows you to select the type of place and get the corresponding results displayed. Since this blogdown site is rendered with Hugo and hence a static website, shiny can’t be run ‘directly within’ the site. To overcome this, shiny apps are hosted externally and subsequently embedded via an iframe. the code for the app is available <a href="https://github.com/werkstattcodes/Shiny_Corona_Mobility_Reports" target="_blank">here</a>.</p>
+<pre class="r"><code>#&lt;iframe height=&quot;1000&quot; width=&quot;100%&quot; frameborder=&quot;no&quot;  src=&quot;https://werkstattcodes.shinyapps.io/Shiny_Corona_Mobility_Reports/&quot;&gt; &lt;/iframe&gt;</code></pre>
+<p>Select the type of place in the dropdown and the graph should subsequently update.</p>
+<iframe height="800px" width="100%" frameborder="no" src="https://werkstattcodes.shinyapps.io/Shiny_Corona_Mobility_Reports/">
+</iframe>
+<p><br>
+Each dot represents a day. The location on the y-axis represent the % change relative to the median value for the same weekdays during the baseline period from 3 January to 6 February (= before Covid19 related restrictions were implemented). The color indicates whether it’s a business, weekend or holiday. The difference is insofar of relevance, since individuals’ mobility patterns are different during business, weekend and holidays and Covid19 restrictions hence have different consequences. The vertical lines indicated dates pertaining to the introduction and gradual withdrawal of the lockdown.</p>
+<div id="interpretation" class="section level2">
+<h2>Interpretation</h2>
+<div id="grocery-and-pharmacy" class="section level3">
+<h3>Grocery and Pharmacy</h3>
+<p>Groceries and pharmacies have experienced a strong recovery if compared to other types of places. With the exception of Tyrol and Salzburg (absence of tourists?), values have returned to or slightly exceed pre-Corona values now. After all, you somehow have to get your food and medicine. The reopening of all shops on 4 May seems to have triggered a particularly strong jump in the numbers.</p>
+</div>
+<div id="parks" class="section level3">
+<h3>Parks</h3>
+<p>Mobility patterns for parks are particularly strongly fluctuating. By Google’s <a href="https://support.google.com/covid19-mobility/answer/9825414?hl=en&amp;ref_topic=9822927" target="_blank">own account</a>, numbers for ‘visitors to parks are heavily influenced by the weather’. Acting on the maxim to never let a distraction go unused, let’s contrast temperature data with mobility patterns for parks.</p>
+<p>To account for temperature, I draw on the <code>rnoaa</code> <a href="https://docs.ropensci.org/rnoaa/" target="_blank">package</a> which facilitates access to the comprehensive dataset of the US National Oceanic and Atmospheric Administration (unfortuantely though, it doesn’t provide data for all nine Austrian states.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>)</p>
+<details closed>
+<p><summary>Get weather data, merge datasets</summary></p>
+<pre class="r"><code>library(rnoaa)
+#get all stations in Austria
+df_AT &lt;- ncdc_stations(locationid=&#39;FIPS:AU&#39;)$data 
+
+#only those of interest
+df_stations &lt;- df_AT %&gt;%  
+  filter(str_detect(name, regex(&quot;Wien|Salzburg|Graz|Klagenfurt|Poelten&quot;, ignore_case = T)))
+
+#get temperature data
+df_res &lt;- ncdc(datasetid = &quot;GHCND&quot;, stationid = df_stations$id, datatypeid = &quot;TAVG&quot;, startdate = &quot;2020-01-01&quot;, enddate = &quot;2020-06-01&quot;,
+     add_units=T, limit=1000)
+
+df_temps &lt;- df_res$data %&gt;% 
+  mutate(date=lubridate::ymd_hms(date) %&gt;% as.Date()) %&gt;% 
+  mutate(tavg=value/10) %&gt;% #! tenth celcius
+  left_join(., df_stations %&gt;% 
+              select(name, id) %&gt;% 
+              distinct(name, id),
+            by=c(&quot;station&quot;=&quot;id&quot;)) %&gt;% 
+  mutate(state=case_when(str_detect(name, regex(&quot;Wien&quot;, ignore_case = T)) ~ &quot;Vienna&quot;,
+                         str_detect(name, regex(&quot;Salzburg&quot;, ignore_case = T)) ~ &quot;Salzburg&quot;,
+                         str_detect(name, regex(&quot;Graz&quot;, ignore_case = T)) ~ &quot;Styria&quot;,
+                         str_detect(name, regex(&quot;Poelten&quot;, ignore_case = T)) ~ &quot;Lower Austria&quot;,
+                         str_detect(name, regex(&quot;Klagenfurt&quot;, ignore_case = T)) ~ &quot;Carinthia&quot;))
+
+df_temp_mobility &lt;- df_AT_long %&gt;% 
+  filter(str_detect(type, regex(&quot;park&quot;, ignore_case=T))) %&gt;% 
+  filter(!str_detect(sub_region_1, &quot;State&quot;)) %&gt;% 
+  select(sub_region_1, date, google.value=value, day.indicator) %&gt;% 
+  inner_join(., df_temps %&gt;% 
+              select(date, state, tavg),
+            by=c(&quot;date&quot;=&quot;date&quot;, &quot;sub_region_1&quot;=&quot;state&quot;))
+
+df_temp_mobility &lt;- df_temp_mobility %&gt;% 
+  mutate(lockdown.indicator=case_when(date&gt;=as.Date(&quot;2020-03-14&quot;) ~ &quot;lockdown&quot;,
+                                      date&lt;as.Date(&quot;2020-03-14&quot;) ~ &quot;pre-lockdown&quot;)) %&gt;% 
+  mutate(lockdown.indicator=forcats::fct_inorder(lockdown.indicator))</code></pre>
+</details>
+<details closed>
+<p><summary>Create plot</summary></p>
+<pre class="r"><code>library(ggbeeswarm)
+
+plot_temp &lt;- df_temp_mobility %&gt;% 
+  ggplot()+
+    labs(x=&quot;daily average temperature&quot;,
+       y=&quot;% change to pre-Covid19 baseline period&quot;,
+       title=&quot;Changes in presences in parks, Covid19 lockdown measures and weather&quot;,
+       subtitle=&quot;Average temperature of state&#39;s captial used&quot;,
+       caption=c(&quot;data: NOAA, Google Mobility Reports&quot;, &quot;graph: Roland Schmidt | @zoowalk | www.werk.statt.code&quot;))+
+  ggbeeswarm:: geom_quasirandom(aes(x=tavg,
+                                y=google.value,
+                                color=lockdown.indicator),
+                                size=.5,
+                                groupOnX = T)+
+  scale_color_manual(values=c(&quot;pre-lockdown&quot;=&quot;#008B00&quot;,
+                              &quot;lockdown&quot;=&quot;#EE0000&quot;),
+                     name=NULL)+
+  scale_y_continuous(labels=scales::label_percent(accuracy = 1,
+                                                            scale=1),
+                               limits=c(-100, 200),
+                     position=&quot;right&quot;)+
+  scale_x_continuous(labels=scales::label_number(suffix=&quot;°&quot;,
+                                                 accuracy = 1))+
+  theme_post()+
+  theme(
+        axis.title.x = element_text(size = 6,
+                                    color=&quot;grey30&quot;,
+                                    hjust=1),
+        axis.title.y = element_text(size = 6,
+                                    color=&quot;grey30&quot;,
+                                    hjust=1),
+        legend.position=&quot;bottom&quot;,
+        legend.direction = &quot;horizontal&quot;,
+        strip.text.y = element_text(hjust=1))+
+  lemon::facet_rep_grid(day.indicator~sub_region_1,
+                        repeat.tick.labels = T,
+                        switch = &quot;y&quot;)</code></pre>
+</details>
+<p><img src="/post/2020-05-05-check-toc-iframe_files/figure-html/unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto auto auto 0;" /></p>
+<p>Admittedly, this is an oversimplification, and I’ll only focus here on business days. But what the graph shows is that numbers in parks dropped following the lockdown as long as temperatures remained relatively low. However, once temperature started to rise, numbers increased and exceeded pre-Covid19 levels (base line period). The latter is not surprising, considering that the base line period runs 3 January to 6 February, hence much colder days.</p>
+</div>
+<div id="residential" class="section level3">
+<h3>Residential</h3>
+<p>A critical difference of the residential category is its unit of measurement. While the other categories measure changes in total visitors, the residential category shows a <em>‘change in duration’</em>. According to Google’s <a href="https://support.google.com/covid19-mobility/answer/9825414?hl=en&amp;ref_topic=9822927" targe="_blank">documentation</a> of its mobility report ‘because people already spend so much of the day at places of residence (even on workdays), the capacity for change isn’t so large.’ Even at the early stages of the lockdown, when individuals were most compliant and cautious, the pertaining values ‘only’ increased by roughly 25 %. Unsurprisingly, these changes were stronger for business days than for weekends. Gradually, even before any formal restrictions were lifted, the duration of presence has been declining. By the end of May, the pertaining values are between six and nine percent above pre-Covid19 levels.</p>
+<p>This dynamic fits pretty well with my own, completely personal observations. While most people in our neighborhood initially left their home in very few instances, people got eventually more relaxed, spend time outside, or even returned to their workplace. The remaining gap at the end of May is likely to be also indicative for the increased use of home-office/remote work and the thousands of newly unemployed.</p>
+</div>
+<div id="workplace" class="section level3">
+<h3>Workplace</h3>
+<p>The data for the workplace category is imho quite impressive since it shows in someway the scale of Covid19’s economic impact. Even by the end of May, at a point in time when many restrictions were already lifted, the number of persons at their workplaces is still around 30 % lower than during pre-Covid19 levels.</p>
+<p>A detail what is striking is the East-West difference when it comes to the dynamic during <em>weekends</em>. In the eastern states, numbers of weekends started to increase relatively early and in clear contrast to business days. Or to put it differently, the difference of the number of persons at their workplace at weekends before COVID and during the lockdown was higher in the west than in the east. Again, I can only speculate, but I wouldn’t surprised if tourism plays a significant part in the explanations. In areas with particularly strong tourism during the base line period (=winter, particularly Tyrol and Salzburg), work during the weekend is far much common than in other areas of Austria. Shops can open also on Sundays; hotels etc obviously as well.</p>
+</div>
+<div id="retail-and-recreation" class="section level3">
+<h3>Retail and Recreation</h3>
+<p>Places related to retail and recreation experienced a remarkable sudden drop following the introduction of the lockdown on 14 March. Subsequently, and at a closer look, values increased almost ‘stepwise’, following the re-opening of small shops on 14 April, the opening of all other shops on 4 May and more recently the opening of restaurants and school on 18 May.
+What stands out is the particularly strong gap in Tyrol and Salzburg. I can only speculate, but I could imagine that this has something to do with both state’s strong tourism industry and the absence of tourists also after the removal of various restrictions.</p>
+</div>
+<div id="transit-station" class="section level3">
+<h3>Transit station</h3>
+<p>As with most other results, the data on transit stations also reveals a steady increase, starting with the end of March. However, despite this growth there is still a considerable gap to the pre-Covid19 lockdown level. As of end of May, values are still down, ranging between -45% (Tyrol) and -16% (Carinthia). As for Vienna (-32 %), the low number ties in well with recent <a href="https://wien.orf.at/stories/3051627/" target="_blank">news reporting</a> on the city’s public transport system.</p>
+<p>I am not sure why the numbers related to Burgenland are missing from mid-April onward. Burgenland would be a state which - as far as I can tell - features particularly strong numbers of commuters (to Vienna). According to Google, its reports can contain gaps when the data doesn’t meet the quality and privacy threshold (i.e. not enough data to ensure anonymity; see <a href="" target="_blank">here</a>). As for the latter, I would be surprised if the number of commuters dropped to such a low level that revealing the pertaining numbers would facilitate identifying individual Android users. Furthermore, the numbers only started to be missing from mid-April onward, hence from a point in time when the number of persons present on transit stations was likely to increase.</p>
+</div>
+</div>
+<div id="recap" class="section level2">
+<h2>Recap</h2>
+<p>Overall, I find Google’s mobility reports quite informative about where people spend their time in the course of this epidemic and the interplay with various restrictions. While the data show that ‘normality’ has almost returned in some areas (grocery), it’s still impressive how fundamental the impact remains in others (workplace, transport).</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>As a proxy for the weather I used the weather data for each state’s captial.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
 
 
 
   <div id=links>
     
-      <a class="basic-alignment left gray no-underline f6" href="/post/test3/">&laquo; test3</a>
+      <a class="basic-alignment left gray no-underline f6" href="/post/update-on-mobility-patterns/">&laquo; Update on Google mobility reports on Austria</a>
     
-    
-      <span class="">--</span>
-      <a class="basic-alignment right f6 gray no-underline" href="/post/vorzugsstimmen/">Vorzugsstimmen &raquo;</a>
     
   </div>
 
       
-      <span class="f6 gray mv3" title="Lastmod: October 14, 2019. Published at: 2019-10-14.">
+      <span class="f6 gray mv3" title="Lastmod: June 8, 2020. Published at: 2020-06-08.">
         
       </span>
 
@@ -148,6 +451,164 @@ if (!doNotTrack) {
         
         
         
+        
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h1 no-underline"><a href="#context">
+                    Context
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#r-code-and-shiny">
+                    R Code and Shiny
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h1 no-underline"><a href="#setup">
+                    Setup
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h1 no-underline"><a href="#get-and-rearrange-data">
+                    Get and rearrange data
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h1 no-underline"><a href="#regional-differences">
+                    Regional differences
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#interpretation">
+                    Interpretation
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h3 no-underline"><a href="#grocery-and-pharmacy">
+                    Grocery and Pharmacy
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h3 no-underline"><a href="#parks">
+                    Parks
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h3 no-underline"><a href="#residential">
+                    Residential
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h3 no-underline"><a href="#workplace">
+                    Workplace
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h3 no-underline"><a href="#retail-and-recreation">
+                    Retail and Recreation
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h3 no-underline"><a href="#transit-station">
+                    Transit station
+                </a></li>
+              
+            
+          
+            
+            
+              
+                
+                
+                
+                <li class="toc-h2 no-underline"><a href="#recap">
+                    Recap
+                </a></li>
+              
+            
+          
         
       </ul>
     </div>

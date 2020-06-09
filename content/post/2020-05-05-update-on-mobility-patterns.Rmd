@@ -9,7 +9,6 @@ tags:
   - shiny
 slug: update-on-mobility-patterns
 draft: FALSE
-runtime: shiny
 ---
 
 # Context
