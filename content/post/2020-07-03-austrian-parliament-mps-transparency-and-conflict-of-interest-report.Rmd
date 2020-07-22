@@ -644,8 +644,8 @@ df_agg <- df_income %>%
 
 pl_rel <- df_agg %>% 
   ggplot()+
-  labs(title="Relative number of MPs per income category and party",
-    subtitle="% are share of each party's total (total = 100%); Members of Austrian lower chamber (Nationalrat); for the calendar year 2019.",
+  labs(title="Austrian Nationalrat: Relative number of MPs per income category and party",
+    subtitle=str_wrap("Percentages are shares of each party's total number of members. Lower chamber only (Nationalrat). Data for 2019.", 105),
     x="[income category] average monthly income",
     caption=my_caption)+
   geom_label(data=. %>% filter(n_obs_rel >0),
@@ -890,7 +890,7 @@ fn_get_positions <- function(x) {
 ```
 </details>
 
-This function is applied to our previous results of the `pdf_data` function. At the end, I combine these results with MPs' names and aggregate those reports of MPs which run over multiple pages. E voila! You can use the arrows to sort the table and get e.g the top-10 MPs as to their number of executive positions.
+This function is applied to our previous results of the `pdf_data` function. At the end, I combine these results with MPs' names and aggregate those reports of MPs which run over multiple pages. Et voila! You can use the arrows to sort the table and get e.g the top-10 MPs as to their number of executive positions.
 
 <details open>
 <summary>Code: Apply function </summary>
@@ -1100,8 +1100,8 @@ df_bar_position <- df_position_long %>%
 
 pl_bar_position <- df_bar_position %>% 
   ggplot()+
-  labs(title="Percentage of MPs with at least one additional professional position per party",
-       subtitle="% are share of each party's total number of MPs. Absolute number in brackets. Only lower chamber. Data for 2019.",
+  labs(title="Austrian Nationalrat: Percentage of MPs with at least one additional position per party",
+       subtitle=str_wrap("Percentages are shares of each party's total number of members. Lower chamber only (Nationalrat). Data for 2019.", 105),
        caption=my_caption)+
   geom_bar(aes(x=party,
                y=perc,
@@ -1170,7 +1170,7 @@ pl_executive <- df_executive %>%
                                  "% MPs with non-remunerated executive positions", after = 1L) %>% fct_rev) %>%
   ggplot()+
   labs(title="Austrian Nationalrat: Percentage of MPs with different executive positions per party",
-       subtitle="% are share of each party's total number of MPs. Absolute number in brackets. Only lower chamber. Data for 2019.",
+       subtitle=str_wrap("Percentages are shares of each party's total number of members. Lower chamber only (Nationalrat). Data for 2019.", 105),
        caption=my_caption)+
   geom_bar(aes(x=party,
                y=perc,
@@ -1228,7 +1228,7 @@ pl_box <- df_position_long %>%
   mutate(party=fct_infreq(party)) %>% 
   ggplot()+
   labs(caption=my_caption,
-       title="Number of MPs' other professional positions per party",
+       title="Austrian Nationalrat: Number of MPs' other professional positions per party",
        subtitle="Members of lower chamber only (Nationalrat); Data for 2019.",
        x="MP's number of positions")+
   geom_boxplot(aes(y=party,
