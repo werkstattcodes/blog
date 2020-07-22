@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Fri, 07 Feb 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 21 Jul 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/web-scraping/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Austrian Parliament: MPs transparency and conflict of interest report</title>
+      <link>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report/</link>
+      <pubDate>Tue, 21 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report/</guid>
+      <description>ContextRecently, at the end of June, the Austrian Parliament published its annual report on MPs’ additional sources of revenue and pertaining activities (see here). The publication is mandatory by law, and basically seeks to curtail potential conflicts of interest and to increase transparency as to MPs’ activities outside of parliament. While the list comes, unsurprisingly, with a number of caveats 1, and by itself can hardly constitute a watertight safeguard against the various ‘undemocratic temptations’, the report nevertheless seems to provide interesting data on MPs’ financial statuses and professional machinations.</description>
+    </item>
     
     <item>
       <title>Bosnia: Voting behavior of MPs in the House of Representatives</title>

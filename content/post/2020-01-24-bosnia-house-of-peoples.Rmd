@@ -1,12 +1,13 @@
 ---
 title: 'Bosnia: Voting behavior in the House of Peoples (2014-2018)'
 author: rs
-date: '2020-03-03'
+date: '2020-07-01'
 slug: bosnia-house-of-peoples
 categories: []
 draft: true
 tags:
   - Bosnia
+  - OCR
 description: ''
 ---
 
@@ -17,7 +18,6 @@ library(ggplot2)
 library(here)
 library(extrafont)
 loadfonts(device = "win", quiet = T)
-extrafont::fonts()
 library(hrbrthemes)
 library(ggtext)
 library(tidytext)
@@ -106,9 +106,10 @@ df_HoP_votes <- df_HoP %>%
 *Site might be best viewed on a desktop computer, rather than mobile device.*
 
 # CONTEXT
-This blog post is a continuation of the analysis of voting behavior in Bosnia’s parliament during the 2014 to 2018 legislative period. In a [<u>previous post</u>]( https://werk.statt.codes/post/bih-voting-behavior-of-mps-in-house-of-representatives/){target=”_blank”}, I looked primarily into the lower chamber, the House of Representatives. This post now deals with the upper chamber, the House of Peoples (HoP, dom naroda). The chamber comprises 10 delegates from the Federation (5 Bosniaks and 5 Croats) and 5 from the RS (5 Serbs). A summary of the chambers tasks and rules of procedure can be found [<u>here</u>]( https://www.parlament.ba/Content/Read/36?title=Op%C4%87i-podaci){target=”_blank”}. 
+This blog post has been lingering for a few months now in my draft folder and for no other tangible reason than the Covid19 mayhem, I have no excuse for not having posted it much earlier. In short, the blog is a continuation of the analysis of voting behavior in Bosnia’s parliament during the 2014 to 2018 legislative period. In a [<u>previous post</u>]( https://werk.statt.codes/post/bih-voting-behavior-of-mps-in-house-of-representatives/){target=”_blank”}, I looked primarily into the lower chamber, the House of Representatives. This post now deals with the upper chamber, the House of Peoples (HoP, dom naroda). The chamber comprises 10 delegates from the Federation (5 Bosniaks and 5 Croats) and 5 from the RS (5 Serbs). A summary of the chambers tasks and rules of procedure can be found [<u>here</u>]( https://www.parlament.ba/Content/Read/36?title=Op%C4%87i-podaci){target=”_blank”}. 
 
-Again, as with the previous post, the subsequent results are based on retrieving all pertaining voting records (pdfs) from the Parliament’s website, OCR-ing their text and extracting the data of interest. Overall, 295 voting records pertaining to the HoP were analyzed. Most interestingly, each voting record provides details on each delegate’s individual voting decisions.
+Again, as with the previous post, the subsequent results are based on retrieving all pertaining voting records (pdfs) from the Parliament’s website, OCR-ing their text and extracting the data of interest. This is the part where the 'heavy lifting' of the analysis took part. You find the pertaining details in the previous blog on the House of Representatives.
+Overall, 295 voting records pertaining to the HoP were analyzed. Most interestingly, each voting record provides details on each delegate’s individual voting decisions.
 
 The most relevant R code snippets are provided in drop-down fields. The entire analysis, including the raw data, is available on my [<u>github account</u>]( https://github.com/werkstattcodes/Bosnia_MP_voting_behavior){target=”_blank”}. Should there be anything what strikes you as improbable etc, feel free to let me know, and I’ll try to look into it (best via [<u>Twitter DM</u>]( https://twitter.com/zoowalk){target=”_blank”}).
 
@@ -188,7 +189,7 @@ It’s noteworthy that there were no incidents of delegates not voting (despite 
 
 
 ## Quorum
-The regulatory framework covering the decision-making process in the House of Peoples requires a quorum of nine (out of 15) members, provided that at least three Bosniak, three Croat and three Serb delegates are present.^[Note that the BiH Constitution and the Rules of Proceudre may stipulate exceptions to the quorum requirement.] 'Present' means to have voted either with 'yes', 'no', 'abstained', or simply not casted a voted despite being present [<u>see here</u>](https://www.parlament.ba/Content/Read/38?title=Odlu%C4%8DivanjeuDomunaroda&lang=en).
+The regulatory framework covering the decision-making process in the House of Peoples requires a quorum of nine (out of 15) members, provided that at least three Bosniak, three Croat and three Serb delegates are present.^[Note that the BiH Constitution and the Rules of Proceudre may stipulate exceptions to the quorum requirement.] 'Present' means to have voted either with 'yes', 'no', 'abstained', or simply not casted a voted despite being present ([<u>see here</u>](https://www.parlament.ba/Content/Read/38?title=Odlu%C4%8DivanjeuDomunaroda&lang=en)).
 
 As the analysis of the voting records shows, there was not a single case in which the presence requirement was not fulfilled. I must admit, this was somewhat surprising to me. Furthermore, there were only relatively few cases, in which only the minimum of three delegates per constituent people was present. Somewhat against the state of play in the House of Representatives, Serb and Croat delegates were present in full strength in an overwhelming number of cases. The two graphs below present the pertaining figures.  
 
@@ -218,7 +219,7 @@ plot_quorum_number <- df_quorum %>%
   mutate(record_id=as.factor(record_id)) %>% 
   ggplot()+
   labs(title="Presence of HoP: Number of delegates per decision and constituent people",
-       subtitle=str_wrap("Legilsative period 2014-2018. In no instance less than three delegates per constitutent people were present. Hence quorum requirements were always fullfiled.", 130),
+       subtitle=str_wrap("Legilsative period 2014-2018. Each bar represents one decision/vote. In no instance less than three delegates per constitutent people were present. Hence quorum requirements were always fullfiled.", 130),
        y="Number of present delegates",
        x="decisions (chronologically ordered)",
        caption=my_caption)+
@@ -259,17 +260,26 @@ plot_quorum_frequency <- df_quorum %>%
   ggplot()+
   labs(x="Number of present delegates",
        y="Frequency/Number of decisions",
-       title="Presence of HoP delegates: Number and frequency",
+       title="Presence of HoP delegates: Number of delegates and frequency",
        subtitle="2014-2018 legislative period.",
        caption=my_caption)+
   geom_bar(aes(x=n_obs,
                y=freq,
-               fill=ethnicity),
+               fill=ethnicity
+               # group=ethnicity
+               ),
            stat="identity",
            position=position_dodge(preserve = c("single")))+
+  geom_text(aes(x=n_obs,
+                y=freq+10,
+                label=freq,
+                group=ethnicity),
+            position=position_dodge(width=0.9),
+            stat="identity")+
   geom_vline(xintercept = 3.5,
              linetype="dotted")+
-  scale_y_continuous(expand=expansion(mult=c(0)))+
+  scale_y_continuous(expand=expansion(mult=c(0, 0.1)),
+                     limits=c(0, 250))+
   scale_fill_manual(values=colors_ethnicity,
                     na.value="gray")+
   scale_x_discrete(breaks=as.character(seq(0,5, 1)),
@@ -285,7 +295,7 @@ plot_quorum_frequency <- df_quorum %>%
         legend.position = "top",
         legend.title=element_blank(),
         legend.justification = "left")
-#plot_quorum_frequency
+plot_quorum_frequency
 
 plot_quorum <- patchwork::wrap_plots(plot_quorum_number, plot_quorum_frequency, ncol = 1)+
     plot_annotation(theme=theme(plot.background=element_rect(fill=bgr_color, color="transparent")))
@@ -293,13 +303,15 @@ plot_quorum <- patchwork::wrap_plots(plot_quorum_number, plot_quorum_frequency, 
 
 ```
 </details>
-```{r echo=FALSE, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=10, fig.width=10, message=FALSE, warning=FALSE}
 plot_quorum
 
 ```
 
 ## Voting by entity
-According to the Rules of Procedure of the House, decisions are taken by a majority of the vote of the delegates who are present and voting and require that at least one third of the votes from each entity are ‘yes’ votes. Two important caveats have to be stated here: First, while the above state majority requirement is a general rule, Bosnia's constitution or the House's Rule of Procedure may stipulate exceptions to it. These exceptions were not considered here. My hunch is though, that these exceptions affect only a few, if at all, cases. Hence, the main message of the results should stand. Second, the House's Rules of Proceduer stipulate a mechanism how to deal with decisions which failed to secure the necessary votes from one entity (see [here](https://www.parlament.ba/Content/Read/38?title=Odlu%C4%8Divanje-u-Domu-naroda){target="_blank"}). This 'fallback mechanism' eventually provides for the avenue that 'the decision shall be made by the majority of the total number of delegates who are present and who vote, provided that the votes “against” are not cast by two thirds or more of the delegates elected from each entity.' The two graphs below do not specifially considere this avenue.
+According to the Rules of Procedure of the House, decisions are taken by a *majority of the vote of the delegates who are present and voting* **and** require that *at least one third of the votes from each entity are ‘yes’ votes*. 
+
+Before diving into the analysis of voting patters per delegates' entity two important two important caveats have to be stated here: First, while the above stated majority requirement is a general rule, Bosnia's constitution or the House's Rule of Procedure may stipulate exceptions to it. These exceptions were not considered here. My hunch is though, that these exceptions affect only a few, if at all, cases. Hence, the main message of the results should stand. Second, the House's Rules of Procedure stipulate a mechanism how to deal with decisions which failed to secure the necessary votes from one entity (see [here](https://www.parlament.ba/Content/Read/38?title=Odlu%C4%8Divanje-u-Domu-naroda){target="_blank"}). This 'fallback mechanism' eventually provides for the avenue that 'the decision shall be made by the majority of the total number of delegates who are present and who vote, provided that the votes “against” are not cast by two thirds or more of the delegates elected from each entity.' The two graphs below do not specifically consider this avenue.
 
 
 ### Dot plot
@@ -373,8 +385,9 @@ plot_HoP_majorities <- df_entity3 %>%
   geom_hline(yintercept=1/3)+
   geom_vline(xintercept=1/3)+
   hrbrthemes::theme_ipsum_rc()+
-  theme(legend.position="none",
-        plot.title = element_text(size = 12, face="bold.italic", margin=margin(b=0.0, unit="cm")),
+  theme(legend.position="bottom",
+        legend.justification= "left",
+        plot.title = element_text(size = 14, face="bold", margin=margin(b=0.0, unit="cm")),
         plot.title.position = "plot",
         plot.subtitle = element_text(size = 12, color = "grey30"),
         axis.title = element_blank(),
@@ -398,8 +411,16 @@ plot_HoP_majorities <- df_entity3 %>%
                      expand=expansion(mult=c(0, 0)),
                      breaks=c(.33, seq(0,1,.25)))+
   scale_color_manual(values=c("majority"="darkgreen",
-                             "no majority"="firebrick"))
-
+                             "no majority"="firebrick"),
+                     labels=c("majority"="yes",
+                              "no majority" = "no"),
+                     name="Overall majority?:")+
+  scale_shape_manual(labels=c("majority" = "yes",
+                              "no majority" = "no"),
+                     values=c("majority"=16,
+                             "no majority"=17),
+                     name="Overall majority?:")
+  
 plot_jitter <- girafe(ggobj=plot_HoP_majorities,
        options=list(opts_tooltip(css = "background-color:lightgray; font-family:Roboto Condensed;",
                                  delay_mouseout = 5000)),
@@ -419,8 +440,45 @@ plot_jitter
 
 Let's have a closer look at those cases which failed to reach the necessary 1/3 support of the RS, but still got the necessary majority vote. See the table here:
 
+<details closed> 
+<summary>Click here for code</summary>
+```{r}
+library(gt)
+table_veto <- df_entity3 %>% 
+  filter(majority=="majority") %>% 
+  filter(RS < 1/3) %>% 
+  mutate(title=paste0(decisions_title, " (", decisions_title_bcs, ")")) %>%
+  select(session_date, title, votes_rel_total, FBiH, RS) %>% 
+  gt() %>% 
+  tab_header(title="House of Peoples: Decisions blocked by lack of entity support",
+             subtitle="Legislative period 2014 - 2018") %>% 
+  cols_label(session_date="date",
+             votes_rel_total="total (%)",
+             FBiH="FBiH (%)",
+             RS="RS (%)") %>% 
+  fmt_number(columns = vars(votes_rel_total, FBiH, RS),
+             scale_by = 100) %>% 
+  tab_style(style=list(cell_text(weight="bold",
+                                 align="left")),
+            locations=cells_title(groups=c("title"))) %>% 
+  tab_style(style=list(cell_text(align="left")),
+            locations=cells_title(groups=c("subtitle"))) %>% 
+  tab_style(style=list(cell_text(v_align = "top")),
+            locations=cells_body()) %>% 
+  tab_style(style=list(cell_text(v_align="top")),
+            locations=cells_column_labels(columns = everything())) %>% 
+  cols_width(vars(session_date) ~ px(100),
+             vars(title) ~ px(400),
+             vars(votes_rel_total,
+                  FBiH,
+                  RS) ~ px(50))
 
+```
+</details>
 
+```{r echo=FALSE}
+table_veto
+```
 
 ### Bar plot
 The bar plot below provides another summary of the outcome of votes taken in House of Peoples. Overall, 73.56 % (217) of all decisions secured the overall majority plus the required entity support of at least 1/3 of each entity’s delegates (who were either voting, abstained or did not cast a vote). 14.24 % (42) of all decisions fell short of the overall 50 % majority threshold. And in 12.20 % (36) decision, the issue at stake gained majoritarian support, but failed to secure the required minimum support of at least 1/3 of the RS delegates. There were no cases which fell short due to missing support from the Federation’s delegates.

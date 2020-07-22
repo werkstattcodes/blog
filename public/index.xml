@@ -13,13 +13,22 @@
     
     
     <item>
-      <title>test</title>
-      <link>/post/test/</link>
-      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
+      <title>Austrian Parliament: MPs transparency and conflict of interest report</title>
+      <link>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report/</link>
+      <pubDate>Tue, 21 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/test/</guid>
-      <description>ContextThis is a short update on my previous post dealing with Google’s mobility reports on Austria. Since the last post was published, the (at least preliminary) peak of the epidemic has passed, restrictions are lifted one after the other , and the country is gradually ‘re-booted’. Against this background, I thought it might be instructive to see how this is reflected in Google’s mobility reports.
-To recap, Google’s mobility reports present data on the change of numbers of individuals staying at particular types of places (e.</description>
+      <guid>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report/</guid>
+      <description>ContextRecently, at the end of June, the Austrian Parliament published its annual report on MPs’ additional sources of revenue and pertaining activities (see here). The publication is mandatory by law, and basically seeks to curtail potential conflicts of interest and to increase transparency as to MPs’ activities outside of parliament. While the list comes, unsurprisingly, with a number of caveats 1, and by itself can hardly constitute a watertight safeguard against the various ‘undemocratic temptations’, the report nevertheless seems to provide interesting data on MPs’ financial statuses and professional machinations.</description>
+    </item>
+    
+    <item>
+      <title>Bosnia: Voting behavior in the House of Peoples (2014-2018)</title>
+      <link>/post/bosnia-house-of-peoples/</link>
+      <pubDate>Wed, 01 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/bosnia-house-of-peoples/</guid>
+      <description>Site might be best viewed on a desktop computer, rather than mobile device.
+CONTEXTThis blog post has been lingering for a few months now in my draft folder and for no other tangible reason than the Covid19 mayhem, I have no excuse for not having posted it much earlier. In short, the blog is a continuation of the analysis of voting behavior in Bosnia’s parliament during the 2014 to 2018 legislative period.</description>
     </item>
     
     <item>
@@ -49,16 +58,6 @@ To recap, Google’s mobility reports present data on the change of numbers of i
       <guid>/post/covid-19-corona-virus-quick-look-at-some-data/</guid>
       <description>Graphs updated on Thursday, 23 Apr 2020
 With the COVID epidemic taking a pretty firm grip on our lives, I thought I’ll use this post as a kind of analytic repository regarding the developments in Austria. There are certainly plenty of other, more advanced analyses out there, so see this as a kind of personal attempt to get a grip on the virus and what is happening around us.</description>
-    </item>
-    
-    <item>
-      <title>Bosnia: Voting behavior in the House of Peoples (2014-2018)</title>
-      <link>/post/bosnia-house-of-peoples/</link>
-      <pubDate>Tue, 03 Mar 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/post/bosnia-house-of-peoples/</guid>
-      <description>Site might be best viewed on a desktop computer, rather than mobile device.
-CONTEXTThis blog post is a continuation of the analysis of voting behavior in Bosnia’s parliament during the 2014 to 2018 legislative period. In a previous post, I looked primarily into the lower chamber, the House of Representatives. This post now deals with the upper chamber, the House of Peoples (HoP, dom naroda).</description>
     </item>
     
     <item>
