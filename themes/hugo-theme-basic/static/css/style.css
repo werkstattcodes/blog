@@ -10,7 +10,7 @@ body {
 p {text-align: justify;
  /*font-family: Open Sans; /*added*/
  font-size: 110%;
- line-height: 1.8;
+ line-height: 1.4; /*zeilenabstand*/
  
 
  /*color: #FF0000; /* line-height: 100%;*/
@@ -124,7 +124,7 @@ h6 {
 	font-size: 100%;
 	/*font-color:orange;*/
 	text-decoration:none;
-	font-style: bold;
+	font-weight: bold;
 	padding: 20px 0px 0px 1px;	
 }
 
@@ -214,7 +214,7 @@ summary {
 details{
 	font-size: 100%;
         line-height: 100%;
-        border-left: 1px dotted firebrick;
+        border-left: 0px dotted steelblue;
         font-family: -apple-system,BlinkMacSystemFont,avenir next,avenir,helvetica neue,helvetica,ubuntu,roboto,noto,segoe ui,arial,sans-serif;
 }
 
