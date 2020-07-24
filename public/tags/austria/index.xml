@@ -7,10 +7,22 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Tue, 21 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 22 Jul 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/austria/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Austrian Parliament: MPs transparency and conflict of interest report - Bundesrat</title>
+      <link>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report-bundesrat/</link>
+      <pubDate>Wed, 22 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report-bundesrat/</guid>
+      <description>ContextThis is a follow-up on my previous post on the transprancey report by Austria’s Parliament. While I limited
+Steps in RSetupCode: Load packages
+library(tidyverse)library(here)library(extrafont)loadfonts(device = &amp;quot;win&amp;quot;, quiet = T)library(hrbrthemes)hrbrthemes::update_geom_font_defaults(family = &amp;quot;Roboto Condensed&amp;quot;,size=3)library(scales)library(knitr)library(paletteer)library(ggtext)library(glue)library(gt)library(DT)library(pdftools)library(lemon)library(gender)library(ggiraph)Code: Define rmarkdown options
+knit_hooks$set(wrap = function(before, options, envir) {if (before) {paste0(&amp;quot;&amp;lt;&amp;quot;, options$wrap, &amp;quot;&amp;gt;&amp;quot;)} else {paste0(&amp;quot;&amp;lt;/&amp;quot;, options$wrap, &amp;quot;&amp;gt;&amp;quot;)}})knitr::opts_chunk$set(echo = TRUE,fig.</description>
+    </item>
     
     <item>
       <title>Austrian Parliament: MPs transparency and conflict of interest report</title>
