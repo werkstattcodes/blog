@@ -13,7 +13,7 @@ description: ''
 
 # Context
 
-Recently, at the end of June, the Austrian Parliament published its annual report on MPs' additional sources of revenue and pertaining activities (see [here](https://www.parlament.gv.at/POOL/SWBRETT/ZUSD/BezBegrBVGPar9-NR.pdf){target="_blank"}). The publication is mandatory by law, and basically seeks to curtail potential conflicts of interest and to increase transparency as to MPs' activities outside of parliament. While the list comes, unsurprisingly, with a number of caveats ^[For details see [here](https://www.parlament.gv.at//POOL/SWBRETT/25020/0010/BezBegrBVGPar9Erkl-NR.pdf#page=1){target="_blank"}], and by itself can hardly constitute a watertight safeguard against the various 'undemocratic temptations', the report nevertheless seems to provide interesting data on MPs' financial statuses and professional machinations. All in all enough reason to give it a closer look, i.e. a blog post^[Halfway through the blog, I realized that the transparency website meineabgeordneten.at had alreay published a similar, although non-technial blog on this matter. If you speak German, have a look [here]. In a previous version I also had wronlgy identified the gender of one MP. Thx for helping to clarify this.(https://www.meineabgeordneten.at/News/detail/Nationalrat_Nebeneinkommen_Offenlegung_2019){target="_blank"}]. Note that I will focus only on Austria's lower chamber (*Nationalrat*) in this post. If time permits, I'll follow up with one on the upper chamber (*Bundesrat*) at a later point.
+Recently, at the end of June, the Austrian Parliament published its annual report on MPs' additional sources of revenue and pertaining activities (see [here](https://www.parlament.gv.at/POOL/SWBRETT/ZUSD/BezBegrBVGPar9-NR.pdf){target="_blank"}). The publication is mandatory by law, and basically seeks to curtail potential conflicts of interest and to increase transparency as to MPs' activities outside of parliament. While the list comes, unsurprisingly, with a number of caveats ^[For details see [here](https://www.parlament.gv.at//POOL/SWBRETT/25020/0010/BezBegrBVGPar9Erkl-NR.pdf#page=1){target="_blank"}], and by itself can hardly constitute a watertight safeguard against the various 'undemocratic temptations', the report nevertheless seems to provide interesting data on MPs' financial statuses and professional machinations. All in all enough reason to give it a closer look, i.e. a blog post.^[Halfway through the blog, I realized that the transparency website meineabgeordneten.at had alreay published a similar, although non-technial blog on this matter. If you speak German, have a look [here](https://www.meineabgeordneten.at/News/detail/Nationalrat_Nebeneinkommen_Offenlegung_2019){target="_blank"}]. In a previous version I also had wrongly identified the gender of one MP. Kindly, Marion Breitschopf from meineabgeordneten.at helped clarifying this.] Note that I will focus only on Austria's lower chamber (*Nationalrat*) in this post. If time permits, I'll follow up with one on the upper chamber (*Bundesrat*) at a later point.
 
 If you're not that much interested in the R code, simply collapse the code chunks. The entire code for the analysis will be on my github account ([link](https://github.com/werkstattcodes){target="_blank"}). For any questions, comments etc. feel free to send me a direct message on twitter ([link](https://twitter.com/zoowalk){target="_blank"}).
 
@@ -163,9 +163,9 @@ data.frame(
                  columns = vars(income.bracket))
 ```
 
-And lists of MPs' **2) executive positions** in stock companies, private limited companies, foundations or saving banks held by each MP; **3) other activities** from which MPs generate income; and **4) honorary activities** which yield no income (but could potentially nevertheless lead to some conflict of interest).
+And lists of **2) executive positions** in stock companies, private limited companies, foundations or saving banks held by each MP; **3) other activities** from which MPs generate income; and **4) honorary activities** which yield no income (but could potentially nevertheless lead to some conflict of interest).
 
-Extracting data from pdfs has been the topic of at least one of my previous posts (see [here](https://werk.statt.codes/post/bih-voting-behavior-of-mps-in-house-of-representatives/){target="_blank"}), and again the primary tool for the job is the wonderful `pdftools` package. Rather than seeking to extract tables from the pdf (e.g. with `tabulizer` ), I convert the content of each page of the report to a long text string and subsequently extract the parts of interest by means of `stringr` and regex. However, as I'll explain below, this approach was only suited to do some part of the task.
+Extracting data from pdfs has been the topic of at least one of my previous posts (see [here](https://werk.statt.codes/post/bih-voting-behavior-of-mps-in-house-of-representatives/){target="_blank"}), and again the primary tool for the job is the wonderful `pdftools` package. Rather than seeking to extract tables from the pdf (e.g. with `tabulizer` ), I convert the content of each page of the report to a long text string and subsequently extract the parts of interest by means of `stringr` and regex. However, as I'll explain below, this approach was only suited to do some part of the task at hand.
 
 Let's start by retrieving the raw text.
 
@@ -183,7 +183,7 @@ df_all <- pdftools::pdf_text(pdf = my_path) %>%
 ```
 </details>
 
-The code above provides us with a tibble containing as many rows as the report has pages (186). The expression `str_replace_all(text_raw, "\\h+", " ")` replaces all horizontal white space with a single spaces, but keeps line breaks (\\n and \\r). The latter will be needed at a later stage when it comes to identifying the location of data of interest and extract it.^[I am grateful to the respondents to my pertaining question on [stackoverflow](https://stackoverflow.com/questions/62678640/stringr-remove-multiple-spaces-but-keep-linebreaks-n-r/62679016#62679016){target="_blank"}]
+The code above provides us with a tibble containing as many rows as the report has pages (186). The expression `str_replace_all(text_raw, "\\h+", " ")` replaces all horizontal white space with a single space, but keeps line breaks (\\n and \\r). The latter will be needed at a later stage when it comes to identifying the location of data of interest and extract them.^[I am grateful to the respondents to my pertaining question on [stackoverflow](https://stackoverflow.com/questions/62678640/stringr-remove-multiple-spaces-but-keep-linebreaks-n-r/62679016#62679016){target="_blank"}]
 
 Each row is one long string containing all the information from only one single page on an MP. However, note that the declarations of some MPs span over multiple pages, hence their data is contained in multiple strings. This is something we have to account for when crunching numbers during the actual analysis. Here one example for the data on one MP. Use the horizontal scrollbar to get an idea of the strings composition.
 
@@ -314,9 +314,11 @@ fn_get_dates <- function(x) {
   html_text()
 }
 
+df
+
 #apply funciton to all links
-df_mp_dates <- df %>% 
-  mutate(mp_dates=map(link, ~fn_get_dates(.))) 
+# df_mp_dates <- df %>% 
+#   mutate(mp_dates=map(link, ~fn_get_dates(.))) 
 
 
 ```
@@ -396,7 +398,7 @@ income_categories_short <- df_income_categories %>%
 
 ```
 
-Let's have a gender-sensitive look at the income data. With the `gender`package we are able to infer with some acceptable margin of error MPs' gender from their first names. 
+Let's have a gender-sensitive look at the income data. With the `gender`package we are able to infer with some acceptable margin of error MPs' gender from their first names. Names which were not (properly) recognized by the package I corrected manually in the code chunk below.
 
 <details open>
 <summary>Code: Get MPs' gender</summary>
@@ -604,6 +606,9 @@ df_income <- df_income %>%
 
 df_income <- df_income %>% 
   mutate(party=fct_infreq(party))
+
+
+
 ```
 </details>
 
@@ -694,16 +699,16 @@ pl_rel <- df_agg %>%
 pl_rel
 ```
 
-The ÖVP features the smallest share of MPs with no additional income (income category 0, only 6.2 %) followed by the FPÖ (though with a substantially higher share of 26.7 %). In contrast, Greens and Neos feature with 45.5 % and 40 % the highest share of MPs in in this category (leaving aside, Philippa Strache, the one independent MP with no additional income). The ÖVP features the highest absolute numbers in 3, 4 and 5. In contrast, there are no Green MPs with an income falling into category 4 or 5. Similarly, there is also not a single MP from the SPÖ with an income from category 5. What's noteworthy with Neos is that they feature a comparably large share of MPs from income category 0, but also the largest relative number of MPs from the highest income category (13.3 %; equal with that of the FPÖ). 
+The ÖVP features the smallest share of MPs with no additional income (income category 0, only 6.2 %) followed by the FPÖ (though with a substantially higher share of 26.7 %). In contrast, Greens and Neos feature with 45.5 % and 40 % the highest share of MPs in in this category (leaving aside, Philippa Strache, the one independent MP with no additional income). The ÖVP features the highest absolute numbers in income categories 3, 4 and 5. In contrast, there are no Green MPs with an income falling into category 4 or 5. Similarly, there is also not a single MP from the SPÖ with an income from category 5. What's noteworthy with Neos is that they feature a comparably large share of MPs from income category 0, but also the largest relative number of MPs from the highest income category (13.3 %; equal with that of the FPÖ). 
 
 # MPs' further jobs
 
-The subsequent part of the analysis will focus on MPs' additional professional positions, as provided by the transparency report. As outlined in the introduction, these comprise details on MPs additional 1) executive positions in stock companies, private limited companies, foundations or saving banks; this section further distinguishes between those executive positions which are remunerated and those which aren't. 2) other professional activities from which MPs generate income; and 3) honorary activities. 
+The subsequent part of the analysis will focus on MPs' additional professional positions, as provided by the transparency report. As outlined in the introduction, it provides details on MPs' additional 1) executive positions in stock companies, private limited companies, foundations or saving banks; this section further distinguishes between those executive positions which are remunerated and those which aren't. 2) other professional activities from which MPs generate income; and 3) (unpaid) honorary activities. 
 
 ## Extracting data
 Extracting MPs' additional professional positions from the pdfs has been somewhat challenging. Initially - I was actually about to post the blog - I thought I could retrieve the data again with the `pdf_text` function as done above. However, when double checking some of the obtained results with the original pdf, I had to realize that some of my obtained numbers were inflated. After some digging and more digging, it turned out that the error originated from professional positions with names running over more than one line, i.e. which have a line break. Since I initially had counted the number of lines of positions to get the number of positions, some positions were counted multiple times. This problem arose since I was not able to distinguish between line breaks within cells (position with a long name) and those line breaks which indicated a new cell/row in the pdf's table (different professional position). 
 
-The answer to this challenge is provided by the `pdf_data` function, also from the `pdftools` package. As the output below shows, the function provides you with x and y values for the actual, physical location of each textbox (for details see [here](https://ropensci.org/technotes/2018/12/14/pdftools-20/){target="_blank"}).
+The answer to this challenge is provided by the `pdf_data` function, also from the `pdftools` package. As the output below shows, the function provides you with x and y coordinates for the actual, physical location of each textbox (for details see [here](https://ropensci.org/technotes/2018/12/14/pdftools-20/){target="_blank"}).
 
 ```{r echo=FALSE}
 pdf_file <- pdftools::pdf_data(pdf = my_path) 
@@ -714,7 +719,7 @@ datatable(pdf_file[[8]],
           rownames=FALSE)
 ```
 
-Taking a closer look at the rows in the results, I noticed that the difference in y values for linebreaks within a cell (long position name) is different than that between cells (different position). While 'normal' line breaks result in a y-value change of 11, new cells result in a higher change of the y value. Hence, the difference in y values can be used as an indicator for a new cell and hence a different professional position. 
+Taking a closer look at the rows in the results, I noticed that the difference in y values for linebreaks within a cell (long position name) is different than that between cells (different position). While 'normal' line breaks result in a y value change of 11, new cells result in a higher change of the y value. Hence, the difference in y values can be used as an indicator for a new cell and hence a different professional position. 
 
 To make use of this difference, I first calculate the difference of y values per row (`line_diff`), and subsequently and indicator which turns 1 if the y difference exceeds 11 (`row_jump`). Finally, I accumulate the value of the indicator to get an indicator for each row (`row_indicator`). For an example see the output below.
 
@@ -971,7 +976,11 @@ df_position_long <- df_count2 %>%
 ```
 
 ## Paid positions and income category
-Let's have a look at MPs' number of paid positions and income category. Hover over the points in the plot below to get details on each individual MP. Note that the points are located randomly *within* each square to avoid overplotting.
+Let's have a look at MPs' number of paid positions and income category. 
+
+Paid are the positions stated in the category 'other positions' and 'executive position'. As for the latter, however, the list also includes unpaid executive positions which are marked with an asterisk (\*). Hence these positions have to be removed when calculating the total number of paid positions. For details see [below](#unpaid_executive)
+
+Hover over the points in the plot below to get details on each individual MP. Note that the points are located randomly *within* each square to avoid overplotting.
 
 <details closed>
 <summary>Code: Number of paid positions and income category</summary>
@@ -996,7 +1005,7 @@ pl_income_positions <- df_income_positions %>%
            fct_inseq()) %>% 
   mutate(party=fct_infreq(party)) %>% 
   ggplot()+
-  labs(x="number of positions",
+  labs(x="number of paid positions",
        y="[income category] average monthly income",
        title="Austrian Nationalrat: MPs' number of paid positions and income category",
        subtitle="Members of lower chamber only (Nationalrat). Data for 2019.\nMove mouse over dots to get info on MPs.",
@@ -1103,7 +1112,7 @@ df_bar_position <- df_position_long %>%
 pl_bar_position <- df_bar_position %>% 
   ggplot()+
   labs(title="Austrian Nationalrat: Percentage of MPs with at least one additional position per party",
-       subtitle=str_wrap("Percentages are shares of each party's total number of members. Lower chamber only (Nationalrat). Data for 2019.", 105),
+       subtitle=str_wrap("Percentages are shares of each party's total number of members. Absolute numbers in brackets. Lower chamber only (Nationalrat). Data for 2019.", 105),
        caption=my_caption)+
   geom_bar(aes(x=party,
                y=perc,
@@ -1142,8 +1151,8 @@ As far as *executive positions* are concerned, the relative numbers of Neos stan
 
 When it comes to *honorary positions*, there is a considerable gap between the three larger parties (ÖVP, SPÖ, FPÖ) and the two smaller ones (Greens, Neos). One possible explanation (which I have not looked into though) could be that larger parties have more party affiliated associations in which their MPs take up honorary positions. Maybe, and I am purely speculating here, the number of honorary positions is a function of a party's institutional width.
 
-## Executive positions
-Below I further disaggregate executive positions into those which entail a salary and those which don't. In the parliament’s report, executive positions without salary were marked with a star (\*). When retrieving the data above, I already accounted for this difference (`str_detect(., "\\*")`). The graph below now shows the percentage of MPs per party without executive positions, those with at least one executive position without salary (and no position with salary), and those with at least one remunerated executive position. 
+## Executive positions {#unpaid_executive}
+Below I further disaggregate executive positions into those which entail a salary and those which don't. In the parliament’s report, executive positions without salary were marked with an asterisk (\*). When retrieving the data above, I already accounted for this difference (`str_detect(., "\\*")`). The graph below now shows the percentage of MPs per party without executive positions, those with at least one executive position without salary (and no position with salary), and those with at least one remunerated executive position. 
 
 <details open>
 <summary>Code: different types of executive positions</summary>
@@ -1172,7 +1181,7 @@ pl_executive <- df_executive %>%
                                  "% MPs with non-remunerated executive positions", after = 1L) %>% fct_rev) %>%
   ggplot()+
   labs(title="Austrian Nationalrat: Percentage of MPs with different executive positions per party",
-       subtitle=str_wrap("Percentages are shares of each party's total number of members. Lower chamber only (Nationalrat). Data for 2019.", 105),
+       subtitle=str_wrap("Percentages are shares of each party's total number of members. Absolute numbers in brackets. Lower chamber only (Nationalrat). Data for 2019.", 105),
        caption=my_caption)+
   geom_bar(aes(x=party,
                y=perc,
@@ -1209,7 +1218,7 @@ pl_executive
 Note that there is only one MP from the Greens with a paid executive position. Also, there are only three Socialdemocrats in this category. Again, the ÖVP features most MPs with a paid executive position in absolute terms, and Neos in relative terms.
 
 ## Parties in comparison (Boxplot)
-The boxplot below, might be a bit of an overkill, but it gives us a more detailed overview of MPs' additional positions per party. Each dot indicates the number of positions which one specific MP holds in one category of professional positions. In addition, the median, mean, max and minimum values for each party/position combination are provided. Note the comparably high median value of honorary positions among SPÖ MPs.  
+The boxplot below might be a bit of an overkill, but it gives us a more detailed overview of MPs' additional positions per party. Each dot indicates the number of positions which one specific MP holds in one category of professional positions. In addition, the median, mean, max and minimum values for each party/position combination are provided. Note the comparably high median value of honorary positions among SPÖ MPs.  
 
 <details closed>
 <summary>Code: boxplots</summary>
@@ -1292,8 +1301,18 @@ pl_box <- df_position_long %>%
 pl_box
 ```
 
-
-
 # Wrap up
 So this has become a rather length blog entry. I hope there's been something useful in it for you as well. Again, the emphasis has been largely on various steps in R to extract and subsequently analyze the data of interest. If there's anything you feel like following up, feel free to let me know.
+
+```{r}
+df_nr<- df_count %>% 
+  left_join(., df_income %>% 
+              select(-ends_with("6"), -first_name),
+            by=c("name"="name")) %>% 
+  select(name, name_clean, party, gender, income_category_19, contains("_n"))
+
+readr::write_excel_csv2(df_nr, path=here::here("blog_data", "MP_activities", "NR.csv"))
+
+
+```
 
