@@ -652,7 +652,7 @@ df_agg <- df_income %>%
 pl_rel <- df_agg %>% 
   ggplot()+
   labs(title="Austrian Nationalrat: Relative number of MPs per income category and party",
-    subtitle=str_wrap("Percentages are shares of each party's total number of members. Lower chamber only (Nationalrat). Data for 2019.", 105),
+    subtitle=str_wrap("Percentages are shares of each party's total number of members. Absolute numbers in brackets. Lower chamber only (Nationalrat). Data for 2019.", 105),
     x="[income category] average monthly income",
     caption=my_caption)+
   geom_label(data=. %>% filter(n_obs_rel >0),
