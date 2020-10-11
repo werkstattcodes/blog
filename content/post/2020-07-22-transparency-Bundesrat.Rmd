@@ -1,0 +1,1207 @@
+---
+title: 'Austrian Parliament: MPs transparency and conflict of interest report - Bundesrat'
+author: rs
+date: '2020-07-22'
+slug: austrian-parliament-mps-transparency-and-conflict-of-interest-report-bundesrat
+categories: []
+draft: true
+tags:
+  - Austria
+  - OCR
+description: ''
+output: 
+  html_document: 
+    highlight: null
+---
+
+# Context
+
+This is a follow-up on my previous post on the transprancey report by Austria's Parliament. While I limited 
+
+
+# Steps in R
+
+## Setup
+<details closed> 
+<summary>Code: Load packages</summary> 
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+library(extrafont)
+loadfonts(device = "win", quiet = T)
+library(hrbrthemes)
+hrbrthemes::update_geom_font_defaults(family = "Roboto Condensed",
+                                      size=3)
+library(scales)
+library(knitr)
+library(paletteer)
+library(ggtext)
+library(glue)
+library(gt)
+library(DT)
+library(pdftools)
+library(lemon)
+library(gender)
+library(ggiraph)
+library(rvest)
+
+```
+</details>
+
+<details closed> 
+<summary>Code: Define rmarkdown options</summary> 
+```{r setup, echo = T}
+knit_hooks$set(wrap = function(before, options, envir) {
+  if (before) {
+    paste0("<", options$wrap, ">")
+  } else {
+    paste0("</", options$wrap, ">")
+  }
+})
+
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.align = "left",
+  # fig.height = 5,
+  # fig.width = 7,
+  out.width = "100%",
+  message = FALSE,
+  warning = FALSE,
+  dpi = 300,
+  dev.args = list(type="cairo")
+)
+
+options(width = 180, dplyr.width = 150)
+```
+</details>
+
+<details closed> 
+<summary>Code: Define plot theme, party colors, caption</summary> 
+```{r echo=TRUE}
+theme_post <- function() {
+  hrbrthemes::theme_ipsum_rc() +
+    theme(
+      plot.margin = margin(l = 0, unit = "cm"),
+      plot.title = element_markdown(
+        color = "grey20",
+        face = "bold",
+        margin = margin(l = 0, unit = "cm"),
+        size = 13
+      ),
+      plot.title.position = "plot",
+      plot.subtitle = element_text(
+        color = "grey50",
+        margin = margin(t = 0.2, b = 0.3, unit = "cm"),
+        size = 11
+      ),
+      plot.caption = element_text(
+        color = "grey50",
+        size = 8,
+        hjust = c(0)
+      ),
+      plot.caption.position = "panel",
+      axis.title.x = element_text(angle = 0,
+                                         color="grey50",
+                                         hjust=1),
+      axis.text.x = element_text(size = 9, 
+                                 color = "grey50"),
+      axis.title.y = element_blank(),
+      axis.text.y = element_text(size = 9,
+                                 color="grey50"),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      panel.spacing = unit(0.25, "cm"),
+      panel.spacing.y = unit(0.25, "cm"),
+      strip.text = element_text(
+        angle = 0,
+        size = 9,
+        vjust = 1,
+        face = "bold"
+      ),
+      legend.title = element_text(
+        color = "grey30",
+        face = "bold",
+        vjust = 1,
+        size = 7
+      ),
+      legend.text = element_text(
+        size = 7,
+        color = "grey30"
+      ),
+      legend.justification = "left",
+      legend.box = "horizontal", # arrangement of multiple legends
+      legend.direction = "vertical",
+      legend.margin = margin(l = 0, t = 0, unit = "cm"),
+      legend.spacing.y = unit(0.07, units = "cm"),
+      legend.text.align = 0,
+      legend.box.just = "top",
+      legend.key.height = unit(0.2, "line"),
+      legend.key.width = unit(0.5, "line"),
+      text = element_text(size = 5)
+    )
+}
+
+party_colors <- c(Fpö = "#005DA8", Neos = "#EA5290", Övp = "#5DC2CC", Spö = "#FC0204", Grüne = "#A3C630",
+                  Independent="grey80")  
+  
+
+chamber_color=c(NR="firebrick", BR="navy")
+
+my_caption=c("data: Austrian Parliament, Liste gemäß § 9 Bezügebegrenzungs-BVG, 2020. \nanalysis: Roland Schmidt | @zoowalk | https://werk.statt.codes")
+
+
+
+
+```
+</details>
+
+<details closed> 
+<summary>Code: Gender color, income categories, and labels</summary> 
+```{r include=FALSE}
+gender_colors <- c(female="firebrick", male="grey", missing="#BEBEBE") 
+
+df_income_categories <- tibble::tribble(
+  ~income, ~category_values, ~category_labels,
+                   0L,              "0",              "0",
+                   1L,        "1-1,000",             ">1",
+                   2L,    "1,001-3,500",            ">1K",
+                   3L,    "3,501-7,000",          ">3.5K",
+                   4L,   "7,001-10,000",            ">7K",
+                   5L,        ">10,000",           ">10K"
+  ) 
+
+income_categories <- df_income_categories %>% 
+  select(1, 2) %>%
+  deframe()
+
+income_categories_short <- df_income_categories %>% 
+  mutate(income_label=paste0(
+    "[",income,"]",
+    "\n",
+    category_labels, "€")) %>% 
+  select(1, 4) %>%
+  deframe()
+
+
+fn_lables_long <- function(x) {
+  str_remove_all(x, regex("\\]|\\[")) %>% 
+  str_replace(., regex("\\\n"), "\\\nIncome:") %>% paste0("Category: ", .)}
+
+map_chr(income_categories_short, fn_lables_long)
+
+```
+
+<details closed> 
+<summary>Code: Import data from analysis of National Council </summary>
+```{r include=FALSE}
+df_NR <- readr::read_csv2(here::here("blog_data", "MP_activities", "NR.csv")) %>% 
+  mutate(chamber="NR") %>% 
+  rename(income=income_category_19) %>% 
+  mutate(name_clean_2=paste(word(name_clean, start=-1),
+                            word(name_clean, start=1, end=-2)))
+```
+</details>
+
+## Data extraction
+
+### Extract data from pdf and get income 
+
+<details closed> 
+<summary>Code: Extract text from pdfs & get income category</summary> 
+```{r}
+my_path <- here::here("blog_data", "MP_activities", "BezBegrBVGPar9-BR.pdf")
+
+df_raw <- pdftools::pdf_data(pdf=my_path)
+
+df_raw_1 <- df_raw %>% 
+  map_dfr(., bind_rows, .id="page_id") %>% 
+  mutate(page_id=as.numeric(page_id)) %>% 
+  filter(y<560)
+  
+df_names <- df_raw_1 %>% 
+  filter(y==99) %>% 
+  group_by(page_id) %>% 
+  summarize(name=paste0(text, collapse=" ")) %>%
+  mutate(name_clean=name %>% str_remove(., regex(",.*$")) %>% str_remove_all(., regex("\\S*\\.")) %>% 
+           str_remove_all(., regex("\\(.*\\)")) %>% 
+           str_trim())
+
+df_raw_2 <- df_raw_1 %>% 
+  group_by(page_id) %>% 
+  mutate(line_diff = y - dplyr::lag(y, default = 0)) %>%
+    mutate(row_jump = case_when(
+      line_diff > 11 ~ 1,
+      TRUE ~ 0
+    )) %>%
+  mutate(row_indicator = cumsum(row_jump)) %>%
+  group_by(page_id, row_indicator) %>% 
+  summarise(text=paste0(text, collapse=" "))
+  
+df_income <- df_raw_2 %>% 
+  filter(str_detect(text, regex("2019\\:"))==T) %>% 
+  mutate(income=str_extract(text, "(?<=2019:.?)\\S")) %>% 
+  select(-row_indicator, -text) %>% 
+  mutate(income=case_when(income=="-" ~ 0,
+                                      TRUE ~ as.numeric(income)))
+
+```
+
+```{r}
+df_pages <- df_names %>% 
+  left_join(., df_income,
+            by="page_id") %>% 
+      mutate(name_clean=name %>% str_remove(., regex(",.*$")) %>% 
+           str_remove_all(., regex("\\S*\\.")) %>% 
+           str_remove_all(., regex("\\(.*\\)")) %>% 
+           str_trim()) %>% 
+    mutate(first_name=str_extract(name_clean, regex("^\\S*"))) 
+
+```
+
+### Party membership
+
+<details closed>
+<summary>Code: Get party membership</summary>
+```{r}
+#link from button 'alle anzeigen'
+link_br_current <- "https://www.parlament.gv.at/WWER/BR/AKT/?xdocumentUri=&letterGroup=&GP=AKT&BL=ALLE_BL&STEP=1100&feldRnr=2&FR=ALLE&FUNK=ALLE&M=M&ascDesc=ASC&NRBR=BR&FBEZ=FW_005&view=&jsMode=&requestId=E2E564D761&LISTE=&W=W&WP=ALLE&R_WF=WP&listeId=5&filterJq="
+
+link_br_all <- "https://www.parlament.gv.at/WWER/BR/MITGL/index.shtml?xdocumentUri=%2FWWER%2FBR%2FMITGL%2Findex.shtml&GP=ALLE&BL=ALLE_BL&STEP=1070&feldRnr=3&FR=ALLE&M=M&ascDesc=ASC&NRBR=BR&FBEZ=FW_007&LISTE=&jsMode=&requestId=AC156E8A28&W=W&letter=&WP=ALLE&R_WF=WP&listeId=7"
+
+df_table <- link_br_all %>%
+  read_html() %>% 
+  # html_nodes("#filterListeFW_005 > table") %>% #for current MPs
+  html_nodes("#filterListeFW_007 > table") %>% 
+  html_table(fill=TRUE) %>% .[[1]]
+
+df_link <- link_br_all %>%
+  read_html() %>% 
+  html_nodes("a") %>% 
+  html_attr("href") %>% 
+  enframe(., name=NULL, 
+          value="link") %>% 
+  filter(str_detect(link, regex("PAD"))) %>% 
+  # distinct() %>% #for current mps
+  mutate(link=paste0("https://www.parlament.gv.at/", link))
+  
+df_table <- bind_cols(df_table,
+                      df_link)
+
+df_BR_all <- df_table %>% 
+  janitor::clean_names() %>% 
+  mutate(name=str_remove_all(name, "Name") %>% str_trim() %>% str_squish(),
+         wahlpartei=str_remove_all(wahlpartei, "Wahlpartei") %>% str_trim() %>% str_squish(),
+         # gesetzgebungsperioden_des_nr=str_remove_all(gesetzgebungsperioden_des_nr, "Gesetzgebungsperioden des NR") %>% 
+         #   str_trim() %>% str_squish(),
+         bundesland=str_remove_all(bundesland, "Bundesland") %>% str_trim() %>% str_squish(),
+         fraktion=str_remove_all(bundesland, "Fraktion") %>% str_trim() %>% str_squish()) %>% 
+  select(-bereich) %>% 
+  mutate(name_clean=str_remove_all(name, regex("\\.-")) %>% 
+           str_remove_all(., regex("\\w*\\.")) %>% 
+           str_remove_all(., regex(",.*")) %>% 
+           str_remove_all(., regex("siehe.*")) %>% 
+           str_squish()) %>% 
+  # mutate(name_family=str_extract(name_clean, regex("(\\w|-|')*\\s"))) %>% 
+  mutate(name_first=stringr::word(name_clean, start=2)) %>%   # mutate(name_first=str_remove(name_clean, name_family)) %>% 
+   mutate(name_family=stringr::word(name_clean, start=1, end=1)) %>% 
+  mutate(name_first_family=paste(name_first, name_family) %>% str_trim() %>% str_squish())
+
+# df_BR <- df_BR %>% 
+#   left_join(., df_pages %>% 
+#               select(name_clean, income) %>% 
+#               distinct(),
+#             by=c("name_first_family"="name_clean")) %>% 
+#   select(contains("name"), party=wahlpartei, income, -bundesland, link)
+
+ df_BR <- df_pages %>% 
+  select(name, name_clean, income) %>% 
+  distinct() %>% 
+   #remove middle name; facilitates join below
+  mutate(name_wo_middle=paste(word(name_clean, start=1),
+                              word(name_clean, start=-1))) %>% 
+  left_join(., df_BR_all %>% 
+              select(-name, -name_clean),
+            by=c("name_wo_middle"="name_first_family")) %>% 
+    select(contains("name"), party=wahlpartei, income, -bundesland, link)
+
+df_BR <- df_BR %>% 
+  mutate(party=case_when(str_detect(name, "Stefan Schennach") ~ "SPÖ",
+                         TRUE ~ as.character(party)))
+ 
+ 
+df_BR %>% 
+  filter(is.na(party)) #0
+df_BR %>% 
+  filter(is.na(income)) #13
+
+```
+</details>
+
+## MPs entry date
+
+<details closed> 
+<summary>Code: Get MPs entry dates</summary>
+```{r}
+
+#define function to extract MP's entry/exit dates from biography
+fn_get_dates <- possibly(function(x) {
+  dates <- read_html(x) %>% 
+  html_nodes(xpath="/html/body/div[1]/div[5]/div[1]/div[1]/div[3]/div[2]/div[2]/ul[1]/li[1]/div/text()[2]") %>% 
+  html_text()
+  
+  #needed since one row character(0) what makes
+  #flatten_chr below not feasible
+  if (length(dates)==0) dates="missing"
+  dates
+},
+otherwise="missing")
+
+#apply function to all links
+df_BR <- df_BR %>% 
+  mutate(mp_dates_list=map(link, ~fn_get_dates(.))) %>% 
+  mutate(mp_dates_chr=flatten_chr(mp_dates_list) %>% 
+           str_remove(., regex("\\ – $"))) %>% 
+  mutate(mp_dates=lubridate::dmy(mp_dates_chr))
+
+df_BR %>% 
+  filter(is.na(party)) #0
+df_BR %>% 
+  filter(is.na(income)) #13
+df_BR %>% 
+  filter(is.na(mp_dates)) #2 Wanner since 2018; Eder-Gitschthaler since 2017; have to report;
+
+```
+</details>
+
+## BR members without subbmissions on 2019 income (15)
+check 2 missing cases
+
+<details closed> 
+<summary>Code: Extract text from pdfs </summary> 
+```{r}
+df_BR_income_na <- df_BR %>% 
+  filter(is.na(income)) %>% 
+  select(name_clean, income, mp_dates) %>% 
+  filter(mp_dates<as.Date("2019-12-01"))
+```
+</details> 
+
+##get gender ender 
+<details closed>
+<summary>Code: Get MPs' gender</summary>
+```{r}
+df_BR <- df_BR %>%
+#  mutate(name_first=stringr::word(name_first, start=1L)) %>%
+  mutate(name_gender=map(name_first, possibly(gender,  otherwise="missing"))) %>% 
+  mutate(gender=map_chr(name_gender, purrr::pluck, "gender", .default=NA)) %>% 
+  select(-name_gender) %>% 
+  mutate(gender=case_when(name_first=="Karlheinz" ~ "male",
+                          name_first=="Günther" ~ "male",
+                          name_first=="Günter" ~ "male",
+                          TRUE ~ as.character(gender))) 
+```
+</details>
+
+
+## get positions
+
+<details closed>
+<summary>Code: Extract MPs' positions</summary>
+```{r}
+fn_get_positions <- function(x) {
+  
+  # headings
+  heading_executive <- x %>%
+    filter(str_detect(text, regex("Leitende Stellung in", ignore_case = T))) %>%
+    pull(row_indicator)
+
+  heading_other <- x %>%
+    filter(str_detect(text, regex("SONSTIGE TÄTIGKEITEN", ignore_case = T))) %>%
+    pull(row_indicator)
+
+  heading_honorary <- x %>%
+    filter(str_detect(text, regex("ehrenamtlich", ignore_case = T))) %>%
+    pull(row_indicator)
+
+  # executive position
+  if (length(heading_executive)!=0 & length(heading_other!=0)) {
+    df_executive <- x %>%
+      filter(!str_detect(text, regex("Rechtsträger Leitende Stellung"))) %>%
+      filter(!str_detect(text, regex("Werden aus einer Tätigkeit keine Vermögensvorteile"))) %>%
+      filter(row_indicator > heading_executive) %>%
+      filter(row_indicator < heading_other) %>%
+      select(-row_indicator)
+
+    n_executive <- ifelse(df_executive %>%
+      filter(str_detect(text, regex("^keine$"))) %>%
+      nrow() == 0,
+    nrow(df_executive),
+    0
+    )
+  } else {
+    df_executive <- tibble(text = NA)
+    n_executive <- NA
+  }
+
+  # non-remunerated positions
+  n_executive_non_remunerated <- df_executive %>% 
+    filter(str_detect(text, regex("\\*"))) %>% 
+    nrow()
+  
+  # other
+
+  if (length(heading_other)!=0 & length(heading_honorary)!=0) {
+    df_other <- x %>%
+      filter(!str_detect(text, regex("Dienstgeber/Rechtsträger/"))) %>%
+      filter(row_indicator > heading_other) %>%
+      filter(row_indicator < heading_honorary) %>%
+      select(-row_indicator)
+
+    n_other <- ifelse(df_other %>%
+      filter(str_detect(text, regex("^keine$"))) %>%
+      nrow() == 0,
+    nrow(df_other),
+    0
+    )
+  } else {
+    df_other <- tibble(text = NA)
+    n_other <- NA
+  }
+
+  # honorary
+  if (length(heading_honorary!=0)) {
+    df_honorary <- x %>%
+      filter(!str_detect(text, regex("Rechtsträger"))) %>%
+      filter(!str_detect(text, regex("\\(i\\) Näheres bei\\: Informationen"))) %>%
+      filter(row_indicator > heading_honorary) %>%
+      select(-row_indicator)
+
+    n_honorary <- ifelse(df_honorary %>%
+      filter(str_detect(text, regex("^keine$"))) %>%
+      nrow() == 0,
+    nrow(df_honorary),
+    0
+    )
+  } else {
+    df_honorary <- tibble(text = NA)
+    n_honorary <- NA
+  }
+
+  # combine retreived info
+  df <- tibble(
+    executive_positions = list(df_executive),
+    executive_n = n_executive,
+    executive_non_remunerated_n=n_executive_non_remunerated,
+    other_positions = list(df_other),
+    other_n = n_other,
+    honorary_positions = list(df_honorary),
+    honorary_n = n_honorary
+  )
+  df
+}
+
+class(df_names$page_id)
+
+df_positions <- df_raw_2 %>%
+  group_by(page_id) %>% 
+  group_split() %>% 
+  map_dfr(., fn_get_positions, .id = "page_id") %>% 
+  left_join(., df_names %>% 
+              mutate(page_id=as.character(page_id)),
+            by="page_id") %>% 
+  relocate(name)
+
+#rowwise & c_across to calculate rowwise sums
+df_positions <- df_positions %>% 
+  group_by(name_clean) %>% 
+  summarize(across(ends_with("_n"), sum, na.rm=T)) %>% 
+  rowwise() %>% 
+  mutate(total_n=sum(c_across(ends_with("_n")&!contains("remunerated")), na.rm=T))
+
+df_BR <- df_BR %>% 
+  left_join(., df_positions,
+            by=c("name_clean"="name_clean")) %>% 
+  mutate(chamber="BR", .before=1)
+
+```
+</details>
+
+## merge NR and BR data
+<details closed>
+<summary>Code: Combine data of both chambers</summary>
+```{r}
+df_both <- bind_rows(df_BR, df_NR) %>% 
+  mutate(chamber=fct_infreq(chamber)) %>% 
+  mutate(party=stringr::str_to_sentence(party)) %>% 
+  mutate(paid_n=executive_n-executive_non_remunerated_n+other_n,
+         .after=total_n)
+
+unique(df_both$party)
+
+```
+</details>
+
+# Analysis
+
+## table
+
+```{r echo=FALSE}
+datatable(df_both %>% select(chamber, name, party, gender, income, ends_with("_n")), 
+          colnames=c("chamber"="chamber",
+                     "MP name"="name", 
+                     "income category"="income",
+                     "# exec. positions"="executive_n",
+                     "# unpaid exec. positions"="executive_non_remunerated_n",
+                     "# other positions"="other_n",
+                     "# honorary positions"="honorary_n"),
+          filter="top",
+          options=list(pageLength=10,
+                       columnDefs = list(list(className = 'dt-center', targets = 1:3,
+                                         searchable=TRUE))),
+          rownames = FALSE)
+
+```
+
+
+## income density two chambers
+```{r}
+class(df_both$income)
+
+df_both_income_density <- df_both %>% 
+  filter(!is.na(income)) %>% #remove those without rported income
+  mutate(income=fct_inseq(as.character(income))) %>% 
+  group_by(chamber, income, .drop=F) %>% 
+  summarise(n_obs=n()) %>% 
+  filter(!is.na(income)) %>% 
+  group_by(chamber) %>% 
+  mutate(n_rel=n_obs/sum(n_obs))
+
+# labs(title=glue("Austrian Bundesrat: Share of <span style  = color:{gender_colors['female']}>female</span> and <span style = color:{gender_colors['male']}>male</span> MPs per income category"),
+
+
+pl_both_income_density <- df_both_income_density %>% 
+  ggplot()+
+  labs(title="Distribution of MPs over income categories and chamber",
+       subtitle=str_wrap(glue::glue("Percentage of MPs in <span style = color:{chamber_color['NR']}>National Council</span> and <span style=color:{chamber_color['BR']}>Federal Council</span> per income category/average montly income from <br>additional income. % from total number of MPs per chamber; absolute numbers in brackets."), 105),
+       caption=my_caption)+
+  geom_bar(aes(x=income,
+               fill=chamber,
+               y=n_rel),
+           position=position_dodge2(preserve = "single"),
+           stat="identity")+
+  geom_text(aes(x=income,
+                y=n_rel+.05,
+                label=paste0(percent(n_rel,
+                                     accuracy = .1), 
+                             "\n",
+                             "(", n_obs, ")")),
+            position = position_dodge2(width=1),
+            lineheight=0.7)+
+  scale_fill_manual(values = chamber_color)+
+  scale_y_continuous(label=scales::label_percent(accuracy = 1))+
+  scale_x_discrete(labels=income_categories_short,
+                   name="[income category] average monthly income")+
+  theme_post()+
+  theme(plot.subtitle = element_markdown(),
+        legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank())+
+  facet_wrap(vars(income),
+             nrow=1,
+             scales="free_x",
+             labeller = labeller(income=income_categories_short %>% map_chr(., str_replace, "\n", " ") %>% map_chr(., ~str_c("Income:", .)) %>% 
+                                   map_chr(., ~str_remove(., regex("\\[.*\\]")))))
+```
+
+```{r echo=FALSE}
+pl_both_income_density
+```
+
+## Income Gender NR vs BR
+<details closed> 
+<summary>Code: Calculate gender data</summary> 
+```{r}
+df_gender <- df_both %>% 
+  mutate(gender=as_factor(gender)) %>% 
+  filter(!is.na(income)) %>% #remove those without declaration
+  group_by(chamber, income, gender, .drop=F) %>% 
+  summarise(n_obs_income_gender=n()) %>% 
+  mutate(total_income_gender=sum(n_obs_income_gender)) %>% 
+  mutate(n_rel_income_gender=n_obs_income_gender/total_income_gender)%>% 
+  group_by(chamber, gender) %>% 
+  mutate(total_gender_chamber=sum(n_obs_income_gender)) %>% 
+  ungroup() %>% 
+  mutate(n_rel_gender=n_obs_income_gender/total_gender_chamber) %>% 
+  mutate(income=as.character(income) %>%
+           fct_inseq)
+```
+</details>
+
+<details closed>
+<summary>Code: Gender shares per income category</summary>
+```{r}
+pl_gender_category <- df_gender %>% 
+  # filter(gender=="female") %>% 
+  # mutate(income=as.character(income) %>%            fct_inseq) %>% 
+  #mutate(gender=fct_rev(gender)) %>% 
+  mutate(income=as_factor(income)) %>% 
+  ggplot()+
+  labs(title=glue("Austrian Bundesrat: Share of <span style  = color:{gender_colors['female']}>female</span> and <span style = color:{gender_colors['male']}>male</span> MPs per income category"),
+       subtitle=str_wrap("Income: average monthly income from professional positions in addition to MPs' salary. Absolute number of female MPs in brackets. Only lower chamber. Data for 2019.", 105),
+       y="[income category] average monthly income",
+       caption=my_caption)+
+  geom_bar(aes(y=income,
+               x=n_obs_income_gender,
+              # group=
+               fill=gender),
+           stat="identity",
+           position="fill")+
+  geom_text(data=. %>% filter(gender=="female"),
+            aes(y=income,
+                x=n_rel_income_gender-0.01,
+                label=paste0(round(n_rel_income_gender,2) %>% 
+                  percent(scale=100),
+                  "\n(",
+                  n_obs_income_gender,
+                  "/", 
+                  total_income_gender,
+                  ")")),
+            color="white",
+            lineheight=0.6,
+            hjust=1,
+            stat="identity")+
+  geom_vline(xintercept = .5,
+             color="white",
+             linetype="dashed"
+             )+
+  scale_fill_manual(values=gender_colors)+
+  scale_x_continuous(label=scales::label_percent(),
+                     expand=expansion(mult=c(0, 0.05)))+
+  scale_y_discrete(labels=income_categories_short,
+                   expand=expansion(mult=c(0, 0)),
+                   position = "left")+
+  facet_wrap(vars(chamber))+
+  theme_post()+
+  theme(legend.position="none",
+        plot.title=element_markdown(),
+        axis.title.x=element_blank(),
+        axis.title.y.left = element_text(angle = 90,
+                                         color="grey50",
+                                         hjust=1),
+        panel.grid.major.y  = element_blank())
+
+```
+</details>
+
+```{r echo=FALSE}
+pl_gender_category
+
+```
+
+<details closed>
+<summary>Code: distribution of income within gender groups</summary>
+```{r}
+pl_gender_intra_dist <- df_gender %>% 
+  ggplot()+
+  labs(title="Austrian Bundesrat: Distribution of MPs over income groups per gender",
+       subtitle=str_wrap("Income: average monthly income from professional positions in addition to MPs' salary. Absolute number of MPs in brackets. Only lower chamber. Data for 2019.", 105),
+       x="[income category] average monthly income",
+       caption=my_caption)+
+  geom_bar(aes(x=income,
+               y=n_rel_gender,
+               fill=chamber),
+           position=position_dodge2(preserve="single"),
+           stat="identity")+
+  geom_text(aes(x=income,
+                y=n_rel_gender+0.12,
+                label=paste0(percent(n_rel_gender, accuracy = 0.1),
+                             "\n",
+                             "(", 
+                             n_obs_income_gender, 
+                             "/",
+                             total_gender_chamber,
+                             ")")),
+            position = position_dodge2(width=1),
+            lineheight=0.7,
+            stat="identity")+
+  scale_fill_manual(values=chamber_color, 
+                    na.value = "grey30")+
+  scale_x_discrete(labels=income_categories_short)+
+  scale_y_continuous(label=scales::label_percent(accuracy=1),
+                    minor_breaks = NULL,
+                    breaks=seq(0,.5,.25),
+                    expand=expansion(mult=c(0, 0.14)))+
+  # facet_wrap(vars(gender))+
+  facet_grid(vars(chamber), vars(gender))+
+  theme_post()+
+  theme(legend.position = "none",
+        axis.title.x = element_text(angle = 0,
+                                         color="grey50",
+                                         hjust=1))
+```
+</details>
+
+```{r echo=FALSE}
+pl_gender_intra_dist
+```
+
+
+##Plot Party and income categories
+<details closed>
+<summary>Code: Party and income categories</summary>
+```{r}
+df_party_income <- df_both %>% 
+  filter(!is.na(party)) %>% 
+  filter(!is.na(income)) %>%
+  ungroup() %>%
+  mutate(party=fct_infreq(party)) %>% 
+  group_by(chamber, income, party, .drop = F) %>% 
+  summarise(n_obs=n()) %>% 
+  group_by(chamber, party) %>% 
+  mutate(n_obs_total=sum(n_obs)) %>% 
+  mutate(n_obs_rel=n_obs/n_obs_total) %>%
+  mutate(income_fac=as_factor(income) %>% 
+           fct_inseq()) 
+
+pl_rel <- df_party_income %>% 
+  ggplot()+
+  labs(title="Austrian Bundesrat: Relative number of MPs per income category and party",
+    subtitle=str_wrap("Percentages are shares of each party's total number of members. Lower chamber only (Nationalrat). Data for 2019.", 105),
+    x="[income category] average monthly income",
+    caption=my_caption)+
+  geom_label(data=. %>% filter(n_obs_rel >0),
+            aes(x=income_fac,
+                y=n_obs_rel+.3,
+                family="Roboto Condensed",
+                group=chamber,
+                label=paste0(scales::percent(n_obs_rel,
+                                      accuracy=0.1),
+                            "\n",
+                            "(", n_obs, ")")
+                ),
+            fill="white",
+            label.size=0,
+            label.padding = unit(0.1, "lines"),
+            lineheight=0.7,
+            family="Roboto Condensed",
+            position=position_dodge2(width = 1))+
+    geom_bar(aes(x=income_fac,
+               y=n_obs_rel,
+               group=chamber,
+               fill=party),
+           position=position_dodge2(),
+           stat="identity"
+           )+
+  scale_fill_manual(values=party_colors)+
+  scale_x_discrete(labels=income_categories_short)+
+  scale_y_continuous(label=scales::label_percent(),
+                     position = "right",
+                     name = NULL,
+                     # limits = c(0, 1.15),
+                     expand=expansion(mult=c(0, 0.15)))+
+  lemon::facet_rep_grid(rows=vars(party), cols=vars(chamber),
+                        #strip.position="left",
+                        switch="y",
+                        labeller=labeller(chamber=c("NR"="Nationalrat/National Council",
+                                           "BR"="Bundesrat/Federal Council")),
+                        # labeller=labeller(income=map_chr(income_categories_short, ~str_remove_all(., regex("\\]|\\["))) %>% 
+                                                                                           # map_chr(., ~str_replace(., regex("\\\n"), "\\\nIncome:")) %>%
+                                                                                             # map_chr(., ~paste0("Category: ", .))),
+                        repeat.tick.labels = TRUE)+
+  theme_post()+
+  theme(legend.position="none",
+        # axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        strip.text.y.left = element_text(angle=0))
+
+
+```
+</details>
+
+# CONTINUE HERE - CHANGE X TO CATEGORIES; AND FACET Y TO PARTY
+
+```{r echo=FALSE, fig.height=10}
+pl_rel
+```
+
+## positions vs income category
+
+<details closed>
+<summary>Code: Number of paid positions vs income category</summary>
+```{r}
+
+income.key <- levels(factor(df_both$income))
+position.key <- seq(0, max(df_both$paid_n), 1) %>%  
+   as.character() 
+
+pl_income_positions <- df_both %>%  
+  filter(!is.na(income)) %>% 
+   mutate(income_fct=income %>% as.character() %>% fct_inseq())%>%  
+   mutate(paid_n_fct=paid_n %>% as_factor() %>% fct_expand(., position.key) %>%  
+            fct_inseq()) %>%  
+   mutate(party=fct_infreq(party)) %>%  
+   ggplot()+ 
+   labs(x="number of paid positions", 
+        y="[income category] average monthly income", 
+        title="Austrian Nationalrat: MPs' number of paid positions and income category", 
+        subtitle="Members of lower chamber only (Nationalrat). Data for 2019.\nMove mouse over dots to get info on MPs.", 
+        caption=my_caption)+ 
+   geom_jitter_interactive(aes(x=paid_n,
+                               y=income_fct,
+                               color=party,
+                               tooltip=paste0(name_clean, " ", party, "\n", "paid positions: ", paid_n, "\n", "income category: ", income)))+ 
+   scale_color_manual(values=party_colors)+ 
+   scale_x_discrete(labels=income.key)+
+   scale_y_discrete(labels=income_categories_short)+ 
+   facet_grid(income_fct ~ paid_n_fct, 
+              drop=FALSE, 
+              scales="free", 
+              switch="x")+ 
+   # facet_wrap(vars(chamber))+
+   theme_post()+ 
+   theme(panel.border = element_rect(color = "black", fill = NA, size = .5), 
+         panel.grid.major = element_blank(),
+         panel.spacing.y = unit(0, "cm"),
+         panel.spacing.x = unit(0, "cm"),
+         legend.position = "bottom", 
+         legend.title=element_blank(), 
+         legend.direction = "horizontal", 
+         axis.text.x = element_blank(),
+         axis.title.y=element_text(color="grey50", 
+                                   hjust=1, 
+                                   angle=90), 
+         strip.text.x = element_text(hjust=0.5, color="grey50", 
+                                     face="plain"), 
+         strip.text.y = element_blank())+ 
+   guides(color=guide_legend(nrow=1)) 
+
+
+pl_income_positions <- df_both %>%  
+  filter(!is.na(income)) %>% 
+   mutate(income_fct=income %>% as.character() %>% fct_inseq())%>%  
+   mutate(paid_n_fct=paid_n %>% as_factor() %>% fct_expand(., position.key) %>%  
+            fct_inseq()) %>%  
+   mutate(party=fct_infreq(party)) %>%  
+   ggplot()+ 
+   labs(x="number of paid positions", 
+        y="[income category] average monthly income", 
+        title="Austrian Nationalrat: MPs' number of paid positions and income category", 
+        subtitle="Members of lower chamber only (Nationalrat). Data for 2019.\nMove mouse over dots to get info on MPs.", 
+        caption=my_caption)+ 
+   geom_jitter_interactive(aes(x=paid_n,
+                               y=income_fct,
+                               color=party,
+                               tooltip=paste0(name_clean, " ", party, "\n", "paid positions: ", paid_n, "\n", "income category: ", income)))+ 
+  geom_vline(xintercept=as.numeric(position.key)+.5,
+             colour="grey50",
+             size=.2)+
+  geom_hline(yintercept=as.numeric(income.key)+.5,
+             colour="grey50",
+             size=.2)+
+   scale_color_manual(values=party_colors)+ 
+   # scale_x_discrete()+
+   scale_x_continuous(labels=position.key,
+                      breaks=as.numeric(position.key),
+                      limits=c(0, 9)
+                      #expand=expansion(add=c(1, 0))
+                      )+
+   scale_y_discrete(labels=income_categories_short)+
+  lemon::facet_rep_wrap(vars(chamber),
+                        repeat.tick.labels = T,
+                        nrow=2,
+                        labeller=labeller(chamber=c("NR"="Nationalrat/National Council",
+                                         "BR"="Bundesrat/Federal Council")))+
+  theme_post()+ 
+  theme(panel.border = element_rect(color = "grey50", fill = NA, size = .2),
+    panel.grid.major = element_blank(),
+    # panel.spacing.y = unit(0, "cm"),
+    legend.position = "bottom", 
+    legend.title=element_blank(),
+    legend.direction = "horizontal", 
+    # axis.text.x = element_blank(),
+    axis.title.y=element_text(color="grey50", 
+                              hjust=1, 
+                              angle=90), 
+    strip.text.y = element_blank())+ 
+   guides(color=guide_legend(nrow=1)) 
+
+ 
+```
+</details> 
+
+```{r echo=FALSE, fig.height=15}
+girafe(ggobj = pl_income_positions,
+       height_svg=10)
+```
+
+
+
+<!-- # ## Paid positions, no income? -->
+<!-- # <details closed> -->
+<!-- # <summary>Code: MPs with no income but paid positions</summary> -->
+<!-- # ```{r} -->
+<!-- # df_mp5 <- df_both %>% -->
+<!-- #   filter(income==0) %>% -->
+<!-- #   filter(paid_n>0) %>% -->
+<!-- #   select(contains("name"), party, executive_n, paid_n) %>% -->
+<!-- #   left_join(., df_positions %>% select(name, executive_positions, other_positions), by=c("name"="name")) %>% -->
+<!-- #   pivot_longer(cols=c(contains("positions"), -paid_n), -->
+<!-- #                names_to="positions", -->
+<!-- #                values_to="positions_name") %>% -->
+<!-- #   mutate(positions_chr=map(positions_name, deframe) %>% -->
+<!-- #            map_chr(., ~paste(., collapse=";\n "))) %>% -->
+<!-- #   select(-positions_name) %>% -->
+<!-- #   pivot_wider(id_cols=c(name, party), -->
+<!-- #               names_from=positions, -->
+<!-- #               values_from=positions_chr) -->
+
+<!-- tb_mp5 <- df_mp5 %>%  -->
+<!--   gt() %>%  -->
+<!--   tab_header( -->
+<!--     title=md("**MPs with zero income, but paid positions**")) %>%  -->
+<!--    tab_footnote(footnote = "Honorary positions exclude since unpaid.", -->
+<!--     locations = cells_title(group="title")) %>%  -->
+<!--   cols_label("name"=md("**MP**"), -->
+<!--              "party"=md("**party**"), -->
+<!--              "executive_positions"=md("**executive positons**"), -->
+<!--              "other_positions"=md("**other positions**")) -->
+
+<!-- ``` -->
+<!-- </details> -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- tb_mp5 -->
+<!-- ``` -->
+
+
+<!-- <details closed> -->
+<!-- <summary>Code: MP share w at least one add. position</summary> -->
+<!-- ```{r} -->
+<!-- df_position_long <- df_count2 %>%  -->
+<!--   select(name_clean, party, ends_with("_n")) %>%  -->
+<!--   pivot_longer(cols=ends_with("_n"),  -->
+<!--                names_to="position", -->
+<!--                values_to="number") %>%  -->
+<!--   mutate(party=fct_infreq(party)) -->
+
+<!-- df_bar_position <- df_position_long %>%  -->
+<!--   filter(!position %in% c("executive_non_remunerated_n", -->
+<!--                         "total_n")) %>%  -->
+<!--   group_by(party, position) %>%  -->
+<!--   summarize(n_zero=length(number[number==0]), -->
+<!--             n_non_zero=length(number[number!=0])) %>%  -->
+<!--   ungroup() %>%  -->
+<!--   mutate(perc=n_non_zero/(n_non_zero+n_zero)) %>%  -->
+<!--   mutate(position=fct_relevel(position, "honorary_n", after = 2)) -->
+
+<!-- pl_bar_position <- df_bar_position %>%  -->
+<!--   ggplot()+ -->
+<!--   labs(title="Austrian Nationalrat: Percentage of MPs with at least one additional position per party", -->
+<!--        subtitle=str_wrap("Percentages are shares of each party's total number of members. Lower chamber only (Nationalrat). Data for 2019.", 105), -->
+<!--        caption=my_caption)+ -->
+<!--   geom_bar(aes(x=party, -->
+<!--                y=perc, -->
+<!--                fill=party), -->
+<!--            stat="identity")+ -->
+<!--   geom_text(aes(x=party, -->
+<!--                y=perc, -->
+<!--                group=party, -->
+<!--                label=paste0(perc %>% scales::percent(), -->
+<!--                            "\n", -->
+<!--                            "(", n_non_zero,")")), -->
+<!--             nudge_y = 0.05, -->
+<!--             lineheight=0.7, -->
+<!--            stat="identity")+ -->
+<!--   scale_fill_manual(values=party_colors)+ -->
+<!--   scale_color_manual(values=party_colors)+ -->
+<!--   scale_y_continuous(label=scales::label_percent(accuracy = 1), -->
+<!--                      expand=expansion(mult=c(0, 0.15)), -->
+<!--                      breaks=seq(0,1,.25))+ -->
+<!--   scale_x_discrete(label=abbreviate)+ -->
+<!--   facet_wrap(vars(position), -->
+<!--              labeller = labeller(position=c("executive_n"="executive functions","other_n"="other activities", -->
+<!--                                             "honorary_n"="honorary positions")))+ -->
+<!--   theme_post()+ -->
+<!--   theme(legend.position="none", -->
+<!--         axis.title.x = element_blank()) -->
+
+<!-- ``` -->
+<!-- </details> -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- pl_bar_position -->
+<!-- ``` -->
+
+<!-- ## Types of Executive positions -->
+<!-- <details closed> -->
+<!-- <summary>Code: different types of executive positions</summary> -->
+<!-- ```{r} -->
+<!-- df_executive <- df_count2 %>%  -->
+<!--     select(party, contains("executive")) %>%  -->
+<!--     mutate(executive_remunerated_n=executive_n-executive_non_remunerated_n) %>%  -->
+<!--   group_by(party) %>%  -->
+<!--   summarize(executive_no=length(executive_n[executive_n==0]), -->
+<!--     remunerated_yes=length(executive_remunerated_n[executive_remunerated_n>0]), -->
+<!--     remunerated_no=length(executive_remunerated_n[executive_remunerated_n==0 & -->
+<!--                             executive_n>0])) %>%  -->
+<!--   ungroup() %>%  -->
+<!--   rowwise() %>%  -->
+<!--   mutate(total=sum(c_across(where(is.numeric)), na.rm=T))  -->
+
+<!-- pl_executive <- df_executive %>%  -->
+<!--   pivot_longer(cols=-c(party, total), -->
+<!--                values_to="number", -->
+<!--                names_to="remunerated") %>%  -->
+<!--   mutate(party=fct_reorder(party, total) %>% fct_rev) %>%   mutate(perc=number/total) %>%  -->
+<!--   mutate(remunerated=case_when(str_detect(remunerated, regex("executive_no"))==TRUE ~"% MPs without executive positions",                               str_detect(remunerated, regex("remunerated_no"))==TRUE ~ "% MPs with non-remunerated executive positions", -->
+<!--                                str_detect(remunerated, regex( "remunerated_yes"))==TRUE ~ "% MPs with remunerated executive positions", -->
+<!--                                TRUE ~ as.character(remunerated))) %>%  -->
+<!--   mutate(remunerated=fct_relevel(remunerated, -->
+<!--                                  "% MPs with non-remunerated executive positions", after = 1L) %>% fct_rev) %>% -->
+<!--   ggplot()+ -->
+<!--   labs(title="Austrian Nationalrat: Percentage of MPs with different executive positions per party", -->
+<!--        subtitle=str_wrap("Percentages are shares of each party's total number of members. Lower chamber only (Nationalrat). Data for 2019.", 105), -->
+<!--        caption=my_caption)+ -->
+<!--   geom_bar(aes(x=party, -->
+<!--                y=perc, -->
+<!--                fill=party), -->
+<!--            position=position_dodge(), -->
+<!--            stat="identity")+ -->
+<!--   geom_text(aes(x=party, -->
+<!--                 y=perc+.05, -->
+<!--                 label=paste0(scales::percent(perc, -->
+<!--                                              accuracy = 0.1), -->
+<!--                              "\n", -->
+<!--                             "(", number,")"), -->
+<!--                 group=remunerated), -->
+<!--             lineheight=0.7, -->
+<!--             position=position_dodge2(width = 1), -->
+<!--             stat="identity")+ -->
+<!--   scale_y_continuous(labels=scales::label_percent(), -->
+<!--                      expand=expansion(mult=c(0, .1)))+ -->
+<!--   #scale_x_discrete(labels=abbreviate)+ -->
+<!--   scale_fill_manual(values=party_colors)+ -->
+<!--   theme_post()+ -->
+<!--   theme(legend.position="none", -->
+<!--         axis.title.x = element_blank())+ -->
+<!--   facet_wrap(vars(remunerated), -->
+<!--              labeller=label_wrap_gen(width=30)) -->
+
+<!-- ``` -->
+<!-- </details> -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- pl_executive -->
+<!-- ``` -->
+
+# Number of positions per party (boxplot)
+<details closed>
+<summary>Code: boxplots</summary>
+```{r echo=TRUE, fig.height=7}
+
+df_position_long <- df_both %>% 
+  select(chamber, party, name, gender, executive_n, other_n, honorary_n) %>% 
+  pivot_longer(cols=ends_with("_n"),
+               names_to="position",
+               values_to="number") %>% 
+  mutate(party_fac=fct_infreq(party)) %>% #what happens with NA
+  mutate(position_fac=fct_inorder(position))
+
+df_position_labels <- df_position_long %>%
+  mutate(party=fct_infreq(party)) %>%
+  group_by(chamber, party, position, .drop=F) %>%
+  summarise(label_median=median(number),
+            label_mean=mean(number),
+            label_max=max(number),
+            label_min=min(number))
+
+pl_box <- df_position_long %>%
+  left_join(., df_position_labels,
+            by=c("party", "chamber","position")) %>% 
+  filter(!is.na(party)) %>% 
+  ggplot()+
+  labs(caption=my_caption,
+       title="Austrian Nationalrat: Number of MPs' other professional positions per party",
+       subtitle="Members of lower chamber only (Nationalrat); Data for 2019.",
+       x="MP's number of positions")+
+  # geom_boxplot(aes(y=chamber,
+  #                 x=number,
+  #                 group=chamber,
+  #                 color=party),
+  #              orientation="y",
+  #              outlier.shape=NA,
+  #              width=0.1
+  #              )+
+  geom_jitter(aes(y=chamber,
+                  x=number,
+                  group=chamber,
+                  colour=party),
+              alpha=.2,
+              orientation="y",
+              height=0.1
+              )+
+  geom_boxplot_interactive(aes(y=chamber,
+                  x=number,
+                  group=chamber,
+                  color=party,
+                  tooltip=paste("median:", round(label_median, 2),
+                            "\n",
+                            "mean:", round(label_mean, 2),
+                            "\n",
+                            "min:", round(label_min, 2),
+                            "\n",
+                            "max:", round(label_max, 2))),
+               orientation="y",
+               family="Roboto Condensed",
+               outlier.shape=NA,
+               width=0.2)+
+
+  # geom_label(data=df_position_labels,
+  #           aes(y=1.2,
+  #               x=0,
+  #               group=party,
+  #               label=paste("median:", round(label_median, 2),
+  #                           # "\n",
+  #                           "mean:", round(label_mean, 2),
+  #                           # "\n",
+  #                           "min:", round(label_min, 2),
+  #                           # "\n",
+  #                           "max:", round(label_max, 2)
+  #                           )),
+  #           fill="white",
+  #           label.padding = unit(0.2,"line"),
+  #           label.r=unit(0.2,"line"),
+  #           label.size = 0,
+  #           family="Roboto Condensed",
+  #           size=3,
+  #           vjust=0,
+  #           hjust=0,
+  #           orientation="y",
+  #           lineheight=0.5)+
+  scale_color_manual(values=party_colors)+
+  scale_x_continuous(expand=expansion(mult=c(0, .2)))+
+  scale_y_discrete(expand=expansion(mult=c(0.3, .3)))+
+  theme_post()+
+  theme(legend.position = "none",
+        strip.placement = "outside",
+        strip.text.y.left = element_text(angle = 0),
+        panel.grid.major.x = element_line(color="gray30"),
+        panel.grid.major.y = element_blank())+
+  lemon::facet_rep_grid(party_fac~position_fac,
+                        repeat.tick.labels = TRUE,
+                    #    scales = "free_y",
+                        switch="y",
+                        labeller = labeller(position_fac=c("executive_n"="executive functions","other_n"="other activities",
+"honorary_n"="honorary positions"),
+party_fac=function(x) str_trunc(x, width=5)))
+
+```
+</details>
+```{r echo=FALSE}
+girafe(ggobj = pl_box,
+       height_svg=5)
+```
+
+
+

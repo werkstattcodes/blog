@@ -1,0 +1,1988 @@
+---
+title: UN human rights treaty bodies - Analysis of individual complaints
+author: rs
+date: '2020-08-16'
+tags:
+  - human rights
+slug: un-treaty-bodies
+description: ''
+draft: true
+output: 
+  html_document: 
+    highlight: null
+---
+
+# Setup
+<details closed> 
+<summary>Code: Load packages</summary> 
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+library(extrafont)
+loadfonts(device = "win", quiet = T)
+library(hrbrthemes)
+hrbrthemes::update_geom_font_defaults(
+  family = "Roboto Condensed",
+  size = 3.5,
+  color = "grey50"
+)
+library(scales)
+library(knitr)
+library(paletteer)
+library(ggtext)
+library(glue)
+library(DT)
+library(pdftools)
+library(lemon)
+library(ggiraph)
+library(rvest)
+library(janitor)
+library(patchwork)
+library(svglite)
+library(countrycode)
+library(fuzzyjoin)
+library(tictoc)
+library(furrr)
+plan(multisession, workers = 3)
+
+```
+</details>
+
+<details closed> 
+<summary>Code: Define rmarkdown options</summary> 
+```{r setup, echo = T}
+knit_hooks$set(wrap = function(before, options, envir) {
+  if (before) {
+    paste0("<", options$wrap, ">")
+  } else {
+    paste0("</", options$wrap, ">")
+  }
+})
+
+knitr::opts_chunk$set(
+	fig.align = "left",
+	message = FALSE,
+	warning = FALSE,
+	dev = "svglite",
+#	dev.args = list(type = "CairoPNG"),
+	dpi = 300,
+	out.width = "100%"
+)
+options(width = 180, dplyr.width = 150)
+```
+</details>
+
+<details closed> 
+<summary>Code: Define plot theme, party colors, caption</summary> 
+```{r echo=TRUE}
+theme_post <- function() {
+  hrbrthemes::theme_ipsum_rc() +
+    theme(
+      plot.margin = margin(l = 0, 
+                           t = 0.25,
+                           unit = "cm"),
+      plot.title = element_markdown(
+        color = "grey20",
+        face = "bold",
+        margin = margin(l = 0, unit = "cm"),
+        size = 13
+      ),
+      plot.title.position = "plot",
+      plot.subtitle = element_text(
+        color = "grey50",
+        margin = margin(t = 0.2, b = 0.3, unit = "cm"),
+        size = 11
+      ),
+      plot.caption = element_text(
+        color = "grey50",
+        size = 8,
+        hjust = c(0)
+      ),
+      plot.caption.position = "panel",
+      axis.title.x = element_text(
+        angle = 0,
+        color = "grey50",
+        hjust = 1
+      ),
+      axis.text.x = element_text(
+        size = 9,
+        color = "grey50"
+      ),
+      axis.title.y = element_blank(),
+      axis.text.y = element_text(
+        size = 9,
+        color = "grey50"
+      ),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      panel.spacing = unit(0.25, "cm"),
+      panel.spacing.y = unit(0.25, "cm"),
+      strip.text = element_text(
+        angle = 0,
+        size = 9,
+        vjust = 1,
+        face = "bold"
+      ),
+      legend.title = element_text(
+        color = "grey30",
+        face = "bold",
+        vjust = 1,
+        size = 7
+      ),
+      legend.text = element_text(
+        size = 7,
+        color = "grey30"
+      ),
+      legend.justification = "left",
+      legend.box = "horizontal", # arrangement of multiple legends
+      legend.direction = "vertical",
+      legend.margin = margin(l = 0, t = 0, unit = "cm"),
+      legend.spacing.y = unit(0.07, units = "cm"),
+      legend.text.align = 0,
+      legend.box.just = "top",
+      legend.key.height = unit(0.2, "line"),
+      legend.key.width = unit(0.5, "line"),
+      text = element_text(size = 5)
+    )
+}
+
+text_add <- "Communications considered jointly were counted as one."
+
+data_date <- format(Sys.Date(), "%d %b %Y")
+my_caption <- glue::glue("data: juris.ohchr.org/; as of {data_date}.\nanalysis: Roland Schmidt | @zoowalk | https://werk.statt.codes")
+```
+
+# Context
+
+Deviating from the structure of previous posts, I will first present the results of the analysis and subsequently dive into the underlying steps in R leading to them. Readers (if there are any ;-) whose primary interest is more in the substance of the matter rather than the blog's technical focus 
+
+own professional link
+Atlas of Torture
+Commentary on Convention against Torture
+
+what are treaty bodies, what are individual complaints
+
+
+# Results
+
+# Steps in R
+
+## Data extraction
+
+SIM website of the UN Office for the High Commissioner
+offer data to be downloaded (at your own risk)
+reference to package from hrbrmstr; 
+link to tweet
+
+
+### Data quality
+
+During the analysis, there were a number of instances in which it became apparent that the data represented at the UN OHCHR's database were wrong, in the sense that it did not reflect the actual data contained in the text of the individual complaints. This was particularly the case with complaints' dates of submission or consideration. Whenever I detected such errors I corrected them, and mention the pertaining modification in the relevant code block. In addition, at the end of this blog entry, I included a link to a file which enumerates all changes introduced to the data. While this list may not be exhaustive, it is nevertheless hopefully helpful for anyone working with the UN OHCHR's data.^[I forwarded the list of errors to the OHCHR's treaty body secretariat, so hopefully these errors will eventually be rectified in the OHCHR's website.]
+
+### Getting the data
+Obtaining the data as provided in the database on the OHCHR's website is relatively straightforward, with the exception that the overview table on the site is dynamically generated by some javascript. As a consequence, its content can't be retrieved by the `rvest`, my package of choice when it comes to web scrapping. While there are approaches which would allow you to overcome this hurdle (e.g. RSelenium etc), I instead extracted the data from the details pages which are linked to each row of the summary table. This not only allows us to extract the data from a plain html site, but also to get more details than from the summary table.    
+
+```{r eval=FALSE, include=FALSE}
+# define values to iterate over
+
+id <- seq(0, 3500, 1)
+df_links <- glue("https://juris.ohchr.org/Search/Details/{id}") %>%
+  enframe(name = NULL) %>%
+  mutate(value = as.character(value))
+
+pb <- progress_estimated(nrow(df_links))
+
+# define functoin
+fn_scrap <- function(page_link) {
+  pb$tick()$print()
+  print(page_link)
+
+  page_html <- page_link %>%
+    read_html()
+
+  df_headings <- page_html %>%
+    html_nodes("body > div > div > div.col-sm-10 > section > section > dl > dt") %>%
+    html_text(., trim = T) %>%
+    enframe(name = NULL, value = "heading")
+
+  df_content <- page_html %>%
+    html_nodes("body > div > div > div.col-sm-10 > section > section > dl > dd") %>%
+    html_text(., trim = T) %>%
+    enframe(name = NULL, value = "content")
+
+  bind_cols(headings = df_headings, values = df_content) %>%
+    mutate(page_link = page_link)
+}
+
+# apply function
+
+df_scrapping_results <- df_links$value %>%
+  map_dfr(., possibly(fn_scrap, otherwise = NULL))
+```
+
+```{r include=FALSE}
+latest_file <- list.files(path = here::here("blog_data", "un_treaty_bodies"), full.names = T) %>%
+  map_dfr(., file.info) %>%
+  tibble::rownames_to_column(var = "file") %>%
+  filter(str_detect(file, "scrapping_results")) %>%
+  arrange(desc(mtime)) %>%
+  mutate(file_name = str_extract(file, regex("scrapping.*csv"))) %>%
+  pull(file_name)
+
+df_scrapping_results <- readr::read_csv2(here("blog_data", "un_treaty_bodies", latest_file))
+
+df_scrapping_results <- df_scrapping_results %>%
+  rename(page_link = id) %>%
+  mutate(page_id = str_extract(page_link, regex("(?<=/)[0-9]*$")))
+```
+
+### Data cleaning 
+
+
+<details closed> 
+<summary>Code: Data cleaning</summary> 
+```{r}
+# transform long dataset to wide dataset
+df_wide <- df_scrapping_results %>%
+  pivot_wider(
+    id_cols = page_link,
+    names_from = heading,
+    values_from = content
+  ) %>%
+  clean_names() %>%
+  rename(
+    communication_no = communication_number_s,
+    date_submission = submission_date,
+    date_admissibility = date_of_admissibility,
+    date_views = date_of_adoption_of_the_views,
+  ) %>%
+  mutate_at(vars(contains("date")), lubridate::dmy) %>%
+  mutate(communication_no = str_trim(communication_no, side = c("both")) %>%
+    str_remove(., regex(",$")) %>%
+    str_split(., ",")) %>%
+  mutate(communication_no_bundled = communication_no, .before = communication_no) %>%
+  relocate(date_submission, .before=date_admissibility)
+  
+
+# make one row per communication number
+df_res <- df_wide %>%
+  unnest_longer(col = communication_no)
+
+# removes those where all fields are NA
+df_res <- df_res %>%
+  filter(!across(.cols = -page_link, .fns = ~ is.na(.) == T))
+```
+</details>
+
+
+### ONLY cat
+In this blog post, I'll focus only on the communications considered by the Committee against Torture. If time permits, I'll take up the work of other treaty bodies with a later post.
+
+<details closed> 
+<summary>Code: only CAT</summary> 
+```{r}
+df_res <- df_res %>%
+  filter(committee=="CAT")
+```
+</details>
+
+```{r eval=FALSE, include=FALSE}
+bundled <- df_res %>% 
+  filter(communication_no!=communication_no_bundled)
+
+```
+
+
+
+### dupliacates
+merged the provided information into one record
+deleted one;
+
+## Data mugging
+
+### Decisions per country
+Another interesting angle to look at the available data is to see at which countries the individual complaints were actually addressed. To do so we have to bear in mind that some communications are addressed to more than one country. See the table below.   
+
+<details closed> 
+<summary>Code: Example of communications with multiple countries</summary>
+```{r}
+df_multiple_countries <- df_res %>%
+  select(contains("countries")) %>%
+  filter(str_detect(countries, regex(".*[a-z][A-Z].*")))
+```
+</details>
+
+```{r echo=FALSE}
+df_multiple_countries
+```
+
+Note that in raw data multiple countries are not separated by any space, dot or other seperator, but their names are directly concocted. Hence, to calculate how many complaints each individual country has received, we need to disentangle the individual country names and create one row per one country and complaint. The chunk below does this. The graph shows the result.
+
+<details closed> 
+<summary>Code: split multiple state parties into individual countries</summary> 
+```{r}
+df_results_countries <- df_res %>%
+  mutate(country_split = str_split(
+    countries,
+    "(?<=[a-z)])(?=[A-Z])"
+  )) %>%
+  unnest(country_split)
+
+# renaming
+df_results_countries <- df_results_countries %>%
+  mutate(country_split = case_when(
+    str_detect(country_split, "United Kingdom") ~ "UK",
+    is.na(country_split) ~ "missing",
+    TRUE ~ as.character(country_split)
+  ))
+
+# no missing countries
+df_results_countries %>%
+  select(country_split, countries, communication_no) %>%
+  filter(is.na(country_split))
+```
+</details>
+
+<details closed> 
+<summary>Code: plot # communications per country</summary> 
+```{r}
+pl_results_countries <- df_results_countries %>%
+  # mutate(country_l=fct_lump_n(country_split, n=10)) %>%
+  mutate(country_l = country_split) %>%
+  group_by(committee, country_l) %>%
+  summarise(n_communications = n()) %>%
+  mutate(max_n_obs = max(n_communications, na.rm = T)) %>%
+  mutate(rel_n_obs = n_communications / sum(n_communications, na.rm = T) * 100) %>%
+  mutate(country_l = fct_reorder(country_l, n_communications) %>%
+    fct_relevel(., "Other", after = 0)) %>%
+  arrange(desc(n_communications), .by_group = T) %>%
+  slice_head(n = 10) %>%
+  ggplot() +
+  labs(
+    title = "CAT: Number of complaints per country",
+    subtitle = "Top 10 countries only. Communications considered jointly were counted as one.",
+    caption = my_caption
+  ) +
+  geom_bar(aes(
+    y = tidytext::reorder_within(
+      x = country_l,
+      by = n_communications,
+      within = committee
+    ),
+    x = n_communications,
+    fill=committee,
+  ),
+  orientation = "y",
+  stat = "identity"
+  ) +
+  geom_text(aes(
+    y = tidytext::reorder_within(
+      x = country_l,
+      by = n_communications,
+      within = committee
+    ),
+    x = max_n_obs * 1.50,
+    label = paste0(
+      n_communications,
+      " (",
+      round(rel_n_obs, 2),
+      "%)"
+    )
+    ),
+    orientation = "y",
+    hjust = 1,
+    check_overlap = T
+    ) +
+  tidytext::scale_y_reordered( # guide=guide_axis(n.dodge = 2),
+    limits = function(x) {
+      y <- paste0("dummy", seq_len(10))
+      c(y[seq_len(10 - length(x))], x)
+    },
+    breaks = function(x) {
+      x[!startsWith(x, "dummy")]
+    }
+  ) +
+  geom_vline(xintercept = seq(0, 150, 50),
+             color="white")+
+  scale_x_continuous(
+    expand = expansion(mult = c(0, .1)),
+    labels = scales::label_comma(),
+    breaks=seq(0, 150, 50)
+  ) +
+  scale_fill_paletteer_d("ggsci::default_jama") +
+  theme_post() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    plot.title = element_markdown(),
+    legend.position = "none"
+  ) +
+  facet_wrap(vars(committee),
+    ncol = 2,
+    scales = "free"
+  )
+```
+</details>
+
+```{r echo=FALSE, fig.height=4}
+pl_results_countries
+```
+
+What the result shows is that around a fifth of all individual complaints submitted to the Committee against Torture are addressed to Switzerland, closely followed by Sweden with around 18 %. Overall, the top-4 states - Switzerland, Sweden, Canada, and Australia - account for not fewer than 60 % of all submissions. This is quite remarkable. Without wanting to belittle their own human rights violations, none of these countries would be associated by a general audience with rampant torture. Similarly, countries which would come to ones mind when thinking about torture do not even show up among the top 10 countries.
+
+```{r barchart race, eval=FALSE, include=FALSE}
+
+#### Barchart race
+
+df_race <- df_results_countries %>% 
+  mutate(year_submission=lubridate::year(date_submission)) %>% 
+  distinct(committee, year_submission, country_split, communication_no) %>% 
+  mutate(across(.cols=everything(), .fns=as.factor)) %>% 
+  group_by(committee, year_submission, country_split, .drop=F) %>% 
+  summarise(n_year=n()) %>% 
+  ungroup() %>% 
+  mutate(year_submission=as.numeric(as.character(year_submission))) %>% 
+  group_by(committee, country_split) %>% 
+  arrange(year_submission, .by_group=T) %>% 
+  #mutate(n_accumulated=n_year+lag(n_accumulated, default=0))
+  mutate(n_accumulated=cumsum(n_year)) %>% 
+  filter(!is.na(year_submission)) %>% 
+  group_by(year_submission) %>% 
+  mutate(rank=row_number(-n_accumulated))
+
+
+library(gganimate)
+
+df_race %>% 
+  filter(rank<=10) %>% 
+  ggplot()+
+  labs(title="Accummulated number of communications per country and year (top 10)",
+       x="Rank",
+       y="Number of communications (accumulated)",
+       caption=my_caption)+
+  geom_tile(aes(
+    label=country_split,
+    group=country_split,
+    x=rank,
+    y=n_accumulated/2,
+    height=n_accumulated,
+    width=0.9,
+    fill="blue"),
+    alpha=0.8,
+    color=NA)+
+  geom_text(aes(
+    group=country_split,
+    x=rank,
+    y=n_accumulated/2,
+    label=country_split
+  ),
+  fontface="bold",
+  )+
+  geom_text(aes(
+    x=10,
+    y=100,
+    label=glue::glue("Year: {year_submission}")),
+    size=6,
+    color="grey50")+
+  scale_x_continuous(trans = "reverse",
+                     breaks=seq(1,10,1),
+                     labels=seq(1,10,1))+
+  coord_flip()+
+  theme_post()+
+  theme(panel.grid.major.y =  element_blank(),
+        axis.text.y=element_text(face="bold"),
+        legend.position = "none")+
+  transition_states(year_submission,
+                    # transition_length = 4,
+                    # state_length = 1,
+                    wrap = FALSE) +
+  ease_aes('linear') 
+
+
+```
+
+```{r print barchart race, eval=FALSE, include=FALSE}
+#animate
+animate(pl_race)
+```
+
+## per Article
+
+The 'puzzle' becomes somewhat resolved once we start digging into the CAT conventions' articles and their prevalence in individual complaints submitted to the Committee. As a first step, let's check whether the UN OHCHR's database actually provides data on the invoked articles for all communications.
+
+<details closed> 
+<summary>Code: frequency of communications' articles</summary> 
+```{r}
+df_articles_availability <- df_res %>%
+  select(committee, communication_no, articles, type_of_decision) %>%
+  mutate(article_yes_no = case_when(
+    nchar(articles) > 0 ~ "yes",
+    TRUE ~ "no"
+  ))%>%
+  group_by(committee, article_yes_no) %>%
+  summarise(n_abs = n()) %>% 
+  mutate(n_rel=n_abs/sum(n_abs))
+```
+</details>
+
+```{r echo=FALSE}
+df_articles_availability 
+```
+
+As it turns out, in around 15 % of all individual complaints no information on the relevant articles are provided. This is a caveat to bear in mind (and would merit to go back to the original text of each decision).
+
+In the next step, and in order to count the number of complaints per article, we again have to account for those many communications which feature more than one invoked article. As above with names of states parties, communications which refer to multiple articles have to be split into separate observations to count each distinct article separately. 
+
+Furthermore, the UN OHCHR's database may indicate that a complaint relates to different paragraphs of the same article. E.g. a complaint may relate to articles 5-1 and 5-3. Instead of counting these as two distinct provisions, I decided to count such cases as one (1) observation for e.g. article 5. The code chunk below implements these steps.
+
+<details closed> 
+<summary>Code: Split multiple articles into separate observations</summary> 
+```{r split articles}
+df_res_articles <- df_res %>%
+  select(committee, date_submission, articles, countries, communication_no) %>%
+  mutate(articles = str_trim(articles, side = c("both"))) %>%
+  mutate(article_split = stringr::str_split(articles, regex("(?<=[a-z0-9])(?=[A-Z])"))) %>% # split concatenated articles
+  unnest(article_split) %>%
+  mutate(article_split_clean = str_remove(article_split, paste0(committee, "-"))) %>% # remove committee name
+  mutate(article_split_main = str_extract(article_split_clean, regex(".*?\\d+"))) # extract main article (remove paras)
+```
+</details>
+
+<details closed> 
+<summary>Code: # communications per article of the CAT</summary> 
+```{r}
+df_arts <- df_res_articles %>%
+  distinct(committee, communication_no, article_split_main) %>%
+  count(committee, article_split_main, name = "n_communications") %>%
+  group_by(committee) %>%
+  arrange(desc(n_communications), .by_group = T) %>%
+  mutate(max_n_obs = max(n_communications, na.rm = T)) %>%
+  mutate(rel_n_obs = n_communications / sum(n_communications, na.rm = T) * 100) %>%
+  # filter(!is.na(article_split_main)) %>%
+  slice_head(., n = 25) 
+  
+pl_arts <- df_arts %>% 
+  ggplot() +
+  labs(title="Number of communications per article",
+       subtitle=str_wrap("Communications which were considered jointly by the committee are counted as distinct items here. An articles different (sub)paragraphs are unified unter the articles' heading, e.g. Art 5(1) and 5(3) are both assigned to Art 5.", 110),
+         caption=my_caption,
+       x="number of communications",
+       y="treaty article"
+       )+
+  geom_bar(aes(
+    y = tidytext::reorder_within(
+      x = article_split_main,
+      by = n_communications,
+      within = committee
+    ),
+    x = n_communications,
+    fill=committee
+  ),
+  orientation = "y",
+  stat = "identity"
+  ) +
+  geom_label(aes(
+    y = tidytext::reorder_within(
+      x = article_split_main,
+      by = n_communications,
+      within = committee
+    ),
+    # x = max_n_obs * 1.10,
+    x = Inf,
+    label = paste0(
+      n_communications,
+      " (",
+      round(rel_n_obs, 1),
+      "%)"
+    )
+  ),
+  fill="white",
+  label.size = 0,
+  orientation = "y",
+  hjust = 1,
+  check_overlap = T
+  ) +
+  geom_vline(xintercept = seq(0, unique(df_arts$max_n_obs), 100),
+             color="white")+
+  scale_x_continuous(expand=expansion(mult=c(0,.05)))+
+  scale_fill_paletteer_d("ggsci::default_jama") +
+  tidytext::scale_y_reordered(
+    #guide = guide_axis(n.dodge = 2)
+    ) +
+  facet_wrap(vars(committee),
+    scales = "free"
+  )+
+  theme_post()+
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(size=.5,
+                                          color="white"),
+        legend.position = "none",
+        axis.text.y=element_text(color=paletteer_d("ggsci::default_jama")[1]),
+        axis.title.y = element_text(color="grey50", 
+                                    hjust=1,
+                                    angle=90))
+```
+</details>
+
+```{r echo=FALSE, dev='svg'}
+pl_arts
+```
+
+What becomes quite clear from the plot above is the dominant resort to Article 3 of the Convention (Non-refoulement). More than 40 % of all complaints submitted invoke a violation of the non-refoulement provision which stipulates, in simple terms, that no person should be transferred, extradited etc. to another country if he or she faces there a credible risk of being tortured. 
+
+Let's combine now the previous analysis of states parties being addressed in complaints and the invoked paragraphs of the Convention.
+
+## Share of Article 3 submission over the years
+
+<details closed> 
+<summary>Code: Share and number of complaints with Article 3 CAT per country</summary> 
+```{r}
+#number of communications with have at least one art 3
+df_art_3 <- df_res_articles %>% 
+  filter(article_split_main=="3") %>% 
+  select(date_submission, communication_no) %>% 
+  distinct() %>% 
+  mutate(art_3="yes")
+
+#number of communications which have no art 3
+df_not_art_3 <- df_res_articles %>% 
+  select(date_submission, communication_no) %>% 
+  distinct() %>% 
+  filter(!communication_no %in% df_art_3$communication_no) %>% 
+  mutate(art_3="no")
+
+# length(unique(df_res_articles$communication_no))
+# nrow(df_art_3)+nrow(df_not_art_3)
+```
+
+```{r Art 3 abs}
+df_art3_state_share <- bind_rows(df_art_3, df_not_art_3) %>% 
+  left_join(., df_results_countries %>% 
+              distinct(communication_no, country_split)) %>% 
+  group_by(country_split, art_3) %>% 
+  summarise(n_obs=n()) %>% 
+  #mutate(n_rel=n_obs/sum(n_obs)) %>% 
+  ungroup() %>% 
+  pivot_wider(id_cols=c("country_split"),
+              names_from=art_3,
+              values_from=n_obs,
+              values_fill=0) %>% 
+  mutate(yes_share=yes/(no+yes),
+         total=yes+no)
+
+pl_art3_state_abs <- df_art3_state_share %>% 
+  arrange(-yes_share) %>%
+  # arrange(-total) %>% 
+  mutate(country_split=fct_inorder(country_split) %>% fct_rev) %>% 
+  select(country_split, yes, no) %>% 
+  pivot_longer(cols = c("yes", "no"),
+               names_to="art_3") %>% 
+  ggplot()+
+  labs(title=str_wrap("Number of complaints with(out) Art 3", 15),
+       x="number of communications")+
+  geom_bar_interactive(aes(y=country_split,
+               x=value,
+               fill=art_3,
+               tooltip=glue::glue("{country_split}
+                                  article 3 {art_3}: {value}"),
+               data_id=paste0(country_split, art_3)),
+           orientation="y",
+           position=position_stack(),
+           stat="identity")+
+  scale_fill_manual(values=c("yes"=paletteer_d("ggsci::default_jama")[1],
+                             "no"="grey50"),
+                    name="Communication invokes Article 3")+  scale_x_continuous(expand=expansion(mult=c(0,.05)))+
+  theme_post()+
+  theme(panel.grid.major.y = element_blank(),
+        plot.title.position = "panel",
+        plot.margin = margin(l=0.2, unit="cm"),
+        # legend.position = "none",
+        axis.title.x=element_text(size=7),
+        axis.text.x=element_text(size=7),
+        axis.text.y=element_text(size=7))
+
+```
+
+```{r Art 3 share}
+library(countrycode)
+
+df_pl_art3_state_share <- df_art3_state_share %>% 
+  arrange(-yes_share) %>%
+  # arrange(-total) %>% 
+  mutate(country_split=fct_inorder(country_split) %>% fct_rev) %>% 
+#  select(country_split, yes, no) %>% 
+  pivot_longer(cols = c("yes", "no"),
+               names_to="art_3") %>% 
+  group_by(country_split, art_3) %>% 
+  mutate(share=value/total)
+
+pl_art3_state_share <- df_pl_art3_state_share%>% 
+  ggplot()+
+  labs(title="Share of complaints <br>with(out) Art 3",
+       x="% of all communications")+
+  geom_bar_interactive(aes(y=country_split,
+                           x=value,
+                           fill=art_3,
+                           tooltip=glue::glue("{country_split}
+                                              Art 3 {art_3}: {percent(share)}"),
+                           data_id=paste0(country_split, art_3)),
+           stat="identity",
+           position="fill")+
+  # scale_fill_paletteer_d("ggsci::dark_uchicago",
+  #                        direction=-1)+
+  scale_fill_manual(values=c("yes"=paletteer_d("ggsci::default_jama")[1],
+                             "no"="grey50"),
+                    name="Communication invokes Article 3")+
+  scale_x_continuous(label=scales::label_percent(),
+                     expand=expansion(mult=c(0,.05)))+
+  scale_y_discrete(label=function(x) {countrycode::countrycode(x, origin="country.name",
+                                                               destination="iso3c")})+
+  theme_post()+
+  theme(panel.grid.major.y = element_blank(),
+        plot.title.position = "panel",
+        # legend.position = "none",
+        axis.text.x=element_text(size=7),
+        axis.title.x=element_text(size=7),
+        axis.text.y=element_text(size=7))
+
+```
+</details>
+
+```{r plot patchwork Art 3, echo=FALSE}
+pl_combined<- patchwork::wrap_plots(pl_art3_state_share, pl_art3_state_abs+theme(axis.text.y=element_blank()))+
+  plot_layout(widths=c(1, 2), guides = "collect") &
+  theme(legend.position="bottom",
+        legend.text = element_text(vjust=1),
+        legend.justification = "left",
+        legend.direction = "horizontal") &
+  guides(fill=guide_legend(reverse=T))
+
+
+girafe(code = print(pl_combined),
+                             options=list(
+                               # opts_hover_inv(css = "opacity:0.1;"),
+                               opts_hover(css = "fill:#FFA500;color:#FFA500"),
+                               opts_tooltip(css = "background-color:#323E4F;
+                               color: white;
+                               font-family: Roboto;",
+                               offx = 30, offy = -30,
+                               delay_mouseout = 5000)
+                               ))
+
+```
+
+The plot above shows each country's share of communications which invoke Article 3 (left plot) as well as the absolute number of communications with and without Article 3 (right plot). Hover over the bars' segment to get the pertaining numbers. 
+
+The plot reveals that the countries with most communications addressed to also feature a considerable large share of articles invoking article 3. Around 70 % of all communications addressed to Switzerland and Canada feature Article 3, in the case of Sweden its 74 %, and for Australia the pertaining share is even above 90 %. 
+
+## Articles over time
+
+Let's now look at the dynamic of submissions to the Committee against Torture over time. The graph below depicts the total number of communications submitted (!) by year. 
+
+<details closed> 
+<summary>Code: number of submissions per year</summary> 
+```{r}
+df_communication_per_year <- df_res %>% 
+  mutate(submission_year=lubridate::year(date_submission)) %>% 
+  group_by(submission_year)%>% 
+  summarise(n_obs=n())
+
+pl_communication_per_year <- df_communication_per_year %>% 
+  ggplot()+
+  labs(title="Total number of communications submitted to the CAT Committee per year",
+       x="year of submission",
+       caption=my_caption)+
+  geom_bar_interactive(aes(x=submission_year,
+                           y=n_obs,
+                           tooltip=glue::glue("{submission_year}
+                           n obs: {n_obs}"),
+ data_id=submission_year),
+  fill=paletteer_d("ggsci::default_jama")[1],
+ stat="identity")+
+  scale_y_continuous(expand=expansion(mult=c(0, .1)))+
+  theme_post()
+```
+</details>
+
+```{r echo=FALSE}
+girafe(ggobj =pl_communication_per_year,
+                             options=list(
+                               # opts_hover_inv(css = "opacity:0.1;"),
+                               opts_hover(css = "fill:#FFA500;color:#FFA500"),
+                               opts_tooltip(css = "background-color:#323E4F;
+                               color: white;
+                               font-family: Roboto;",
+                               offx = 30, offy = -30,
+                               delay_mouseout = 5000)
+                               ),
+       height_svg=3)
+```
+
+After an early phase of almost no submissions, the annual number fluctuated roughly between 10 and 20 complaints for most of the time. This however changed in 2014 and for the subsequent two to three years. From 2013 to 2014, the number of submissions more than doubled to `r df_communication_per_year %>% filter(submission_year==2014) %>% pull(n_obs)`. In 2015, an all-time high of `r df_communication_per_year %>% filter(submission_year==2015) %>% pull(n_obs)` was registered. Also in the subsequent year, the number of communications remained high with `r df_communication_per_year %>% filter(submission_year==2016) %>% pull(n_obs)`.
+
+### 2014 bump
+This '2014 bump' is quite a remarkable dynamic and one wonders what's behind. 
+
+As a first step let's see whether we can identify state parties which experienced a particularly strong increase of submissions for the period 2014 to 2016. To do so, I first calculate each countries' share of the annual total number of communications per year, and second, the year-to-year change of this share. Finally, since we are interested in the bump starting in 2014, I'll filter out those countries with the highest change rate in this period. The table below shows the result:
+
+<details closed> 
+<summary>Code: State party's share of submissions and change 2013-2015</summary> 
+```{r plot - year country}
+
+df_country_year <- df_results_countries %>% 
+  distinct(country_split, date_submission, communication_no) %>% 
+  mutate(year_submission=lubridate::year(date_submission)) %>% 
+  mutate(across(where(is.character), .fns=as.factor)) %>% 
+  group_by(year_submission, country_split, .drop=F) %>% 
+  summarise(n_year=n()) %>% 
+  mutate(total_year=sum(n_year)) %>% 
+  ungroup() %>% 
+  mutate(rel_year=n_year/total_year) %>% 
+  group_by(country_split) %>% 
+  arrange(year_submission, .by_group=T) %>% 
+  mutate(change_year=rel_year-lag(rel_year)) %>% 
+  ungroup()
+
+df_countries_peak <- df_country_year %>% 
+  mutate(rel_year_previous=lag(rel_year)) %>% 
+  select(country_split, year_submission, contains("rel_year"), change_year) %>% 
+  filter(year_submission %in% c(2014, 2015)) %>%
+  arrange(desc(change_year)) %>% 
+  slice_head(n=5) %>% 
+  mutate(across(where(is.numeric), .fns=~round(., digits=2)))
+
+library(gt)
+tb_countries_peak<- df_countries_peak %>% 
+  gt() %>% 
+  cols_label(country_split="state party",
+             year_submission="year of submission",
+             rel_year="share",
+             rel_year_previous="share prev. year",
+             change_year="change") %>% 
+  cols_align(columns=contains("submission"),
+             align="center") %>% 
+  cols_align(columns=contains("year"),
+             align="center") %>% 
+  cols_align(columns=contains("country"),
+             align="left") %>% 
+   tab_header(
+    title = md("**Change of annual share of submissions 2013-2015**"),
+    subtitle = md("Top 4 only")
+  ) %>% 
+  fmt_percent(
+    columns = vars(rel_year, rel_year_previous, change_year),
+    decimals = 1
+    )
+
+```
+</details>
+
+
+```{r echo=FALSE, fig.align="left"}
+tb_countries_peak
+```
+
+Complaints addressed to Australia in 2014 represented `r df_countries_peak %>% filter(country_split=="Australia" & year_submission==2014) %>%  pull(rel_year) %>% scales::percent()` of all complaints submitted that year. In the year prior, the corresponding share was 0. Similarly for the year 2015, Switzerland's share of all complaints submitted that year amounted to `r df_countries_peak %>% filter(country_split=="Switzerland" & year_submission==2015) %>%  pull(rel_year) %>% scales::percent()` and only to `r df_countries_peak %>% filter(country_split=="Switzerland")  %>%  pull(rel_year_previous) %>% scales::percent()` the year prior. Canada's dynamic looks similar. The next country, Germany, only featured `r df_countries_peak %>% filter(country_split=="Germany" & year_submission==2014) %>%  pull(rel_year) %>% scales::percent()` of all complaints in 2014. The gap to Australia, Switzerland and Canada is obvious.
+
+The graph below complements the information conveyed in the table.
+
+<details closed> 
+<summary>Code: 2014 bump</summary> 
+```{r message=FALSE, warning=FALSE}
+df_country_year_2 <- df_country_year  %>% 
+  filter(between(year_submission, 2013, 2015)) %>% 
+  mutate(country.select=case_when(!country_split %in% c("Switzerland",
+                                                       "Canada",
+                                                       "Australia") ~ "other",
+                                  TRUE ~ as.character(country_split))) %>% 
+  mutate(country.select=fct_relevel(country.select, "other", after=3)) %>% 
+  group_by(year_submission, country.select) %>% 
+  summarise(n_year=sum(n_year)) %>% 
+  mutate(rel_year=n_year/sum(n_year))
+  
+
+pl_country_year <-  df_country_year_2 %>% 
+  ggplot()+
+  labs(title=glue::glue("'2014 Bump:' Relative contribution of <span style='color:{paletteer_d('ggsci::default_jama', direction=1)[1]}'>Australia</span>, <span style='color:{paletteer_d('ggsci::default_jama', direction=1)[2]}'>Canada</span>, <span style='color:{paletteer_d('ggsci::default_jama', direction=1)[3]}'>Switzerland</span> and <span style='color:grey50'>all other </span> state parties"),
+         subtitle="Share of communications per addressed state party per year. Absolute numbers in brackets. Other countries in ",
+       x="year of submission",
+       y="% of all sumbissions of a year",
+       caption=my_caption)+
+  geom_bar(aes(x=year_submission,
+                y=n_year,
+                fill=country.select),
+           position="fill",
+           stat="identity")+
+  geom_text(data=. %>% filter(n_year > 0),
+              aes(label=glue::glue("{percent(rel_year)} ({n_year})"),
+                y=n_year,
+                group=country.select,
+                x=year_submission),
+            position=position_fill(vjust=.5),
+            #stat="identity",
+            size=5,
+            check_overlap = TRUE,
+            color="white")+
+   geom_text(data=. %>% group_by(year_submission) %>% 
+               summarize(total_year=sum(n_year)),
+             aes(x=year_submission,
+                 y=1.03,
+                 label = paste0("100%", " (",total_year,")"), 
+                 group = year_submission), 
+             size=5,
+             stat = "identity")+
+  theme_post()+
+  theme(panel.grid.major.y = element_blank(),
+        plot.title = element_markdown(),
+        strip.text = element_text(size=15),
+        axis.text.x = element_blank(),
+        legend.position="none",
+        legend.direction="horizontal")+
+  scale_fill_manual(values=c(paletteer_d("ggsci::default_jama", 
+                                         direction=1)[1:3], 
+                             "other"="grey80"))+
+  scale_y_continuous(labels = scales::label_percent(),
+                     expand=expansion(mult=c(0, .02)))+
+  scale_x_continuous(expand=expansion(mult=c(0,0.05)),
+                     breaks=unique(df_country_year$year_submission),
+                     position="bottom")+
+  facet_wrap(vars(year_submission),
+             scales="free_x",
+             nrow = 1)
+```
+</details>
+
+
+```{r echo=FALSE, fig.align="left", fig.height=6, message=FALSE, warning=FALSE, dev='svg', out.width='70%'}
+pl_country_year
+```
+
+
+Let's now have a closer look at the cases of these three countries responsible for the 2014 'bump'. For a start, let's simply create a list of the cases in question.
+
+<details closed> 
+<summary>Code: bump cases</summary> 
+```{r}
+df_bump_cases <- df_results_countries %>% 
+  mutate(year_submission=lubridate::year(date_submission)) %>% 
+  filter(country_split %in% c("Australia", "Switzerland", "Canada") &
+           year_submission %in% c(2014, 2015, 2016)) %>% 
+  mutate(communication=paste0(author, " (",communication_no,")")) %>% 
+  select(country_split, communication) %>% 
+  pivot_wider(names_from=country_split,
+              values_from=communication) 
+
+CA <- df_bump_cases$Canada %>% unlist() %>% tibble() %>% rownames_to_column() %>% rename(Canada=".")
+AU <- df_bump_cases$Australia %>% unlist() %>% tibble() %>% rownames_to_column() %>% rename(Australia=".")
+CH <- df_bump_cases$Switzerland %>% unlist() %>% tibble() %>% rownames_to_column() %>% rename(Switzerland=".")
+
+library(reactable)
+tb_AU_CA_CH <- CA %>% 
+  left_join(., AU, by=c("rowname")) %>% 
+  left_join(., CH,by=c("rowname")) %>% 
+  select(-rowname) %>% 
+  reactable(., 
+             pagination = FALSE, highlight = TRUE, height = 250)
+```
+</details>
+
+```{r echo=FALSE}
+tb_AU_CA_CH
+```
+
+### Counsels
+
+<details closed> 
+<summary>Code: contribution of counsels</summary> 
+```{r}
+df_counsel <- df_results_countries %>% 
+  mutate(year_submission=lubridate::year(date_submission)) %>% 
+  # filter(country_split %in% c("Australia", "Switzerland", "Canada") &
+  #          year_submission %in% c(2014, 2015, 2016)) %>% 
+  group_by(country_split) %>% 
+  mutate(country_sum=n()) %>% 
+  mutate(counsel=str_detect(author, "represented")) %>% 
+  mutate(counsel_name=str_extract(author, regex("(?<=counsel.?,).*(?=\\))")) %>% 
+           str_remove_all(., ",") %>% 
+           str_remove_all(., "Mr.|Mrs.|Ms.") %>% 
+           str_trim()) %>% 
+  mutate(counsel_name=case_when(str_detect(counsel_name, "Sweeney") ~ "John Sweeney",
+                                str_detect(counsel_name, "Bhambi") ~ "Rajwinder Bhambi",
+                                TRUE ~ as.character(counsel_name))) %>% 
+  select(author, counsel_name, counsel, country_split, year_submission) %>% 
+  mutate(counsel_name=case_when(counsel==FALSE & is.na(counsel_name) ~ "no counsel",
+                                counsel==TRUE & is.na(counsel_name) ~ "name not available",
+         TRUE ~ as.character(counsel_name))) %>% 
+  group_by(year_submission) %>% 
+  mutate(n_year=n()) %>% 
+  ungroup()
+
+df_counsel_wide <- df_counsel %>% 
+  group_by(counsel, country_split, year_submission, n_year) %>% 
+  count(counsel_name, name = "n_counsel") %>% 
+  arrange(country_split, -n_counsel) %>% 
+  ungroup() %>% 
+  mutate(counsel_rel_year=n_counsel/n_year) %>% 
+  select(country_split, everything(), -counsel) %>% 
+  arrange(year_submission) %>% 
+  filter(country_split %in% c("Australia", "Canada", "Switzerland")) %>% 
+  filter(between(year_submission, 2013, 2016)) %>% 
+  pivot_wider(id_cols=c(country_split, counsel_name),
+              names_from=year_submission,
+              values_from=c(n_counsel, counsel_rel_year),
+              values_fill=0) %>% 
+  rowwise() %>% 
+  mutate(sum_counsel=sum(c_across(cols=contains("n_counsel")))) %>% 
+  arrange(country_split, -sum_counsel) %>% 
+  select(-sum_counsel)
+
+tb_counsel <- df_counsel_wide %>%   
+  gt(groupname_col = "country_split",  rowname_col  = "counsel_name") %>% 
+  tab_header(title=md("**'2014 Bump': Number of complaints submitted by counsels**"), 
+             subtitle = "Only top 3 countries in terms of share of total number of complaints; 2014-2016") %>% 
+  cols_label(
+    n_counsel_2013="2013",
+    n_counsel_2014="2014",
+    n_counsel_2015="2015",
+    n_counsel_2016="2016",
+    counsel_rel_year_2013="2013",
+    counsel_rel_year_2014="2014",
+    counsel_rel_year_2015="2015",
+    counsel_rel_year_2016="2016") %>%
+  tab_spanner(label="submissions by counsel",
+              columns=contains("n_counsel")) %>% 
+  tab_spanner(label="% of global total",
+              columns=contains("counsel_rel")) %>% 
+  tab_options(heading.align = "left",
+                row_group.font.weight = "bold") %>% 
+  fmt_percent(columns = contains("rel"),
+              decimals = 1)
+  
+
+#spread multiple columns!
+```
+</details>
+
+When glancing through the submissions, I noted that the names of some counsels appeared quite frequently. To get a more systematic view on this matter see the table below. What it shows is the number of cases submitted by individual counsels each year in the time from 2013 to 2016 and the relative share of these submissions of the total number of cases submitted in these years (all countries). 
+
+The most striking case here, in my opinion here, is John Sweeney. Sweeney submitted 2016 `r df_counsel_wide %>%  filter(str_detect(counsel_name, "Sweeney")) %>% pull(n_counsel_2016)`. These submissions amounted to `r df_counsel_wide %>%  filter(str_detect(counsel_name, "Sweeney")) %>% pull(counsel_rel_year_2016) %>% scales::percent()` of all submissions made to the Committee in that year. 
+Similarly, although with somewhat lower numbers, Rajwinder Bhambi	contributed as counsel `r df_counsel_wide %>%  filter(str_detect(counsel_name, "Bhambi")) %>% pull(n_counsel_2015)` cases, equaling `r df_counsel_wide %>%  filter(str_detect(counsel_name, "Bhambi")) %>% pull(counsel_rel_year_2015)` of all 2015 cases. Tarig Hassan has to be mentioned in the case of Switzerland. 
+
+This is not to say that these counsels were solely responsible for the bump in cases after 2013. After all, submissions without a counsel also featured high numbers for countries and years considered. Nevertheless, these counsel contributed a considerable numbers cases in the period from 2014 to 2015, and haven't done so prior to these years.
+
+```{r echo=FALSE}
+tb_counsel
+```
+
+### Article 3 Country of destination
+
+The final angle I want to take up to better understand the reasons behind the 2014-2016 bump is their country of destination. With the exception of one case, all submissions addressed to Australia, Canada, and Switzerland from 2014 to 2016 are non-refoulement cases (article 3). Hence, the cases are addressed to these state parties in order to avoid or raise a violation of a person's transfer to another country where he or she risks being tortured. 
+
+Unfortunately, the case details in the OHCHR database do not provide any systematic information on the identity of these target countries. The information is obviously contained in the decision text of the committee, but not in the database's overview. Hence, to get this information, we have to dig into the actual text and extract country names. Unfold the code chunk to see the steps implemented. Here, I am particularly grateful to @hrbrmstr for basically providing me with a ready-made template when it comes to extracting the links to the decision texts.
+
+
+First, let's define a function which extracts the English text of the decision in a html format.
+
+<details open> 
+<summary>Code: define function extracting links to decision texts</summary> 
+```{r}
+fn_get_doc_link <- function(details_url) {
+  
+  res <- httr::GET(url = details_url)
+  out <- httr::content(res, as = "text", encoding = "UTF-8")
+  pg <- read_html(out)
+  table_exists <- html_node(pg, "section#download-listings > table")
+  detail_cols <- table_exists %>% html_table() %>% colnames() %>% 
+    tolower() %>% trimws()
+  detail_entries <- html_nodes(pg, "section#download-listings > table > tbody > tr")
+  cols <- html_nodes(detail_entries, "td")
+  doc_link <- html_nodes(cols[5], "a") %>% html_attr("href") #take only last column (html) of document table
+  ifelse(length(doc_link)>0, doc_link, "missing")
+
+ }
+```
+</details>
+
+Second, let's define a function which extracts the text from these html documents.
+
+<details open> 
+<summary>Code: define function to get text</summary> 
+```{r}
+fn_get_doc_text <- function(doc_link) {
+  xml2::read_html(doc_link) %>% 
+    rvest::html_text()
+  }
+```
+</details>
+
+In the next step, let's apply both functions to all (!) article 3 cases.
+
+<details open> 
+<summary>Code: apply function to get text</summary> 
+```{r eval=FALSE, include=FALSE}
+tic()
+
+df_art_3 <- df_res %>% 
+  mutate(year_submission=lubridate::year(date_submission)) %>% 
+  mutate(art_3=str_detect(articles, "CAT-3")) %>% 
+  filter(art_3==TRUE) %>% 
+  #get links
+  mutate(doc_link=future_map_chr(page_link, 
+                                 possibly(fn_get_doc_link, otherwise="missing"),
+                                 .progress = TRUE)) %>%  
+  #extract text
+  mutate(doc_text=future_map_chr(doc_link, possibly(fn_get_doc_text, otherwise="missing"),
+                                .progress = TRUE) %>% 
+           str_squish())  %>% 
+  mutate(doc_length=nchar(doc_text)) %>% 
+  mutate(doc_intro=str_sub(doc_text, end=4000)) %>% 
+  mutate(subject_matter=str_extract(doc_intro, regex("Subject matter.*?(?=Procedural|Substantive)", dotall=T)) %>% 
+           str_squish()) %>%
+  mutate(discontinued=str_detect(doc_intro, regex("discontinue", dotall=T)) %>% str_squish())
+
+toc()
+```
+
+
+```{r}
+# readr::write_rds(df_art_3, path=here::here("blog_data","un_treaty_bodies","df_art_3.rds"))
+df_art_3 <- read_rds(here::here("blog_data", "un_treaty_bodies", "df_art_3.rds"))
+
+```
+
+=> define regex pattern
+```{r eval=FALSE, include=FALSE}
+codelist_mod <- countrycode::codelist %>% 
+                    select(country.name.en,
+                           country.name.en.regex) %>% mutate(country.name.en.regex=str_remove(country.name.en.regex, "\\^")) %>% mutate(country.name.en.regex=case_when(country.name.en=="Sudan" ~ "(?<!South)\\sSudan",                                         TRUE~as.character(country.name.en.regex))) %>%
+  mutate(country_pattern=paste0(".{50}to (the\\s)?", country.name.en, ".{50}")) %>% mutate(country_pattern_specific=paste0("(?<=(removal|deportation|transfer).{0,50}","to\\s(the\\s?)?)", country.name.en))
+
+
+
+#pattern vector
+vec_pattern_countries <- codelist_mod %>% 
+  pull(country_pattern) %>% 
+  paste0(., collapse="|")
+
+```
+
+=> search
+```{r eval=FALSE, include=FALSE}
+tic()
+df_art_3_x <- df_art_3 %>% 
+  mutate(target_countries=str_extract_all(doc_intro, regex(vec_pattern_countries, dotall = TRUE, ignore_case = T)))
+toc()
+
+readr::write_rds(df_art_3_x, path=here::here("blog_data","un_treaty_bodies","df_art_3_countries.rds"))
+
+
+```
+
+=> read back
+```{r}
+df_art_3_x <- readr::read_rds(here::here("blog_data","un_treaty_bodies", "df_art_3_countries.rds")) %>% 
+  unnest_longer(target_countries)
+
+```
+
+## HERE
+```{r eval=FALSE, include=FALSE}
+vec_pattern_countries_specific <- codelist_mod %>% 
+  pull(country_pattern_specific) %>% 
+  paste0(., collapse="|")
+
+tic()
+y <- df_art_3_x[1:3,] %>% 
+  select(target_countries, doc_intro) %>% 
+  mutate(target_countries_specific=str_extract_all(target_countries, regex(vec_pattern_countries_specific, ignore_case = T, dotall = T)))
+toc()
+```
+
+
+```{r eval=FALSE, include=FALSE}
+tic()
+df_art_3_x <- df_art_3 %>% 
+  select(-doc_text) %>% 
+  regex_left_join(., codelist_mod,
+                  by=c(subject_matter="country.name.en.regex"),
+                  ignore_case=TRUE) %>% 
+  rename(target_subject_matter=country.name.en) %>% 
+  select(-contains("regex"))
+  # group_by(page_link) %>%  
+  # mutate(target_countries=paste(country.name.en, collapse=", ")) %>% 
+  # ungroup()
+toc()
+
+df_subject_countries <- df_art_3_x %>% 
+    filter(!is.na(target_subject_matter))
+
+df_subject_countries %>% 
+  count(is.na(target_subject_matter))
+
+tic()
+df_intro_countries <- df_art_3_x %>%
+  filter(is.na(target_subject_matter)) %>% 
+  select(-contains("regex")) %>% 
+  regex_left_join(., codelist_mod,
+                  by=c(doc_intro="country.name.en.regex_3"),
+                  ignore_case=TRUE) %>% 
+  rename(target_country_intro=country.name.en)
+toc()
+
+df_intro_countries <-  df_intro_countries %>% 
+  group_by(communication_no) %>% 
+  mutate(target_country_all=paste(target_country_intro, collapse=", ")) %>% 
+  slice_head(n=1) %>% 
+  ungroup()
+
+ x <- df_intro_countries %>% 
+       select(doc_link, communication_no, doc_intro, countries, target_country_intro, target_country_all, contains("regex")) %>% 
+   filter(doc_link!="missing")
+
+
+```
+
+
+```{r eval=FALSE, include=FALSE}
+#checks
+df_target_countries <- df_art_3_x %>% 
+  select(doc_link, communication_no, articles, countries,
+         doc_intro, target_subject_matter, discontinued)
+
+df_art_3_x %>% 
+  count(is.na(target_subject_matter))
+
+xtabs(~df_target_countries$discontinued+ is.na(df_target_countries$target_subject_matter))
+
+
+
+length(unique(df_target_countries$communication_no)) #361
+
+df_target_countries <- df_target_countries %>% 
+  group_by(communication_no, doc_link) %>% 
+  mutate(n_obs=n())
+  
+
+df_target_countries %>% 
+  filter(communication_no=="316/2007") %>% 
+  pull(doc_intro)
+```
+
+
+
+
+#extract sections of country names
+```{r eval=FALSE, include=FALSE}
+codelist_vec <- codelist_mod %>% 
+  pull(country.name.en.regex_3) %>% 
+  glue_collapse(., sep="|")
+
+tic()
+df_art_3_y <- df_art_3[1:10,] %>% 
+  mutate(country_sections=stringr::str_extract_all(doc_intro, codelist_vec))
+toc()
+
+df_art_3_y_select <- df_art_3_y %>% 
+  select(communication_no, doc_link, countries, country_sections)
+```
+
+
+We have now a dataframe comprising the text of complaints invoking a violation of article 3 submitted to the Committee against Torture. From these decision texts we have now to identify and extract the country where the complainant argues to risk being/have been tortured. So how to do this?
+
+Below I inserted a screen shot of the first half-page of a decision by the Committee against Torture. As you can see, the document starts with some kind of a keyword index, including the 'subject matter' which reveals, in article 3 cases, the country to which a complainant was about to or actually was transferred to. Assuming now that the Committee stuck to this template, we should be able to 1) extract those rows of the document which start with 'subject matter' and 2) extract the country name from these rows. 
+
+
+![](/post/2020-08-16-un-treaty-bodies_files/subject_matter_art_3.PNG)
+
+
+First, let's extract those rows containing 'subject matter'. This can be done by a relatively simple `regex("Subject matter.*?(?=Procedural)", dotall=T)`.
+
+<details open> 
+<summary>Code: apply function to get text</summary> 
+```{r eval=FALSE, include=FALSE}
+df_subject_matter <- df_art_3 %>% 
+  select(contains("link"), country_split, doc_text, date_submission, doc_length) %>% 
+  mutate(subject_matter=str_extract(doc_text, regex("Subject matter.*?(?=Procedural|Substantive)", dotall=T)) %>% 
+           str_squish())
+```
+
+Unfortunately, however, the results are somewhat disappointing. In 45 out of 95 cases, no subject matter was detected.
+```{r eval=FALSE, include=FALSE}
+df_subject_matter %>% 
+  count(is.na(subject_matter))
+```
+
+
+After looking into the text of those cases where the subject matter was missing, I noticed that the Committee's decisions on these cases were not decisions on the admissibility or merits, but overwhelmingly discontinuation decisions. And for some reason, discontinuation decisions do not feature the name of the country where a complainant was about or actually transferred to. To check this observation, below a cross-tabulation of cases with(out) subject matter information and with(out) discontinuation decisions.
+
+```{r eval=FALSE, include=FALSE}
+df_subject_matter <- df_subject_matter %>% 
+  mutate(discontinued=str_detect(doc_text, regex("discontinue", dotall=T)) %>% str_squish()) 
+
+
+df_subject_matter %>% 
+  ggplot()+
+  geom_jitter(aes(x=discontinued,
+                  y=doc_length))
+
+view(df_subject_matter %>% 
+       select(-doc_text))
+
+
+xtabs(~ df_subject_matter$discontinued + is.na(df_subject_matter$subject_matter))
+
+```
+</details>
+
+The crosstab shows that out of the 45 decisions without a subject matter (is.na()==TRUE), 38 were actually discontinued cases. This is obviously a considerable caveat and severely limits the ability to identify countries of destination in article 3 cases. Nevertheless, let's continue with the 50 remaining cases and extract the country names.
+
+```{r eval=FALSE, include=FALSE}
+codelist_mod <- countrycode::codelist %>% 
+                    filter(!country.name.en %in% unique(df_subject_matter$country_split)) %>% 
+                    select(country.name.en,
+                           country.name.en.regex) %>% mutate(country.name.en.regex=str_remove(country.name.en.regex, "\\^")) %>% 
+  mutate(country.name.en.regex=case_when(country.name.en=="Sudan" ~ "(?<!South)\\sSudan",
+                                         TRUE~as.character(country.name.en.regex)))
+mutate(country_pattern=paste0(".{50} to (the\\s)?",
+                              "country.name.en"))
+```
+
+
+```{r eval=FALSE, include=FALSE}
+vec_country_pattern <- codelist_mod %>% 
+  pull(country_pattern) %>% 
+  paste0(., collapse="|")
+```
+
+
+### str_extract_all
+
+
+
+### fuzzy join
+
+To do so, I make us of the the wonderful `countrycode` package by Vincent Arel-Bundock. Not only does it allow you to convert country names between different formats, it also includes a column of regex expressions to identify each country name. After some fine-tuning for my specific purpose, I use the regex expressions with the similarly wonderful `fuzzyjoin` package by [@drob](https://twitter.com/drob, target="_blank"). The `regex_left_join` function allows to basically merge two dataframes even if we do not have a perfect match between the two fields which we use to connect both dataframes. In this case, it allows us to add a country name to our dataframe with decisions from the 2014-2016 bump whenever the regex of a country names has a (fuzzy/regex) match.
+
+```{r eval=FALSE, include=FALSE}
+#removing country_split not entirely correct;
+#would require removing only state party for each complaint; not all state parties
+codelist_mod <- countrycode::codelist %>% 
+                    filter(!country.name.en %in% unique(df_subject_matter$country_split)) %>% 
+                    select(country.name.en,
+                           country.name.en.regex) %>% mutate(country.name.en.regex=str_remove(country.name.en.regex, "\\^")) %>% 
+  mutate(country.name.en.regex=case_when(country.name.en=="Sudan" ~ "(?<!South)\\sSudan",
+                                         TRUE~as.character(country.name.en.regex)))
+```
+
+
+```{r eval=FALSE, include=FALSE}
+tic()
+
+df_subject_matter <- df_subject_matter %>% 
+ # mutate(doc_text_start=stringr::str_sub(doc_text, end=2000) %>% 
+           # str_squish()) %>% 
+  regex_left_join(., codelist_mod,
+                  by=c(subject_matter="country.name.en.regex"),
+                  ignore_case=TRUE) %>% 
+  group_by(page_link) %>%  #since left_join can produce multiple rows if there are multiple hits we only take the first row = first country identified
+  slice_head(n=1)
+toc()
+
+df_subject_matter_no_text <- df_subject_matter %>% 
+  select(-doc_text)
+
+
+x <- df_subject_matter %>% 
+    select(-doc_text) %>% 
+  ungroup() %>% 
+  mutate(country.name.en=case_when(discontinued==TRUE ~ "discontinued",
+                                   is.na(country.name.en)~"missing",
+                                   TRUE ~ as.character(country.name.en))) %>%
+  mutate(year_submission=lubridate::year(date_submission))
+
+x2 <- x %>% 
+  select(country_split,
+         country.name.en,
+         year_submission)
+  
+pl_x2 <- x2 %>% 
+  mutate(country.name.lump=fct_other(country.name.en, keep=c("missing","discontinued","India", "Sri Lanka", "Ethopia"))) %>% 
+  mutate(country.name.lump=fct_infreq(country.name.lump) %>% fct_rev) %>% 
+  group_by(country_split, country.name.lump, year_submission) %>% 
+  summarise(n=n()) %>% 
+  ggplot()+
+  geom_bar_interactive(aes(x=as.factor(year_submission),
+                           y=n,
+                           tooltip=glue::glue("{country.name.lump}: {n}"),
+               fill=country.name.lump),
+           stat="identity")+
+  scale_fill_paletteer_d("ggsci::default_aaas")+
+  facet_wrap(vars(country_split))+
+  theme_post()
+
+# 
+# pl_art_country_destination <- df_subject_matter %>% 
+#   mutate(country.name.en=forcats::fct_infreq(country.name.en) %>% fct_rev()) %>% 
+#   ggplot()+
+#   geom_bar_interactive(aes(x=country.name.en,
+#                            tooltip=glue::glue("{coutnry.name}")),
+#            stat="count")+
+#   ggforce::facet_row(vars(country_split),
+#              shrink=T,
+#              space="free",
+#              scale="free_x")+
+#   theme_post()+
+#   theme(axis.text.x=element_text(angle=90,
+#                                  vjust=0.5,
+#                                  hjust=1))
+
+
+girafe(ggobj =pl_x2,
+                             options=list(
+                               # opts_hover_inv(css = "opacity:0.1;"),
+                               opts_hover(css = "fill:#FFA500;color:#FFA500"),
+                               opts_tooltip(css = "background-color:#323E4F;
+                               color: white;
+                               font-family: Roboto;",
+                               offx = 30, offy = -30,
+                               delay_mouseout = 5000)
+                               ),
+       height_svg=3)
+
+
+```
+
+```{r eval=FALSE, include=FALSE}
+pl_art_country_destination
+```
+
+
+```{r eval=FALSE, include=FALSE}
+library(reactable)
+reactable(df_results_countries %>% 
+            mutate(year_submission=lubridate::year %>% (date_submission)) %>% 
+            mutate(country_split=as.factor(country_split)) %>% 
+            filter(country_split %in% c("Australia", "Sweden", "Canada") &
+                   year_submission %in% c(2014, 2015)) %>% 
+            select(communication_no,
+                   author,
+                   country_split), 
+          filterable = TRUE, 
+          compact=TRUE,
+          minRows = 10)
+
+```
+
+
+
+```{r table - year country, eval=FALSE, include=FALSE}
+tb_country_year <- df_country_year %>%   
+    pivot_wider(id_cols = country_split,
+              names_from=year_submission,
+              values_from=n_year,
+              values_fill=0) %>% 
+  arrange(country_split) %>% 
+  mutate(across(.cols=where(is.numeric), .fns=~round(., digits=2)))
+
+
+```
+
+<details closed> 
+<summary>Code: # communications per article and year</summary> 
+```{r eval=FALSE, include=FALSE}
+# check: art 3-1 and 3-2 => article_main 3 => two article 3 communications; has to be controlled for;
+
+df_art_year <- df_res_articles %>% 
+  ungroup() %>% 
+  select(committee, communication_no, date_submission, article_split_main) %>% 
+  mutate(year_submission=lubridate::year(date_submission)) %>% 
+  mutate(article_split_main_fct=fct_lump_n(article_split_main, n=5) %>% 
+           fct_infreq) %>% 
+  count(committee, year_submission, article_split_main_fct, name = "n_article") %>% 
+  group_by(committee, year_submission) %>% 
+  mutate(n_year=sum(n_article, na.rm = T)) %>% 
+  mutate(rel_year=n_article/n_year)
+
+pl_art_year <- df_art_year %>% 
+  ggplot()+
+  labs(title="Number of communications per article and year",
+       x="year of submission",
+       y="# communications",
+       caption=my_caption)+
+  # ggchicklet::geom_chicklet(aes(x=year_submission,
+  #              y=n,
+  #              group=article_split_main_fct,
+  #              fill=article_split_main_fct),
+  #       #   stats="identity",
+  #          radius = grid::unit(1, "pt"),
+  #          position=position_stack(reverse = T)
+  #          # position="fill"
+  #          )+
+  geom_bar_interactive(aes(x=year_submission,
+               y=n_article,
+               group=article_split_main_fct,
+               fill=article_split_main_fct,
+               tooltip=glue::glue("Article: {article_split_main_fct}
+               Number of communications: {n_article}
+               Total number of communiations in {year_submission}: {n_year}
+               Share Article {article_split_main_fct}: {percent(rel_year, accuracy = 0.1)}")),
+           stat="identity",
+           position=position_stack(reverse=T)
+           # position="fill"
+           )+
+  scale_fill_paletteer_d("ggsci::default_jama",
+                         na.value="grey50") +
+  theme_post()+
+  facet_wrap(vars(committee))+
+  theme(legend.position="top",
+        legend.justification = "left",
+        legend.title = element_text(vjust=1),
+        legend.direction = "horizontal")+
+  guides(fill=guide_legend(title="Article",
+                           title.position = "left",
+                           nrow=1))
+```
+</details>
+
+```{r eval=FALSE, include=FALSE}
+girafe(ggobj = pl_art_year,
+       fonts = list(sans = "Bahnschrift"),
+       height_svg=3)
+```
+
+
+
+
+
+
+```{r eval=FALSE, include=FALSE}
+df_all_art_3 %>% 
+  mutate(year_submission=as.numeric(as.character(year_submission))) %>% 
+  ggplot()+
+  labs(title="Share of Article 3 communications",
+       subtitle="",
+       x="year of submission",
+       y=" share of all communications",
+       caption=my_caption)+
+  geom_bar(aes(x=year_submission,
+               y=n_obs,
+               fill=art_3),
+           stat="identity",
+           position="fill")+
+  scale_y_continuous(labels = scales::label_percent(),
+                     expand=expansion(mult=c(0, .05)))+
+  scale_fill_paletteer_d("ggsci::default_jama")+
+  theme_post()
+```
+
+<details closed> 
+<summary>Code: # communications per country</summary> 
+```{r eval=FALSE, include=FALSE}
+df_all_art_3 <- bind_rows(df_art_3, df_not_art_3) %>% 
+  mutate(year_submission=lubridate::year(date_submission)) %>% 
+  mutate(across(.cols=everything(), .fns=as.factor)) %>% 
+  group_by(year_submission, art_3, .drop = F) %>% 
+  summarise(n_obs=n())
+
+df_all_art_3_wide <- df_all_art_3 %>% 
+  pivot_wider(id_cols=year_submission,
+              names_from=art_3,
+              values_from=n_obs) %>% 
+  mutate(art_3_share=yes/(yes+no))
+
+pl_df_all_art_3 <- df_all_art_3_wide %>% 
+  ggplot()+
+  labs(title="Share of Article 3 communications",
+       subtitle="How many percent of all communications in a year refer to Article 3?",
+       x="year of submission",
+       y=" share of all communications",
+       caption=my_caption)+
+  geom_bar_interactive(aes(x=year_submission %>% as.character %>% as.numeric,
+                y=art_3_share, 
+                tooltip=glue::glue("year {year_submission}
+                total number of communications: {yes+no}
+                                    number of communications w Art 3: {yes}
+                                   % communications w Art 3: {percent(art_3_share, accuracy = 0.1)}")),
+            stat="identity",
+            fill=paletteer_d("ggsci::default_jama")[1]
+            )+
+  # geom_text(aes(x=year_submission %>% as.character %>% as.numeric,
+  #               y=art_3_share+.05,
+  #               label=percent(art_3_share, accuracy = 0.1)),
+  #           stat="identity")+
+  scale_y_continuous(labels = scales::label_percent(),
+                     expand=expansion(mult=c(0, .05)))+
+  theme_post()
+
+
+```
+</details>
+
+```{r eval=FALSE, fig.height=5, include=FALSE}
+girafe(ggobj = pl_df_all_art_3,
+       fonts = list(sans = "Bahnschrift"),
+       height_svg=3)
+```
+
+## Combination of articles
+
+<details closed> 
+<summary>Code: # communications per country</summary> 
+```{r eval=FALSE, include=FALSE}
+library(ggupset)
+pl_upset <- df_res_articles %>% 
+  distinct(communication_no , article_split_main) %>% 
+  group_by(communication_no) %>% 
+  summarise(articles_comb=list(article_split_main)) %>% 
+  ggplot(aes(x = articles_comb)) +
+    labs(title="Combination of Articles and their Frequency",
+         subtitle=str_wrap("Dots in the lower panel indicate presence and combination of articles. Bars in upper panel indicate number of communications containing each combination.", 120),
+         X="combination of articles",
+         y="number of communications with combinations",
+         caption=my_caption)+
+    geom_bar(fill=paletteer_d("ggsci::default_jama")[1]) +
+    scale_x_upset(n_intersections = 10)+
+    geom_text(stat='count', 
+              aes(label=after_stat(count)), 
+              vjust=-1,
+              colour=paletteer_d("ggsci::default_jama")[1],
+              fontface="bold") +
+  scale_y_continuous(expand=expansion(mult=c(0.05, .15)))+
+  theme_post()
+```
+</details>
+
+```{r eval=FALSE, dev='svg', include=FALSE}
+pl_upset
+```
+
+
+# Number of pending complaints
+
+<details closed> 
+<summary>Code: # communications per country</summary>
+```{r eval=FALSE, include=FALSE}
+df_submitted <- df_res %>% 
+  select(committee, date_submission, communication_no) %>% 
+  distinct() %>% 
+  mutate(year=lubridate::year(date_submission)) %>% 
+  group_by(committee, year) %>% 
+  summarise(n_submitted=n())
+
+#check: there is no decision in which views would be later than admissibility decision; ok;
+df_decision_sequence <- df_res %>% 
+  select(communication_no, contains("date")) %>% 
+  filter(date_admissibility > date_views) 
+
+df_finalized <- df_res %>% 
+  select(committee, communication_no, contains("date")) %>% 
+  mutate(date_final=coalesce(date_views, date_admissibility)) %>%  #if there is no views, than take admissibility decision
+  mutate(year=lubridate::year(date_final)) %>% 
+  group_by(committee, year) %>% 
+  summarise(n_finalized=n())
+
+df_in_outgoing <- df_submitted %>% 
+  full_join(., df_finalized) %>% 
+  mutate(across(contains("n_"), ~replace_na(., 0))) %>% 
+  mutate(n_net=n_submitted-n_finalized) %>% 
+  arrange(year) %>% 
+  mutate(n_pending=cumsum(n_net))
+```
+</details>
+
+
+```{r eval=FALSE, include=FALSE}
+library(padr)
+library(lubridate)
+
+df_pad <- df_res %>% 
+  mutate(date_final=coalesce(date_views, date_admissibility)) %>% 
+  #filter(!is.na(date_admissibility) & !is.na(date_views)) %>% 
+  mutate(duration_days=date_final-date_submission) %>% 
+  mutate(duration_year=lubridate::as.duration(duration_days)/dyears(1)) %>% 
+  select(committee, communication_no, date_submission, date_final) %>% 
+  mutate_at(vars(contains("date")), .funs=list(year=lubridate::year)) %>% 
+  select(committee, communication_no, matches("^date.*year$")) %>% 
+  drop_na() %>%  #removes rows where at least one element is missing; why
+  pivot_longer(cols=contains("date"), names_to = "year_name",
+               values_to="year") %>% 
+  mutate(year=lubridate::ymd(year, truncated=2L)) %>% 
+  mutate(year=case_when(str_detect(year_name, "final") ~ year-years(1),
+                         TRUE ~ as.Date(year))) %>%
+  ungroup() %>% 
+  padr::pad(interval="year", group=c("committee", "communication_no")) 
+
+df_pending <- df_pad %>% 
+  group_by(communication_no) %>% 
+  arrange(year, .by_group=T) %>% 
+  tidyr::fill(committee, .direction=c("down")) %>% 
+  distinct(committee, communication_no, year) %>%  #remove year_name; communications starting/ending in same year are otherwise counted as one;
+  group_by(committee, year) %>% 
+  summarise(n_pending1=n()) %>% 
+  mutate(year=lubridate::year(year))
+
+df_pending %>% 
+  filter(y)
+
+
+```
+
+
+```{r eval=FALSE, include=FALSE}
+df_colors_flow <- data.frame(
+  stringsAsFactors = FALSE,
+  n_submitted = c("red"),
+  n_finalized = c("green"),
+  n_pending = c("orange")
+)
+```
+
+<details closed> 
+<summary>Code: # communications per country</summary>
+```{r eval=FALSE, include=FALSE}
+pl_in_out <- df_in_outgoing %>% 
+  pivot_longer(cols=contains("n_")) %>% 
+  filter(!str_detect(name, "n_net|pending")) %>% 
+  ggplot()+
+  labs(title=glue("Number of communications <span style='color:{df_colors_flow$n_submitted}'>submitted</span> and <span style='color:{df_colors_flow$n_finalized}'>finalized</span> per year"),
+       subtitle="",
+       y="number of communications",
+       caption=my_caption)+
+  geom_bar_interactive(aes(x=year,
+                y=value,
+                fill=name,
+                tooltip=glue::glue("{year}
+                                   {name}: {value}")),
+           position = position_dodge(),
+           stat="identity")+
+  geom_text(data=. %>%
+              group_by(name) %>% 
+              slice_tail(n=1),
+            aes(x=year,
+                y=value,
+                label=name),
+            hjust=0)+
+  scale_fill_manual(values=c("n_finalized"="green", "n_submitted"="red"),
+                    labels=c("n_finalized"="# communications finalized",
+                             "n_submitted"="# communications submitted"),
+                    name=NULL)+
+  scale_x_continuous(expand=expansion(mult=c(0.01, 0.01)))+
+  scale_y_continuous(expand=expansion(mult=c(0,.1)))+
+  theme_post()+
+  theme(legend.position = "top",
+        legend.justification = "left",
+        plot.title = element_markdown(),
+        axis.title.y = element_text(angle=90,
+                                    size=9,
+                                    color="grey50"))
+```
+</details>
+
+```{r eval=FALSE, include=FALSE}
+girafe(ggobj = pl_in_out,
+       fonts = list(sans = "Bahnschrift"),
+       height_svg=3)
+```
+
+<details closed> 
+<summary>Code: # communications per country</summary>
+```{r eval=FALSE, include=FALSE}
+pl_pending <- df_in_outgoing %>% 
+  pivot_longer(cols=contains("n_")) %>% 
+  filter(str_detect(name, "pending")) %>% 
+  ggplot()+
+  labs(title=glue::glue("Number of <span style='color:{df_colors_flow$n_pending}'>pending</span> communications per year"),
+       subtitle="",
+       y="number of communications",
+       caption=my_caption)+
+  geom_bar_interactive(aes(x=year,
+                y=value,
+                fill=name,
+                tooltip=glue::glue("year: {year}
+                                   # pending communications: {value}")),
+           position = position_dodge(),
+           stat="identity")+
+  geom_text(data=. %>%
+              group_by(name) %>% 
+              slice_tail(n=1),
+            aes(x=year,
+                y=value,
+                label=name),
+            hjust=0)+
+  # scale_fill_manual(values=c("n_finalized"="green", "n_submitted"="red"),
+  #                   labels=c("n_finalized"="# communications finalized",
+  #                            "n_submitted"="# communications submitted"),
+  #                   name=NULL)+
+  scale_fill_manual(values=df_colors_flow,
+                    # labels=c("n_finalized"="# communications finalized",
+                    #          "n_submitted"="# communications submitted"),
+                    name=NULL)+
+  scale_x_continuous(expand=expansion(mult=c(0.01, 0.01)))+
+  scale_y_continuous(expand=expansion(mult=c(0,.1)))+
+  theme_post()+
+  theme(legend.position = "none",
+        # legend.justification = "left",
+        plot.title = element_markdown(),
+        axis.title.y = element_text(angle=90,
+                                    size=9,
+                                    color="grey50"))
+
+
+```
+</details>
+
+
+# Duration of Complaint
+
+<details closed> 
+<summary>Code: # communications per country</summary>
+```{r eval=FALSE, include=FALSE}
+library(lubridate)
+df_duration <- df_res %>% 
+  mutate(date_final=coalesce(date_views, date_admissibility)) %>% 
+  #filter(!is.na(date_admissibility) & !is.na(date_views)) %>% 
+  mutate(duration_days=date_final-date_submission) %>% 
+  mutate(duration_year=lubridate::as.duration(duration_days)/dyears(1)) %>% 
+  mutate(year_finalization=lubridate::year(date_final)) %>% 
+  select(committee, communication_no, countries, starts_with("date"), contains("duration"), contains("year"), page_link)
+
+library(ggridges)
+
+pl_duration_1 <- df_duration %>% 
+  ggplot()+
+  labs(title="Duration of communications"#,
+      # caption=my_caption,
+      # x="duration in days"
+      )+
+  # geom_jitter_interactive(aes(x=duration_days,
+  #                             y=1,
+  #                             onclick = sprintf("window.open(\"%s\")", page_link),
+  #                             tooltip=glue::glue("communication no: {communication_no}
+  #                             country: {countries}
+  #                                                date submission: {date_submission}
+  #                                                date admissibility: {date_admissibility}
+  #                                                date views: {date_views}
+  #                                                duration days: {duration_days}")),
+  #                         orientaton="y")+
+  geom_density(aes(x=duration_days),
+               color="turquoise2")+
+  # geom_boxplot(aes(x=duration_days,
+  #                  y=1),
+  #              outlier.colour = NA,
+  #              fill=NA,
+  #              range_scale = 0.1,
+  #              center = TRUE, 
+  #              orientation="y")+
+  scale_x_continuous(labels=scales::label_comma())+
+  theme_post()+
+  theme(axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        panel.grid.major.y = element_blank())
+
+pl_duration_2 <- df_duration %>% 
+  ggplot()+
+  labs(x="duration in days")+
+  geom_jitter_interactive(aes(x=duration_days,
+                              y=1,
+                              onclick = sprintf("window.open(\"%s\")", page_link),
+                              data_id=communication_no,
+                              tooltip=glue::glue("communication no: {communication_no}
+                              country: {countries}
+                                                 date submission: {date_submission}
+                                                 date admissibility: {date_admissibility}
+                                                 date views: {date_views}
+                                                 duration days: {duration_days}")
+                              ),
+                         color="grey50",
+                         orientaton="y"
+                 )+
+  geom_boxplot(aes(x=duration_days,
+                   y=1),
+               color="turquoise2",
+               outlier.colour = NA,
+               fill=NA,
+               range_scale = 0.1,
+               center = TRUE,
+               orientation="y")+
+  scale_x_continuous(labels=scales::label_comma())+
+  theme_post()+
+  theme(panel.grid.major.y = element_blank(),
+        axis.text.y=element_blank())
+
+
+```
+</details>
+
+```{r eval=FALSE, include=FALSE}
+#https://twitter.com/eric_bickel/status/992102337652117504/photo/1
+girafe(code = print(pl_duration_1/pl_duration_2),
+                             options=list(
+                              opts_hover_inv(css = "opacity:0.1;"),
+                               opts_hover(css = "fill:#00E5EE;color:#00E5EE"),
+                               opts_tooltip(css = "background-color:#323E4F;
+                               color: white;
+                               font-family: Roboto;",
+                               offx = 30, offy = -30,
+                               delay_mouseout = 5000)
+                               ))
+```
+
+
+
+# Duration per year of finalization
+
+```{r eval=FALSE, include=FALSE}
+df_duration %>% 
+  ggplot()+
+  geom_boxplot(aes(x=year_finalization,
+                   y=duration_days,
+                   group=year_finalization))+
+  theme_post()
+
+```
+
+# Number of decisions per committtee session
+<details closed> 
+<summary>Code: # communications per country</summary>
+```{r eval=FALSE, include=FALSE}
+#session dates
+#https://tbinternet.ohchr.org/_layouts/15/TreatyBodyExternal/SessionsList.aspx?Treaty=CAT
+
+df_session_dates <- readxl::read_xls(path=here::here("blog_data", "un_treaty_bodies", "CAT_sessions.xls")) %>% 
+  janitor::clean_names() %>% 
+  select(session_no_2=session_no, date_start=start_date, date_end=end_date) %>% 
+  mutate(across(contains("date"), .fns = ~str_remove_all(., regex("<.*?>")) %>% 
+                  lubridate::dmy(.)))
+
+
+library(fuzzyjoin)
+df_res %>% 
+  mutate(date_final=coalesce(date_views, date_admissibility)) %>% 
+  mutate(month_final=lubridate::month(date_final)) %>% 
+  fuzzy_left_join(., df_session_dates %>% 
+                    select(contains("session"), contains("date")),
+                  by=c("date_final"="date_start",
+                      "date_final"="date_end"),
+                  match_fun=list(`>=`,`<=`)) %>% 
+  select(contains("session"))
+  
+
+df_res %>% 
+  count(session_no) %>%
+  mutate(session_no=as.numeric(session_no)) %>% 
+  ggplot() +
+  geom_bar(aes(x=session_no,
+               y=n),
+           stat="identity")
+
+
+```
+</details>
+
+# Length of decisions
+
+# Outcome 
+

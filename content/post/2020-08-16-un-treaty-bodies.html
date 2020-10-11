@@ -1,0 +1,2002 @@
+---
+title: UN human rights treaty bodies - Analysis of individual complaints
+author: rs
+date: '2020-08-16'
+tags:
+  - human rights
+slug: un-treaty-bodies
+description: ''
+draft: true
+output: 
+  html_document: 
+    highlight: null
+---
+
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/d3/d3.min.js"></script>
+<script src="/rmarkdown-libs/d3-lasso/d3-lasso.min.js"></script>
+<link href="/rmarkdown-libs/ggiraphjs/ggiraphjs.min.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/ggiraphjs/ggiraphjs.min.js"></script>
+<script src="/rmarkdown-libs/girafe-binding/girafe.js"></script>
+<script src="/rmarkdown-libs/core-js/shim.min.js"></script>
+<script src="/rmarkdown-libs/react/react.min.js"></script>
+<script src="/rmarkdown-libs/react/react-dom.min.js"></script>
+<script src="/rmarkdown-libs/reactwidget/react-tools.js"></script>
+<script src="/rmarkdown-libs/reactable-binding/reactable.js"></script>
+
+
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<details closed>
+<p><summary>Code: Load packages</summary></p>
+<pre class="r"><code>library(tidyverse)
+library(here)
+library(extrafont)
+loadfonts(device = &quot;win&quot;, quiet = T)
+library(hrbrthemes)
+hrbrthemes::update_geom_font_defaults(
+  family = &quot;Roboto Condensed&quot;,
+  size = 3.5,
+  color = &quot;grey50&quot;
+)
+library(scales)
+library(knitr)
+library(paletteer)
+library(ggtext)
+library(glue)
+library(DT)
+library(pdftools)
+library(lemon)
+library(ggiraph)
+library(rvest)
+library(janitor)
+library(patchwork)
+library(svglite)
+library(countrycode)
+library(fuzzyjoin)
+library(tictoc)
+library(furrr)
+plan(multisession, workers = 3)</code></pre>
+</details>
+<details closed>
+<p><summary>Code: Define rmarkdown options</summary></p>
+<pre class="r"><code>knit_hooks$set(wrap = function(before, options, envir) {
+  if (before) {
+    paste0(&quot;&lt;&quot;, options$wrap, &quot;&gt;&quot;)
+  } else {
+    paste0(&quot;&lt;/&quot;, options$wrap, &quot;&gt;&quot;)
+  }
+})
+
+knitr::opts_chunk$set(
+    fig.align = &quot;left&quot;,
+    message = FALSE,
+    warning = FALSE,
+    dev = &quot;svglite&quot;,
+#   dev.args = list(type = &quot;CairoPNG&quot;),
+    dpi = 300,
+    out.width = &quot;100%&quot;
+)
+options(width = 180, dplyr.width = 150)</code></pre>
+</details>
+<details closed>
+<p><summary>Code: Define plot theme, party colors, caption</summary></p>
+<pre class="r"><code>theme_post &lt;- function() {
+  hrbrthemes::theme_ipsum_rc() +
+    theme(
+      plot.margin = margin(l = 0, 
+                           t = 0.25,
+                           unit = &quot;cm&quot;),
+      plot.title = element_markdown(
+        color = &quot;grey20&quot;,
+        face = &quot;bold&quot;,
+        margin = margin(l = 0, unit = &quot;cm&quot;),
+        size = 13
+      ),
+      plot.title.position = &quot;plot&quot;,
+      plot.subtitle = element_text(
+        color = &quot;grey50&quot;,
+        margin = margin(t = 0.2, b = 0.3, unit = &quot;cm&quot;),
+        size = 11
+      ),
+      plot.caption = element_text(
+        color = &quot;grey50&quot;,
+        size = 8,
+        hjust = c(0)
+      ),
+      plot.caption.position = &quot;panel&quot;,
+      axis.title.x = element_text(
+        angle = 0,
+        color = &quot;grey50&quot;,
+        hjust = 1
+      ),
+      axis.text.x = element_text(
+        size = 9,
+        color = &quot;grey50&quot;
+      ),
+      axis.title.y = element_blank(),
+      axis.text.y = element_text(
+        size = 9,
+        color = &quot;grey50&quot;
+      ),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      panel.spacing = unit(0.25, &quot;cm&quot;),
+      panel.spacing.y = unit(0.25, &quot;cm&quot;),
+      strip.text = element_text(
+        angle = 0,
+        size = 9,
+        vjust = 1,
+        face = &quot;bold&quot;
+      ),
+      legend.title = element_text(
+        color = &quot;grey30&quot;,
+        face = &quot;bold&quot;,
+        vjust = 1,
+        size = 7
+      ),
+      legend.text = element_text(
+        size = 7,
+        color = &quot;grey30&quot;
+      ),
+      legend.justification = &quot;left&quot;,
+      legend.box = &quot;horizontal&quot;, # arrangement of multiple legends
+      legend.direction = &quot;vertical&quot;,
+      legend.margin = margin(l = 0, t = 0, unit = &quot;cm&quot;),
+      legend.spacing.y = unit(0.07, units = &quot;cm&quot;),
+      legend.text.align = 0,
+      legend.box.just = &quot;top&quot;,
+      legend.key.height = unit(0.2, &quot;line&quot;),
+      legend.key.width = unit(0.5, &quot;line&quot;),
+      text = element_text(size = 5)
+    )
+}
+
+text_add &lt;- &quot;Communications considered jointly were counted as one.&quot;
+
+data_date &lt;- format(Sys.Date(), &quot;%d %b %Y&quot;)
+my_caption &lt;- glue::glue(&quot;data: juris.ohchr.org/; as of {data_date}.\nanalysis: Roland Schmidt | @zoowalk | https://werk.statt.codes&quot;)</code></pre>
+</div>
+<div id="context" class="section level1">
+<h1>Context</h1>
+<p>Deviating from the structure of previous posts, I will first present the results of the analysis and subsequently dive into the underlying steps in R leading to them. Readers (if there are any ;-) whose primary interest is more in the substance of the matter rather than the blog’s technical focus</p>
+<p>own professional link
+Atlas of Torture
+Commentary on Convention against Torture</p>
+<p>what are treaty bodies, what are individual complaints</p>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+</div>
+<div id="steps-in-r" class="section level1">
+<h1>Steps in R</h1>
+<div id="data-extraction" class="section level2">
+<h2>Data extraction</h2>
+<p>SIM website of the UN Office for the High Commissioner
+offer data to be downloaded (at your own risk)
+reference to package from hrbrmstr;
+link to tweet</p>
+<div id="data-quality" class="section level3">
+<h3>Data quality</h3>
+<p>During the analysis, there were a number of instances in which it became apparent that the data represented at the UN OHCHR’s database were wrong, in the sense that it did not reflect the actual data contained in the text of the individual complaints. This was particularly the case with complaints’ dates of submission or consideration. Whenever I detected such errors I corrected them, and mention the pertaining modification in the relevant code block. In addition, at the end of this blog entry, I included a link to a file which enumerates all changes introduced to the data. While this list may not be exhaustive, it is nevertheless hopefully helpful for anyone working with the UN OHCHR’s data.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
+</div>
+<div id="getting-the-data" class="section level3">
+<h3>Getting the data</h3>
+<p>Obtaining the data as provided in the database on the OHCHR’s website is relatively straightforward, with the exception that the overview table on the site is dynamically generated by some javascript. As a consequence, its content can’t be retrieved by the <code>rvest</code>, my package of choice when it comes to web scrapping. While there are approaches which would allow you to overcome this hurdle (e.g. RSelenium etc), I instead extracted the data from the details pages which are linked to each row of the summary table. This not only allows us to extract the data from a plain html site, but also to get more details than from the summary table.</p>
+</div>
+<div id="data-cleaning" class="section level3">
+<h3>Data cleaning</h3>
+<details closed>
+<p><summary>Code: Data cleaning</summary></p>
+<pre class="r"><code># transform long dataset to wide dataset
+df_wide &lt;- df_scrapping_results %&gt;%
+  pivot_wider(
+    id_cols = page_link,
+    names_from = heading,
+    values_from = content
+  ) %&gt;%
+  clean_names() %&gt;%
+  rename(
+    communication_no = communication_number_s,
+    date_submission = submission_date,
+    date_admissibility = date_of_admissibility,
+    date_views = date_of_adoption_of_the_views,
+  ) %&gt;%
+  mutate_at(vars(contains(&quot;date&quot;)), lubridate::dmy) %&gt;%
+  mutate(communication_no = str_trim(communication_no, side = c(&quot;both&quot;)) %&gt;%
+    str_remove(., regex(&quot;,$&quot;)) %&gt;%
+    str_split(., &quot;,&quot;)) %&gt;%
+  mutate(communication_no_bundled = communication_no, .before = communication_no) %&gt;%
+  relocate(date_submission, .before=date_admissibility)
+  
+
+# make one row per communication number
+df_res &lt;- df_wide %&gt;%
+  unnest_longer(col = communication_no)
+
+# removes those where all fields are NA
+df_res &lt;- df_res %&gt;%
+  filter(!across(.cols = -page_link, .fns = ~ is.na(.) == T))</code></pre>
+</details>
+</div>
+<div id="only-cat" class="section level3">
+<h3>ONLY cat</h3>
+<p>In this blog post, I’ll focus only on the communications considered by the Committee against Torture. If time permits, I’ll take up the work of other treaty bodies with a later post.</p>
+<details closed>
+<p><summary>Code: only CAT</summary></p>
+<pre class="r"><code>df_res &lt;- df_res %&gt;%
+  filter(committee==&quot;CAT&quot;)</code></pre>
+</details>
+</div>
+<div id="dupliacates" class="section level3">
+<h3>dupliacates</h3>
+<p>merged the provided information into one record
+deleted one;</p>
+</div>
+</div>
+<div id="data-mugging" class="section level2">
+<h2>Data mugging</h2>
+<div id="decisions-per-country" class="section level3">
+<h3>Decisions per country</h3>
+<p>Another interesting angle to look at the available data is to see at which countries the individual complaints were actually addressed. To do so we have to bear in mind that some communications are addressed to more than one country. See the table below.</p>
+<details closed>
+<p><summary>Code: Example of communications with multiple countries</summary></p>
+<pre class="r"><code>df_multiple_countries &lt;- df_res %&gt;%
+  select(contains(&quot;countries&quot;)) %&gt;%
+  filter(str_detect(countries, regex(&quot;.*[a-z][A-Z].*&quot;)))</code></pre>
+</details>
+<pre><code>## # A tibble: 39 x 1
+##    countries                                  
+##    &lt;chr&gt;                                      
+##  1 SwedenSwitzerland                          
+##  2 AzerbaijanSweden                           
+##  3 Democratic Republic of the CongoSwitzerland
+##  4 CanadaMexico                               
+##  5 AfghanistanSweden                          
+##  6 AzerbaijanSweden                           
+##  7 MoroccoRussian Federation                  
+##  8 DenmarkIran (Islamic Republic of)          
+##  9 IndiaSwitzerland                           
+## 10 SwedenTurkey                               
+## # ... with 29 more rows</code></pre>
+<p>Note that in raw data multiple countries are not separated by any space, dot or other seperator, but their names are directly concocted. Hence, to calculate how many complaints each individual country has received, we need to disentangle the individual country names and create one row per one country and complaint. The chunk below does this. The graph shows the result.</p>
+<details closed>
+<p><summary>Code: split multiple state parties into individual countries</summary></p>
+<pre class="r"><code>df_results_countries &lt;- df_res %&gt;%
+  mutate(country_split = str_split(
+    countries,
+    &quot;(?&lt;=[a-z)])(?=[A-Z])&quot;
+  )) %&gt;%
+  unnest(country_split)
+
+# renaming
+df_results_countries &lt;- df_results_countries %&gt;%
+  mutate(country_split = case_when(
+    str_detect(country_split, &quot;United Kingdom&quot;) ~ &quot;UK&quot;,
+    is.na(country_split) ~ &quot;missing&quot;,
+    TRUE ~ as.character(country_split)
+  ))
+
+# no missing countries
+df_results_countries %&gt;%
+  select(country_split, countries, communication_no) %&gt;%
+  filter(is.na(country_split))</code></pre>
+<pre><code>## # A tibble: 0 x 3
+## # ... with 3 variables: country_split &lt;chr&gt;, countries &lt;chr&gt;, communication_no &lt;chr&gt;</code></pre>
+</details>
+<details closed>
+<p><summary>Code: plot # communications per country</summary></p>
+<pre class="r"><code>pl_results_countries &lt;- df_results_countries %&gt;%
+  # mutate(country_l=fct_lump_n(country_split, n=10)) %&gt;%
+  mutate(country_l = country_split) %&gt;%
+  group_by(committee, country_l) %&gt;%
+  summarise(n_communications = n()) %&gt;%
+  mutate(max_n_obs = max(n_communications, na.rm = T)) %&gt;%
+  mutate(rel_n_obs = n_communications / sum(n_communications, na.rm = T) * 100) %&gt;%
+  mutate(country_l = fct_reorder(country_l, n_communications) %&gt;%
+    fct_relevel(., &quot;Other&quot;, after = 0)) %&gt;%
+  arrange(desc(n_communications), .by_group = T) %&gt;%
+  slice_head(n = 10) %&gt;%
+  ggplot() +
+  labs(
+    title = &quot;CAT: Number of complaints per country&quot;,
+    subtitle = &quot;Top 10 countries only. Communications considered jointly were counted as one.&quot;,
+    caption = my_caption
+  ) +
+  geom_bar(aes(
+    y = tidytext::reorder_within(
+      x = country_l,
+      by = n_communications,
+      within = committee
+    ),
+    x = n_communications,
+    fill=committee,
+  ),
+  orientation = &quot;y&quot;,
+  stat = &quot;identity&quot;
+  ) +
+  geom_text(aes(
+    y = tidytext::reorder_within(
+      x = country_l,
+      by = n_communications,
+      within = committee
+    ),
+    x = max_n_obs * 1.50,
+    label = paste0(
+      n_communications,
+      &quot; (&quot;,
+      round(rel_n_obs, 2),
+      &quot;%)&quot;
+    )
+    ),
+    orientation = &quot;y&quot;,
+    hjust = 1,
+    check_overlap = T
+    ) +
+  tidytext::scale_y_reordered( # guide=guide_axis(n.dodge = 2),
+    limits = function(x) {
+      y &lt;- paste0(&quot;dummy&quot;, seq_len(10))
+      c(y[seq_len(10 - length(x))], x)
+    },
+    breaks = function(x) {
+      x[!startsWith(x, &quot;dummy&quot;)]
+    }
+  ) +
+  geom_vline(xintercept = seq(0, 150, 50),
+             color=&quot;white&quot;)+
+  scale_x_continuous(
+    expand = expansion(mult = c(0, .1)),
+    labels = scales::label_comma(),
+    breaks=seq(0, 150, 50)
+  ) +
+  scale_fill_paletteer_d(&quot;ggsci::default_jama&quot;) +
+  theme_post() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    plot.title = element_markdown(),
+    legend.position = &quot;none&quot;
+  ) +
+  facet_wrap(vars(committee),
+    ncol = 2,
+    scales = &quot;free&quot;
+  )</code></pre>
+</details>
+<p><img src="/post/2020-08-16-un-treaty-bodies_files/figure-html/unnamed-chunk-12-1.svg" width="100%" style="display: block; margin: auto auto auto 0;" /></p>
+<p>What the result shows is that around a fifth of all individual complaints submitted to the Committee against Torture are addressed to Switzerland, closely followed by Sweden with around 18 %. Overall, the top-4 states - Switzerland, Sweden, Canada, and Australia - account for not fewer than 60 % of all submissions. This is quite remarkable. Without wanting to belittle their own human rights violations, none of these countries would be associated by a general audience with rampant torture. Similarly, countries which would come to ones mind when thinking about torture do not even show up among the top 10 countries.</p>
+</div>
+</div>
+<div id="per-article" class="section level2">
+<h2>per Article</h2>
+<p>The ‘puzzle’ becomes somewhat resolved once we start digging into the CAT conventions’ articles and their prevalence in individual complaints submitted to the Committee. As a first step, let’s check whether the UN OHCHR’s database actually provides data on the invoked articles for all communications.</p>
+<details closed>
+<p><summary>Code: frequency of communications’ articles</summary></p>
+<pre class="r"><code>df_articles_availability &lt;- df_res %&gt;%
+  select(committee, communication_no, articles, type_of_decision) %&gt;%
+  mutate(article_yes_no = case_when(
+    nchar(articles) &gt; 0 ~ &quot;yes&quot;,
+    TRUE ~ &quot;no&quot;
+  ))%&gt;%
+  group_by(committee, article_yes_no) %&gt;%
+  summarise(n_abs = n()) %&gt;% 
+  mutate(n_rel=n_abs/sum(n_abs))</code></pre>
+</details>
+<pre><code>## # A tibble: 2 x 4
+## # Groups:   committee [1]
+##   committee article_yes_no n_abs n_rel
+##   &lt;chr&gt;     &lt;chr&gt;          &lt;int&gt; &lt;dbl&gt;
+## 1 CAT       no                84 0.152
+## 2 CAT       yes              470 0.848</code></pre>
+<p>As it turns out, in around 15 % of all individual complaints no information on the relevant articles are provided. This is a caveat to bear in mind (and would merit to go back to the original text of each decision).</p>
+<p>In the next step, and in order to count the number of complaints per article, we again have to account for those many communications which feature more than one invoked article. As above with names of states parties, communications which refer to multiple articles have to be split into separate observations to count each distinct article separately.</p>
+<p>Furthermore, the UN OHCHR’s database may indicate that a complaint relates to different paragraphs of the same article. E.g. a complaint may relate to articles 5-1 and 5-3. Instead of counting these as two distinct provisions, I decided to count such cases as one (1) observation for e.g. article 5. The code chunk below implements these steps.</p>
+<details closed>
+<p><summary>Code: Split multiple articles into separate observations</summary></p>
+<pre class="r"><code>df_res_articles &lt;- df_res %&gt;%
+  select(committee, date_submission, articles, countries, communication_no) %&gt;%
+  mutate(articles = str_trim(articles, side = c(&quot;both&quot;))) %&gt;%
+  mutate(article_split = stringr::str_split(articles, regex(&quot;(?&lt;=[a-z0-9])(?=[A-Z])&quot;))) %&gt;% # split concatenated articles
+  unnest(article_split) %&gt;%
+  mutate(article_split_clean = str_remove(article_split, paste0(committee, &quot;-&quot;))) %&gt;% # remove committee name
+  mutate(article_split_main = str_extract(article_split_clean, regex(&quot;.*?\\d+&quot;))) # extract main article (remove paras)</code></pre>
+</details>
+<details closed>
+<p><summary>Code: # communications per article of the CAT</summary></p>
+<pre class="r"><code>df_arts &lt;- df_res_articles %&gt;%
+  distinct(committee, communication_no, article_split_main) %&gt;%
+  count(committee, article_split_main, name = &quot;n_communications&quot;) %&gt;%
+  group_by(committee) %&gt;%
+  arrange(desc(n_communications), .by_group = T) %&gt;%
+  mutate(max_n_obs = max(n_communications, na.rm = T)) %&gt;%
+  mutate(rel_n_obs = n_communications / sum(n_communications, na.rm = T) * 100) %&gt;%
+  # filter(!is.na(article_split_main)) %&gt;%
+  slice_head(., n = 25) 
+  
+pl_arts &lt;- df_arts %&gt;% 
+  ggplot() +
+  labs(title=&quot;Number of communications per article&quot;,
+       subtitle=str_wrap(&quot;Communications which were considered jointly by the committee are counted as distinct items here. An articles different (sub)paragraphs are unified unter the articles&#39; heading, e.g. Art 5(1) and 5(3) are both assigned to Art 5.&quot;, 110),
+         caption=my_caption,
+       x=&quot;number of communications&quot;,
+       y=&quot;treaty article&quot;
+       )+
+  geom_bar(aes(
+    y = tidytext::reorder_within(
+      x = article_split_main,
+      by = n_communications,
+      within = committee
+    ),
+    x = n_communications,
+    fill=committee
+  ),
+  orientation = &quot;y&quot;,
+  stat = &quot;identity&quot;
+  ) +
+  geom_label(aes(
+    y = tidytext::reorder_within(
+      x = article_split_main,
+      by = n_communications,
+      within = committee
+    ),
+    # x = max_n_obs * 1.10,
+    x = Inf,
+    label = paste0(
+      n_communications,
+      &quot; (&quot;,
+      round(rel_n_obs, 1),
+      &quot;%)&quot;
+    )
+  ),
+  fill=&quot;white&quot;,
+  label.size = 0,
+  orientation = &quot;y&quot;,
+  hjust = 1,
+  check_overlap = T
+  ) +
+  geom_vline(xintercept = seq(0, unique(df_arts$max_n_obs), 100),
+             color=&quot;white&quot;)+
+  scale_x_continuous(expand=expansion(mult=c(0,.05)))+
+  scale_fill_paletteer_d(&quot;ggsci::default_jama&quot;) +
+  tidytext::scale_y_reordered(
+    #guide = guide_axis(n.dodge = 2)
+    ) +
+  facet_wrap(vars(committee),
+    scales = &quot;free&quot;
+  )+
+  theme_post()+
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(size=.5,
+                                          color=&quot;white&quot;),
+        legend.position = &quot;none&quot;,
+        axis.text.y=element_text(color=paletteer_d(&quot;ggsci::default_jama&quot;)[1]),
+        axis.title.y = element_text(color=&quot;grey50&quot;, 
+                                    hjust=1,
+                                    angle=90))</code></pre>
+</details>
+<p><img src="/post/2020-08-16-un-treaty-bodies_files/figure-html/unnamed-chunk-16-1.svg" width="100%" style="display: block; margin: auto auto auto 0;" /></p>
+<p>What becomes quite clear from the plot above is the dominant resort to Article 3 of the Convention (Non-refoulement). More than 40 % of all complaints submitted invoke a violation of the non-refoulement provision which stipulates, in simple terms, that no person should be transferred, extradited etc. to another country if he or she faces there a credible risk of being tortured.</p>
+<p>Let’s combine now the previous analysis of states parties being addressed in complaints and the invoked paragraphs of the Convention.</p>
+</div>
+<div id="share-of-article-3-submission-over-the-years" class="section level2">
+<h2>Share of Article 3 submission over the years</h2>
+<details closed>
+<p><summary>Code: Share and number of complaints with Article 3 CAT per country</summary></p>
+<pre class="r"><code>#number of communications with have at least one art 3
+df_art_3 &lt;- df_res_articles %&gt;% 
+  filter(article_split_main==&quot;3&quot;) %&gt;% 
+  select(date_submission, communication_no) %&gt;% 
+  distinct() %&gt;% 
+  mutate(art_3=&quot;yes&quot;)
+
+#number of communications which have no art 3
+df_not_art_3 &lt;- df_res_articles %&gt;% 
+  select(date_submission, communication_no) %&gt;% 
+  distinct() %&gt;% 
+  filter(!communication_no %in% df_art_3$communication_no) %&gt;% 
+  mutate(art_3=&quot;no&quot;)
+
+# length(unique(df_res_articles$communication_no))
+# nrow(df_art_3)+nrow(df_not_art_3)</code></pre>
+<pre class="r"><code>df_art3_state_share &lt;- bind_rows(df_art_3, df_not_art_3) %&gt;% 
+  left_join(., df_results_countries %&gt;% 
+              distinct(communication_no, country_split)) %&gt;% 
+  group_by(country_split, art_3) %&gt;% 
+  summarise(n_obs=n()) %&gt;% 
+  #mutate(n_rel=n_obs/sum(n_obs)) %&gt;% 
+  ungroup() %&gt;% 
+  pivot_wider(id_cols=c(&quot;country_split&quot;),
+              names_from=art_3,
+              values_from=n_obs,
+              values_fill=0) %&gt;% 
+  mutate(yes_share=yes/(no+yes),
+         total=yes+no)
+
+pl_art3_state_abs &lt;- df_art3_state_share %&gt;% 
+  arrange(-yes_share) %&gt;%
+  # arrange(-total) %&gt;% 
+  mutate(country_split=fct_inorder(country_split) %&gt;% fct_rev) %&gt;% 
+  select(country_split, yes, no) %&gt;% 
+  pivot_longer(cols = c(&quot;yes&quot;, &quot;no&quot;),
+               names_to=&quot;art_3&quot;) %&gt;% 
+  ggplot()+
+  labs(title=str_wrap(&quot;Number of complaints with(out) Art 3&quot;, 15),
+       x=&quot;number of communications&quot;)+
+  geom_bar_interactive(aes(y=country_split,
+               x=value,
+               fill=art_3,
+               tooltip=glue::glue(&quot;{country_split}
+                                  article 3 {art_3}: {value}&quot;),
+               data_id=paste0(country_split, art_3)),
+           orientation=&quot;y&quot;,
+           position=position_stack(),
+           stat=&quot;identity&quot;)+
+  scale_fill_manual(values=c(&quot;yes&quot;=paletteer_d(&quot;ggsci::default_jama&quot;)[1],
+                             &quot;no&quot;=&quot;grey50&quot;),
+                    name=&quot;Communication invokes Article 3&quot;)+  scale_x_continuous(expand=expansion(mult=c(0,.05)))+
+  theme_post()+
+  theme(panel.grid.major.y = element_blank(),
+        plot.title.position = &quot;panel&quot;,
+        plot.margin = margin(l=0.2, unit=&quot;cm&quot;),
+        # legend.position = &quot;none&quot;,
+        axis.title.x=element_text(size=7),
+        axis.text.x=element_text(size=7),
+        axis.text.y=element_text(size=7))</code></pre>
+<pre class="r"><code>library(countrycode)
+
+df_pl_art3_state_share &lt;- df_art3_state_share %&gt;% 
+  arrange(-yes_share) %&gt;%
+  # arrange(-total) %&gt;% 
+  mutate(country_split=fct_inorder(country_split) %&gt;% fct_rev) %&gt;% 
+#  select(country_split, yes, no) %&gt;% 
+  pivot_longer(cols = c(&quot;yes&quot;, &quot;no&quot;),
+               names_to=&quot;art_3&quot;) %&gt;% 
+  group_by(country_split, art_3) %&gt;% 
+  mutate(share=value/total)
+
+pl_art3_state_share &lt;- df_pl_art3_state_share%&gt;% 
+  ggplot()+
+  labs(title=&quot;Share of complaints &lt;br&gt;with(out) Art 3&quot;,
+       x=&quot;% of all communications&quot;)+
+  geom_bar_interactive(aes(y=country_split,
+                           x=value,
+                           fill=art_3,
+                           tooltip=glue::glue(&quot;{country_split}
+                                              Art 3 {art_3}: {percent(share)}&quot;),
+                           data_id=paste0(country_split, art_3)),
+           stat=&quot;identity&quot;,
+           position=&quot;fill&quot;)+
+  # scale_fill_paletteer_d(&quot;ggsci::dark_uchicago&quot;,
+  #                        direction=-1)+
+  scale_fill_manual(values=c(&quot;yes&quot;=paletteer_d(&quot;ggsci::default_jama&quot;)[1],
+                             &quot;no&quot;=&quot;grey50&quot;),
+                    name=&quot;Communication invokes Article 3&quot;)+
+  scale_x_continuous(label=scales::label_percent(),
+                     expand=expansion(mult=c(0,.05)))+
+  scale_y_discrete(label=function(x) {countrycode::countrycode(x, origin=&quot;country.name&quot;,
+                                                               destination=&quot;iso3c&quot;)})+
+  theme_post()+
+  theme(panel.grid.major.y = element_blank(),
+        plot.title.position = &quot;panel&quot;,
+        # legend.position = &quot;none&quot;,
+        axis.text.x=element_text(size=7),
+        axis.title.x=element_text(size=7),
+        axis.text.y=element_text(size=7))</code></pre>
+</details>
+<div id="htmlwidget-1" style="width:100%;height:1500px;" class="girafe html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"html":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd' viewBox='0 0 432.00 360.00'>\n  <g>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_1'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <rect x='0.00' y='0.00' width='432.00' height='360.00' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_1' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_1)' fill='#FFFFFF' fill-opacity='1' stroke='#FFFFFF' stroke-opacity='1' stroke-width='0.75' stroke-linejoin='round' stroke-linecap='round'/>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_2'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <rect x='0.00' y='0.00' width='432.00' height='360.00' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_2' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_2)' fill='#FFFFFF' fill-opacity='1' stroke='#FFFFFF' stroke-opacity='1' stroke-width='1.07' stroke-linejoin='round' stroke-linecap='round'/>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_3'>\n        <rect x='5.48' y='5.48' width='148.39' height='349.04'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_4'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5'>\n        <rect x='21.80' y='36.60' width='132.06' height='281.82'/>\n      <\/clipPath>\n    <\/defs>\n    <rect x='21.80' y='37.44' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_3' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Bangladeshyes' title='Bangladesh&amp;lt;br&amp;gt;Art 3 yes: 100.00%'/>\n    <rect x='147.58' y='37.44' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_4' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Bangladeshno' title='Bangladesh&amp;lt;br&amp;gt;Art 3 no: 0.00%'/>\n    <rect x='21.80' y='43.05' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_5' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Belarusyes' title='Belarus&amp;lt;br&amp;gt;Art 3 yes: 100.00%'/>\n    <rect x='147.58' y='43.05' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_6' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Belarusno' title='Belarus&amp;lt;br&amp;gt;Art 3 no: 0.00%'/>\n    <rect x='21.80' y='48.67' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_7' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Ethiopiayes' title='Ethiopia&amp;lt;br&amp;gt;Art 3 yes: 100.00%'/>\n    <rect x='147.58' y='48.67' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_8' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Ethiopiano' title='Ethiopia&amp;lt;br&amp;gt;Art 3 no: 0.00%'/>\n    <rect x='21.80' y='54.28' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_9' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Georgiayes' title='Georgia&amp;lt;br&amp;gt;Art 3 yes: 100.00%'/>\n    <rect x='147.58' y='54.28' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_10' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Georgiano' title='Georgia&amp;lt;br&amp;gt;Art 3 no: 0.00%'/>\n    <rect x='21.80' y='59.90' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_11' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Greeceyes' title='Greece&amp;lt;br&amp;gt;Art 3 yes: 100.00%'/>\n    <rect x='147.58' y='59.90' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_12' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Greeceno' title='Greece&amp;lt;br&amp;gt;Art 3 no: 0.00%'/>\n    <rect x='21.80' y='65.51' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_13' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Guineayes' title='Guinea&amp;lt;br&amp;gt;Art 3 yes: 100.00%'/>\n    <rect x='147.58' y='65.51' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_14' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Guineano' title='Guinea&amp;lt;br&amp;gt;Art 3 no: 0.00%'/>\n    <rect x='21.80' y='71.12' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_15' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Hungaryyes' title='Hungary&amp;lt;br&amp;gt;Art 3 yes: 100.00%'/>\n    <rect x='147.58' y='71.12' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_16' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Hungaryno' title='Hungary&amp;lt;br&amp;gt;Art 3 no: 0.00%'/>\n    <rect x='21.80' y='76.74' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_17' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Lebanonyes' title='Lebanon&amp;lt;br&amp;gt;Art 3 yes: 100.00%'/>\n    <rect x='147.58' y='76.74' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_18' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Lebanonno' title='Lebanon&amp;lt;br&amp;gt;Art 3 no: 0.00%'/>\n    <rect x='21.80' y='82.35' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_19' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Netherlandsyes' title='Netherlands&amp;lt;br&amp;gt;Art 3 yes: 100.00%'/>\n    <rect x='147.58' y='82.35' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_20' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Netherlandsno' title='Netherlands&amp;lt;br&amp;gt;Art 3 no: 0.00%'/>\n    <rect x='21.80' y='87.97' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_21' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Republic of Koreayes' title='Republic of Korea&amp;lt;br&amp;gt;Art 3 yes: 100.00%'/>\n    <rect x='147.58' y='87.97' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_22' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Republic of Koreano' title='Republic of Korea&amp;lt;br&amp;gt;Art 3 no: 0.00%'/>\n    <rect x='21.80' y='93.58' width='115.29' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_23' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Australiayes' title='Australia&amp;lt;br&amp;gt;Art 3 yes: 91.67%'/>\n    <rect x='137.10' y='93.58' width='10.48' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_24' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Australiano' title='Australia&amp;lt;br&amp;gt;Art 3 no: 8.33%'/>\n    <rect x='21.80' y='99.19' width='100.62' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_25' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Democratic Republic of the Congoyes' title='Democratic Republic of the Congo&amp;lt;br&amp;gt;Art 3 yes: 80.00%'/>\n    <rect x='122.42' y='99.19' width='25.15' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_26' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Democratic Republic of the Congono' title='Democratic Republic of the Congo&amp;lt;br&amp;gt;Art 3 no: 20.00%'/>\n    <rect x='21.80' y='104.81' width='96.75' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_27' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Denmarkyes' title='Denmark&amp;lt;br&amp;gt;Art 3 yes: 76.92%'/>\n    <rect x='118.55' y='104.81' width='29.02' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_28' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Denmarkno' title='Denmark&amp;lt;br&amp;gt;Art 3 no: 23.08%'/>\n    <rect x='21.80' y='110.42' width='94.33' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_29' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Germanyyes' title='Germany&amp;lt;br&amp;gt;Art 3 yes: 75.00%'/>\n    <rect x='116.13' y='110.42' width='31.44' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_30' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Germanyno' title='Germany&amp;lt;br&amp;gt;Art 3 no: 25.00%'/>\n    <rect x='21.80' y='116.04' width='94.04' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_31' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Swedenyes' title='Sweden&amp;lt;br&amp;gt;Art 3 yes: 74.77%'/>\n    <rect x='115.84' y='116.04' width='31.74' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_32' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Swedenno' title='Sweden&amp;lt;br&amp;gt;Art 3 no: 25.23%'/>\n    <rect x='21.80' y='121.65' width='88.66' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_33' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Switzerlandyes' title='Switzerland&amp;lt;br&amp;gt;Art 3 yes: 70.49%'/>\n    <rect x='110.46' y='121.65' width='37.11' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_34' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Switzerlandno' title='Switzerland&amp;lt;br&amp;gt;Art 3 no: 29.51%'/>\n    <rect x='21.80' y='127.26' width='88.20' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_35' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Canadayes' title='Canada&amp;lt;br&amp;gt;Art 3 yes: 70.13%'/>\n    <rect x='110.01' y='127.26' width='37.57' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_36' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Canadano' title='Canada&amp;lt;br&amp;gt;Art 3 no: 29.87%'/>\n    <rect x='21.80' y='132.88' width='83.85' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_37' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Finlandyes' title='Finland&amp;lt;br&amp;gt;Art 3 yes: 66.67%'/>\n    <rect x='105.65' y='132.88' width='41.92' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_38' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Finlandno' title='Finland&amp;lt;br&amp;gt;Art 3 no: 33.33%'/>\n    <rect x='21.80' y='138.49' width='80.04' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_39' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Azerbaijanyes' title='Azerbaijan&amp;lt;br&amp;gt;Art 3 yes: 63.64%'/>\n    <rect x='101.84' y='138.49' width='45.74' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_40' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Azerbaijanno' title='Azerbaijan&amp;lt;br&amp;gt;Art 3 no: 36.36%'/>\n    <rect x='21.80' y='144.11' width='67.08' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_41' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Moroccoyes' title='Morocco&amp;lt;br&amp;gt;Art 3 yes: 53.33%'/>\n    <rect x='88.88' y='144.11' width='58.69' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_42' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Moroccono' title='Morocco&amp;lt;br&amp;gt;Art 3 no: 46.67%'/>\n    <rect x='21.80' y='149.72' width='62.89' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_43' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Indiayes' title='India&amp;lt;br&amp;gt;Art 3 yes: 50.00%'/>\n    <rect x='84.69' y='149.72' width='62.89' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_44' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Indiano' title='India&amp;lt;br&amp;gt;Art 3 no: 50.00%'/>\n    <rect x='21.80' y='155.33' width='62.89' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_45' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Uzbekistanyes' title='Uzbekistan&amp;lt;br&amp;gt;Art 3 yes: 50.00%'/>\n    <rect x='84.69' y='155.33' width='62.89' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_46' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Uzbekistanno' title='Uzbekistan&amp;lt;br&amp;gt;Art 3 no: 50.00%'/>\n    <rect x='21.80' y='160.95' width='62.89' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_47' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Venezuela (Bolivarian Republic of)yes' title='Venezuela (Bolivarian Republic of)&amp;lt;br&amp;gt;Art 3 yes: 50.00%'/>\n    <rect x='84.69' y='160.95' width='62.89' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_48' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Venezuela (Bolivarian Republic of)no' title='Venezuela (Bolivarian Republic of)&amp;lt;br&amp;gt;Art 3 no: 50.00%'/>\n    <rect x='21.80' y='166.56' width='58.05' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_49' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Franceyes' title='France&amp;lt;br&amp;gt;Art 3 yes: 46.15%'/>\n    <rect x='79.85' y='166.56' width='67.72' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_50' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Franceno' title='France&amp;lt;br&amp;gt;Art 3 no: 53.85%'/>\n    <rect x='21.80' y='172.18' width='41.92' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_51' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Kazakhstanyes' title='Kazakhstan&amp;lt;br&amp;gt;Art 3 yes: 33.33%'/>\n    <rect x='63.73' y='172.18' width='83.85' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_52' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Kazakhstanno' title='Kazakhstan&amp;lt;br&amp;gt;Art 3 no: 66.67%'/>\n    <rect x='21.80' y='177.79' width='41.92' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_53' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Norwayyes' title='Norway&amp;lt;br&amp;gt;Art 3 yes: 33.33%'/>\n    <rect x='63.73' y='177.79' width='83.85' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_54' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Norwayno' title='Norway&amp;lt;br&amp;gt;Art 3 no: 66.67%'/>\n    <rect x='21.80' y='183.41' width='41.92' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_55' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Ukraineyes' title='Ukraine&amp;lt;br&amp;gt;Art 3 yes: 33.33%'/>\n    <rect x='63.73' y='183.41' width='83.85' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_56' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Ukraineno' title='Ukraine&amp;lt;br&amp;gt;Art 3 no: 66.67%'/>\n    <rect x='21.80' y='189.02' width='31.44' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_57' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Algeriayes' title='Algeria&amp;lt;br&amp;gt;Art 3 yes: 25.00%'/>\n    <rect x='53.25' y='189.02' width='94.33' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_58' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Algeriano' title='Algeria&amp;lt;br&amp;gt;Art 3 no: 75.00%'/>\n    <rect x='21.80' y='194.63' width='31.44' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_59' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Mexicoyes' title='Mexico&amp;lt;br&amp;gt;Art 3 yes: 25.00%'/>\n    <rect x='53.25' y='194.63' width='94.33' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_60' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Mexicono' title='Mexico&amp;lt;br&amp;gt;Art 3 no: 75.00%'/>\n    <rect x='21.80' y='200.25' width='20.96' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_61' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Serbiayes' title='Serbia&amp;lt;br&amp;gt;Art 3 yes: 16.67%'/>\n    <rect x='42.77' y='200.25' width='104.81' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_62' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Serbiano' title='Serbia&amp;lt;br&amp;gt;Art 3 no: 83.33%'/>\n    <rect x='21.80' y='205.86' width='15.72' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_63' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Russian Federationyes' title='Russian Federation&amp;lt;br&amp;gt;Art 3 yes: 12.50%'/>\n    <rect x='37.53' y='205.86' width='110.05' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_64' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Russian Federationno' title='Russian Federation&amp;lt;br&amp;gt;Art 3 no: 87.50%'/>\n    <rect x='21.80' y='211.48' width='12.58' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_65' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Tunisiayes' title='Tunisia&amp;lt;br&amp;gt;Art 3 yes: 10.00%'/>\n    <rect x='34.38' y='211.48' width='113.20' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_66' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Tunisiano' title='Tunisia&amp;lt;br&amp;gt;Art 3 no: 90.00%'/>\n    <rect x='21.80' y='217.09' width='10.48' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_67' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Spainyes' title='Spain&amp;lt;br&amp;gt;Art 3 yes: 8.33%'/>\n    <rect x='32.28' y='217.09' width='115.29' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_68' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Spainno' title='Spain&amp;lt;br&amp;gt;Art 3 no: 91.67%'/>\n    <rect x='21.80' y='222.70' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_69' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Afghanistanyes' title='Afghanistan&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='222.70' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_70' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Afghanistanno' title='Afghanistan&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='228.32' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_71' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Argentinayes' title='Argentina&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='228.32' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_72' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Argentinano' title='Argentina&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='233.93' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_73' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Austriayes' title='Austria&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='233.93' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_74' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Austriano' title='Austria&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='239.55' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_75' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Belgiumyes' title='Belgium&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='239.55' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_76' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Belgiumno' title='Belgium&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='245.16' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_77' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Bosnia and Herzegovinayes' title='Bosnia and Herzegovina&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='245.16' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_78' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Bosnia and Herzegovinano' title='Bosnia and Herzegovina&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='250.77' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_79' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Bulgariayes' title='Bulgaria&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='250.77' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_80' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Bulgariano' title='Bulgaria&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='256.39' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_81' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Burundiyes' title='Burundi&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='256.39' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_82' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Burundino' title='Burundi&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='262.00' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_83' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Federal Republic of Yugoslavia (Serbia and Montenegro)yes' title='Federal Republic of Yugoslavia (Serbia and Montenegro)&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='262.00' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_84' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Federal Republic of Yugoslavia (Serbia and Montenegro)no' title='Federal Republic of Yugoslavia (Serbia and Montenegro)&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='267.62' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_85' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Iran (Islamic Republic of)yes' title='Iran (Islamic Republic of)&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='267.62' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_86' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Iran (Islamic Republic of)no' title='Iran (Islamic Republic of)&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='273.23' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_87' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Iraqyes' title='Iraq&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='273.23' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_88' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Iraqno' title='Iraq&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='278.84' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_89' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Italyyes' title='Italy&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='278.84' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_90' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Italyno' title='Italy&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='284.46' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_91' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Mauritaniayes' title='Mauritania&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='284.46' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_92' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Mauritaniano' title='Mauritania&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='290.07' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_93' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Monacoyes' title='Monaco&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='290.07' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_94' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Monacono' title='Monaco&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='295.69' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_95' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='New Zealandyes' title='New Zealand&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='295.69' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_96' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='New Zealandno' title='New Zealand&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='301.30' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_97' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Senegalyes' title='Senegal&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='301.30' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_98' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Senegalno' title='Senegal&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='306.91' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_99' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Turkeyyes' title='Turkey&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='306.91' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_100' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Turkeyno' title='Turkey&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <rect x='21.80' y='312.53' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_101' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Yugoslaviayes' title='Yugoslavia&amp;lt;br&amp;gt;Art 3 yes: 0.00%'/>\n    <rect x='21.80' y='312.53' width='125.77' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_102' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_5)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Yugoslaviano' title='Yugoslavia&amp;lt;br&amp;gt;Art 3 no: 100.00%'/>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='10.57' y='317.54' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_103' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>NA<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.65' y='311.93' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_104' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>TUR<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.50' y='306.31' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_105' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>SEN<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.62' y='300.70' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_106' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>NZL<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='5.48' y='295.09' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_107' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>MCO<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='6.29' y='289.47' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_108' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>MRT<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='9.51' y='283.86' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_109' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>ITA<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='9.27' y='278.24' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_110' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>IRQ<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='9.14' y='272.63' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_111' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>IRN<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='10.57' y='267.02' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_112' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>NA<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='9.38' y='261.40' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_113' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>BDI<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.27' y='255.79' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_114' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>BGR<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='9.03' y='250.17' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_115' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>BIH<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='8.32' y='244.56' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_116' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>BEL<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.33' y='238.95' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_117' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>AUT<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.06' y='233.33' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_118' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>ARG<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.41' y='227.72' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_119' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>AFG<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.96' y='222.10' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_120' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>ESP<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.03' y='216.49' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_121' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>TUN<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.67' y='210.88' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_122' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>RUS<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.78' y='205.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_123' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>SRB<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='6.32' y='199.65' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_124' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>MEX<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.25' y='194.03' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_125' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>DZA<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.48' y='188.42' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_126' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>UKR<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='6.69' y='182.81' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_127' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>NOR<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.43' y='177.19' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_128' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>KAZ<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.83' y='171.58' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_129' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>FRA<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.21' y='165.96' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_130' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>VEN<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.53' y='160.35' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_131' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>UZB<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='8.86' y='154.74' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_132' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>IND<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='5.90' y='149.12' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_133' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>MAR<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.77' y='143.51' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_134' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>AZE<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='9.49' y='137.89' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_135' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>FIN<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='6.60' y='132.28' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_136' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>CAN<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.15' y='126.67' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_137' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>CHE<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='6.50' y='121.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_138' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>SWE<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.54' y='115.44' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_139' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>DEU<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='6.80' y='109.82' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_140' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>DNK<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='6.77' y='104.21' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_141' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>COD<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.35' y='98.60' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_142' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>AUS<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.21' y='92.98' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_143' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>KOR<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.28' y='87.37' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_144' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>NLD<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.46' y='81.75' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_145' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>LBN<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='6.33' y='76.14' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_146' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>HUN<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='8.72' y='70.53' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_147' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>GIN<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.12' y='64.91' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_148' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>GRC<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.12' y='59.30' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_149' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>GEO<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='7.48' y='53.68' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_150' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>ETH<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='8.08' y='48.07' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_151' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>BLR<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='6.99' y='42.45' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_152' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>BGD<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='17.86' y='326.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_153' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>0%<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='47.58' y='326.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_154' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>25%<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='79.02' y='326.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_155' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>50%<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='110.46' y='326.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_156' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>75%<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='140.18' y='326.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_157' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>100%<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='86.34' y='335.60' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_158' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>% of all communications<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='21.80' y='21.81' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_159' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>Share<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='54.87' y='21.81' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_160' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>of<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='68.59' y='21.81' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_161' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>complaints<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='21.80' y='33.82' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_162' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>with(out)<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='71.96' y='33.82' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_163' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>Art<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_6)'>\n      <text x='91.02' y='33.82' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_164' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>3<\/text>\n    <\/g>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_7'>\n        <rect x='153.86' y='5.48' width='272.66' height='349.04'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_8'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9'>\n        <rect x='162.40' y='36.60' width='264.12' height='281.82'/>\n      <\/clipPath>\n    <\/defs>\n    <rect x='162.40' y='37.44' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_165' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Bangladeshyes' title='Bangladesh&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='37.44' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_166' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Bangladeshno' title='Bangladesh&amp;lt;br&amp;gt;article 3 no: 0'/>\n    <rect x='162.40' y='43.05' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_167' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Belarusyes' title='Belarus&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='43.05' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_168' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Belarusno' title='Belarus&amp;lt;br&amp;gt;article 3 no: 0'/>\n    <rect x='162.40' y='48.67' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_169' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Ethiopiayes' title='Ethiopia&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='48.67' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_170' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Ethiopiano' title='Ethiopia&amp;lt;br&amp;gt;article 3 no: 0'/>\n    <rect x='162.40' y='54.28' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_171' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Georgiayes' title='Georgia&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='54.28' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_172' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Georgiano' title='Georgia&amp;lt;br&amp;gt;article 3 no: 0'/>\n    <rect x='162.40' y='59.90' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_173' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Greeceyes' title='Greece&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='59.90' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_174' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Greeceno' title='Greece&amp;lt;br&amp;gt;article 3 no: 0'/>\n    <rect x='162.40' y='65.51' width='4.12' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_175' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Guineayes' title='Guinea&amp;lt;br&amp;gt;article 3 yes: 2'/>\n    <rect x='166.52' y='65.51' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_176' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Guineano' title='Guinea&amp;lt;br&amp;gt;article 3 no: 0'/>\n    <rect x='162.40' y='71.12' width='4.12' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_177' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Hungaryyes' title='Hungary&amp;lt;br&amp;gt;article 3 yes: 2'/>\n    <rect x='166.52' y='71.12' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_178' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Hungaryno' title='Hungary&amp;lt;br&amp;gt;article 3 no: 0'/>\n    <rect x='162.40' y='76.74' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_179' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Lebanonyes' title='Lebanon&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='76.74' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_180' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Lebanonno' title='Lebanon&amp;lt;br&amp;gt;article 3 no: 0'/>\n    <rect x='162.40' y='82.35' width='59.79' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_181' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Netherlandsyes' title='Netherlands&amp;lt;br&amp;gt;article 3 yes: 29'/>\n    <rect x='222.19' y='82.35' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_182' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Netherlandsno' title='Netherlands&amp;lt;br&amp;gt;article 3 no: 0'/>\n    <rect x='162.40' y='87.97' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_183' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Republic of Koreayes' title='Republic of Korea&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='87.97' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_184' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Republic of Koreano' title='Republic of Korea&amp;lt;br&amp;gt;article 3 no: 0'/>\n    <rect x='162.40' y='93.58' width='113.40' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_185' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Australiayes' title='Australia&amp;lt;br&amp;gt;article 3 yes: 55'/>\n    <rect x='275.80' y='93.58' width='10.31' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_186' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Australiano' title='Australia&amp;lt;br&amp;gt;article 3 no: 5'/>\n    <rect x='162.40' y='99.19' width='8.25' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_187' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Democratic Republic of the Congoyes' title='Democratic Republic of the Congo&amp;lt;br&amp;gt;article 3 yes: 4'/>\n    <rect x='170.65' y='99.19' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_188' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Democratic Republic of the Congono' title='Democratic Republic of the Congo&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='104.81' width='41.24' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_189' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Denmarkyes' title='Denmark&amp;lt;br&amp;gt;article 3 yes: 20'/>\n    <rect x='203.64' y='104.81' width='12.37' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_190' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Denmarkno' title='Denmark&amp;lt;br&amp;gt;article 3 no: 6'/>\n    <rect x='162.40' y='110.42' width='6.19' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_191' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Germanyyes' title='Germany&amp;lt;br&amp;gt;article 3 yes: 3'/>\n    <rect x='168.58' y='110.42' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_192' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Germanyno' title='Germany&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='116.04' width='164.95' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_193' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Swedenyes' title='Sweden&amp;lt;br&amp;gt;article 3 yes: 80'/>\n    <rect x='327.35' y='116.04' width='55.67' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_194' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Swedenno' title='Sweden&amp;lt;br&amp;gt;article 3 no: 27'/>\n    <rect x='162.40' y='121.65' width='177.32' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_195' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Switzerlandyes' title='Switzerland&amp;lt;br&amp;gt;article 3 yes: 86'/>\n    <rect x='339.72' y='121.65' width='74.23' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_196' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Switzerlandno' title='Switzerland&amp;lt;br&amp;gt;article 3 no: 36'/>\n    <rect x='162.40' y='127.26' width='111.34' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_197' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Canadayes' title='Canada&amp;lt;br&amp;gt;article 3 yes: 54'/>\n    <rect x='273.74' y='127.26' width='47.42' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_198' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Canadano' title='Canada&amp;lt;br&amp;gt;article 3 no: 23'/>\n    <rect x='162.40' y='132.88' width='8.25' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_199' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Finlandyes' title='Finland&amp;lt;br&amp;gt;article 3 yes: 4'/>\n    <rect x='170.65' y='132.88' width='4.12' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_200' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Finlandno' title='Finland&amp;lt;br&amp;gt;article 3 no: 2'/>\n    <rect x='162.40' y='138.49' width='14.43' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_201' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Azerbaijanyes' title='Azerbaijan&amp;lt;br&amp;gt;article 3 yes: 7'/>\n    <rect x='176.83' y='138.49' width='8.25' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_202' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Azerbaijanno' title='Azerbaijan&amp;lt;br&amp;gt;article 3 no: 4'/>\n    <rect x='162.40' y='144.11' width='16.49' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_203' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Moroccoyes' title='Morocco&amp;lt;br&amp;gt;article 3 yes: 8'/>\n    <rect x='178.89' y='144.11' width='14.43' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_204' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Moroccono' title='Morocco&amp;lt;br&amp;gt;article 3 no: 7'/>\n    <rect x='162.40' y='149.72' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_205' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Indiayes' title='India&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='149.72' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_206' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Indiano' title='India&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='155.33' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_207' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Uzbekistanyes' title='Uzbekistan&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='155.33' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_208' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Uzbekistanno' title='Uzbekistan&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='160.95' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_209' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Venezuela (Bolivarian Republic of)yes' title='Venezuela (Bolivarian Republic of)&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='160.95' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_210' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Venezuela (Bolivarian Republic of)no' title='Venezuela (Bolivarian Republic of)&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='166.56' width='12.37' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_211' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Franceyes' title='France&amp;lt;br&amp;gt;article 3 yes: 6'/>\n    <rect x='174.77' y='166.56' width='14.43' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_212' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Franceno' title='France&amp;lt;br&amp;gt;article 3 no: 7'/>\n    <rect x='162.40' y='172.18' width='6.19' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_213' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Kazakhstanyes' title='Kazakhstan&amp;lt;br&amp;gt;article 3 yes: 3'/>\n    <rect x='168.58' y='172.18' width='12.37' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_214' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Kazakhstanno' title='Kazakhstan&amp;lt;br&amp;gt;article 3 no: 6'/>\n    <rect x='162.40' y='177.79' width='6.19' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_215' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Norwayyes' title='Norway&amp;lt;br&amp;gt;article 3 yes: 3'/>\n    <rect x='168.58' y='177.79' width='12.37' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_216' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Norwayno' title='Norway&amp;lt;br&amp;gt;article 3 no: 6'/>\n    <rect x='162.40' y='183.41' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_217' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Ukraineyes' title='Ukraine&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='183.41' width='4.12' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_218' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Ukraineno' title='Ukraine&amp;lt;br&amp;gt;article 3 no: 2'/>\n    <rect x='162.40' y='189.02' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_219' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Algeriayes' title='Algeria&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='189.02' width='6.19' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_220' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Algeriano' title='Algeria&amp;lt;br&amp;gt;article 3 no: 3'/>\n    <rect x='162.40' y='194.63' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_221' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Mexicoyes' title='Mexico&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='194.63' width='6.19' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_222' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Mexicono' title='Mexico&amp;lt;br&amp;gt;article 3 no: 3'/>\n    <rect x='162.40' y='200.25' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_223' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Serbiayes' title='Serbia&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='200.25' width='10.31' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_224' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Serbiano' title='Serbia&amp;lt;br&amp;gt;article 3 no: 5'/>\n    <rect x='162.40' y='205.86' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_225' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Russian Federationyes' title='Russian Federation&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='205.86' width='14.43' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_226' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Russian Federationno' title='Russian Federation&amp;lt;br&amp;gt;article 3 no: 7'/>\n    <rect x='162.40' y='211.48' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_227' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Tunisiayes' title='Tunisia&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='211.48' width='18.56' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_228' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Tunisiano' title='Tunisia&amp;lt;br&amp;gt;article 3 no: 9'/>\n    <rect x='162.40' y='217.09' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_229' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Spainyes' title='Spain&amp;lt;br&amp;gt;article 3 yes: 1'/>\n    <rect x='164.46' y='217.09' width='22.68' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_230' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Spainno' title='Spain&amp;lt;br&amp;gt;article 3 no: 11'/>\n    <rect x='162.40' y='222.70' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_231' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Afghanistanyes' title='Afghanistan&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='222.70' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_232' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Afghanistanno' title='Afghanistan&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='228.32' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_233' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Argentinayes' title='Argentina&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='228.32' width='10.31' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_234' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Argentinano' title='Argentina&amp;lt;br&amp;gt;article 3 no: 5'/>\n    <rect x='162.40' y='233.93' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_235' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Austriayes' title='Austria&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='233.93' width='6.19' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_236' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Austriano' title='Austria&amp;lt;br&amp;gt;article 3 no: 3'/>\n    <rect x='162.40' y='239.55' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_237' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Belgiumyes' title='Belgium&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='239.55' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_238' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Belgiumno' title='Belgium&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='245.16' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_239' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Bosnia and Herzegovinayes' title='Bosnia and Herzegovina&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='245.16' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_240' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Bosnia and Herzegovinano' title='Bosnia and Herzegovina&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='250.77' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_241' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Bulgariayes' title='Bulgaria&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='250.77' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_242' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Bulgariano' title='Bulgaria&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='256.39' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_243' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Burundiyes' title='Burundi&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='256.39' width='14.43' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_244' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Burundino' title='Burundi&amp;lt;br&amp;gt;article 3 no: 7'/>\n    <rect x='162.40' y='262.00' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_245' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Federal Republic of Yugoslavia (Serbia and Montenegro)yes' title='Federal Republic of Yugoslavia (Serbia and Montenegro)&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='262.00' width='8.25' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_246' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Federal Republic of Yugoslavia (Serbia and Montenegro)no' title='Federal Republic of Yugoslavia (Serbia and Montenegro)&amp;lt;br&amp;gt;article 3 no: 4'/>\n    <rect x='162.40' y='267.62' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_247' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Iran (Islamic Republic of)yes' title='Iran (Islamic Republic of)&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='267.62' width='4.12' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_248' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Iran (Islamic Republic of)no' title='Iran (Islamic Republic of)&amp;lt;br&amp;gt;article 3 no: 2'/>\n    <rect x='162.40' y='273.23' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_249' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Iraqyes' title='Iraq&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='273.23' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_250' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Iraqno' title='Iraq&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='278.84' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_251' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Italyyes' title='Italy&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='278.84' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_252' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Italyno' title='Italy&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='284.46' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_253' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Mauritaniayes' title='Mauritania&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='284.46' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_254' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Mauritaniano' title='Mauritania&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='290.07' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_255' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Monacoyes' title='Monaco&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='290.07' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_256' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Monacono' title='Monaco&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='295.69' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_257' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='New Zealandyes' title='New Zealand&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='295.69' width='4.12' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_258' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='New Zealandno' title='New Zealand&amp;lt;br&amp;gt;article 3 no: 2'/>\n    <rect x='162.40' y='301.30' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_259' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Senegalyes' title='Senegal&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='301.30' width='2.06' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_260' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Senegalno' title='Senegal&amp;lt;br&amp;gt;article 3 no: 1'/>\n    <rect x='162.40' y='306.91' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_261' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Turkeyyes' title='Turkey&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='306.91' width='8.25' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_262' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Turkeyno' title='Turkey&amp;lt;br&amp;gt;article 3 no: 4'/>\n    <rect x='162.40' y='312.53' width='0.00' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_263' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#374E55' fill-opacity='1' stroke='none' data-id='Yugoslaviayes' title='Yugoslavia&amp;lt;br&amp;gt;article 3 yes: 0'/>\n    <rect x='162.40' y='312.53' width='4.12' height='5.05' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_264' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_9)' fill='#7F7F7F' fill-opacity='1' stroke='none' data-id='Yugoslaviano' title='Yugoslavia&amp;lt;br&amp;gt;article 3 no: 2'/>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='160.67' y='326.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_265' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>0<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='210.49' y='326.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_266' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>25<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='262.03' y='326.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_267' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>50<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='313.58' y='326.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_268' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>75<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='363.40' y='326.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_269' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>100<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='414.95' y='326.26' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_270' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>125<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='350.69' y='335.60' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_271' font-size='5.25pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>number of communications<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='162.40' y='21.81' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_272' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>Number<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='206.36' y='21.81' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_273' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>of<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='220.09' y='21.81' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_274' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>complaints<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='280.57' y='21.81' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_275' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>with(out)<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='330.73' y='21.81' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_276' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>Art<\/text>\n    <\/g>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_10)'>\n      <text x='349.79' y='21.81' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_277' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>3<\/text>\n    <\/g>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_11'>\n        <rect x='21.80' y='348.05' width='137.34' height='6.47'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_12'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_13'>\n        <rect x='21.80' y='348.05' width='137.34' height='6.47'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_14'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_14)'>\n      <text x='21.80' y='353.03' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_278' font-size='5.25pt' font-weight='bold' fill='#4D4D4D' fill-opacity='1' font-family='Roboto Condensed'>Communication invokes Article 3<\/text>\n    <\/g>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_15'>\n        <rect x='21.80' y='348.05' width='137.34' height='6.47'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_16'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_17'>\n        <rect x='21.80' y='348.05' width='137.34' height='6.47'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_18'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <rect x='118.36' y='348.41' width='6.48' height='5.75' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_279' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_18)' fill='#374E55' fill-opacity='1' stroke='none'/>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_19'>\n        <rect x='21.80' y='348.05' width='137.34' height='6.47'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_20'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_21'>\n        <rect x='21.80' y='348.05' width='137.34' height='6.47'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_22'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <rect x='141.92' y='348.41' width='6.48' height='5.75' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_280' clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_22)' fill='#7F7F7F' fill-opacity='1' stroke='none'/>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_23'>\n        <rect x='21.80' y='348.05' width='137.34' height='6.47'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_24'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_24)'>\n      <text x='128.69' y='353.03' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_281' font-size='5.25pt' fill='#4D4D4D' fill-opacity='1' font-family='Roboto Condensed'>yes<\/text>\n    <\/g>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_25'>\n        <rect x='21.80' y='348.05' width='137.34' height='6.47'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_26'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n    <g clip-path='url(#svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_26)'>\n      <text x='152.25' y='353.03' id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_el_282' font-size='5.25pt' fill='#4D4D4D' fill-opacity='1' font-family='Roboto Condensed'>no<\/text>\n    <\/g>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_27'>\n        <rect x='21.80' y='348.05' width='137.34' height='6.47'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd_cl_28'>\n        <rect x='0.00' y='0.00' width='432.00' height='360.00'/>\n      <\/clipPath>\n    <\/defs>\n  <\/g>\n<\/svg>","js":null,"uid":"svg_dc4f3733-d9bb-42d9-b47e-4007dfbfccbd","ratio":1.2,"settings":{"tooltip":{"css":".tooltip_SVGID_ { background-color:#323E4F;\n                               color: white;\n                               font-family: Roboto; ; position:absolute;pointer-events:none;z-index:999;}\n","offx":30,"offy":-30,"use_cursor_pos":true,"opacity":0.9,"usefill":false,"usestroke":false,"delay":{"over":200,"out":5000}},"hover":{"css":".hover_SVGID_ { fill:#FFA500;color:#FFA500 }\n","reactive":false},"hoverkey":{"css":".hover_key_SVGID_ { stroke:red; }\n","reactive":false},"hovertheme":{"css":".hover_theme_SVGID_ { fill:green; }\n","reactive":false},"hoverinv":{"css":""},"zoom":{"min":1,"max":1},"capture":{"css":".selected_SVGID_ { fill:red;stroke:gray; }\n","type":"multiple","only_shiny":true,"selected":[]},"capturekey":{"css":".selected_key_SVGID_ { stroke:gray; }\n","type":"single","only_shiny":true,"selected":[]},"capturetheme":{"css":".selected_theme_SVGID_ { stroke:gray; }\n","type":"single","only_shiny":true,"selected":[]},"toolbar":{"position":"topright","saveaspng":true,"pngname":"diagram"},"sizing":{"rescale":true,"width":1}}},"evals":[],"jsHooks":[]}</script>
+<p>The plot above shows each country’s share of communications which invoke Article 3 (left plot) as well as the absolute number of communications with and without Article 3 (right plot). Hover over the bars’ segment to get the pertaining numbers.</p>
+<p>The plot reveals that the countries with most communications addressed to also feature a considerable large share of articles invoking article 3. Around 70 % of all communications addressed to Switzerland and Canada feature Article 3, in the case of Sweden its 74 %, and for Australia the pertaining share is even above 90 %.</p>
+</div>
+<div id="articles-over-time" class="section level2">
+<h2>Articles over time</h2>
+<p>Let’s now look at the dynamic of submissions to the Committee against Torture over time. The graph below depicts the total number of communications submitted (!) by year.</p>
+<details closed>
+<p><summary>Code: number of submissions per year</summary></p>
+<pre class="r"><code>df_communication_per_year &lt;- df_res %&gt;% 
+  mutate(submission_year=lubridate::year(date_submission)) %&gt;% 
+  group_by(submission_year)%&gt;% 
+  summarise(n_obs=n())
+
+pl_communication_per_year &lt;- df_communication_per_year %&gt;% 
+  ggplot()+
+  labs(title=&quot;Total number of communications submitted to the CAT Committee per year&quot;,
+       x=&quot;year of submission&quot;,
+       caption=my_caption)+
+  geom_bar_interactive(aes(x=submission_year,
+                           y=n_obs,
+                           tooltip=glue::glue(&quot;{submission_year}
+                           n obs: {n_obs}&quot;),
+ data_id=submission_year),
+  fill=paletteer_d(&quot;ggsci::default_jama&quot;)[1],
+ stat=&quot;identity&quot;)+
+  scale_y_continuous(expand=expansion(mult=c(0, .1)))+
+  theme_post()</code></pre>
+</details>
+<div id="htmlwidget-2" style="width:100%;height:1500px;" class="girafe html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"html":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b' viewBox='0 0 432.00 216.00'>\n  <g>\n    <defs>\n      <clipPath id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_1'>\n        <rect x='0.00' y='0.00' width='432.00' height='216.00'/>\n      <\/clipPath>\n    <\/defs>\n    <rect x='0.00' y='0.00' width='432.00' height='216.00' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_1' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_1)' fill='#FFFFFF' fill-opacity='1' stroke='#FFFFFF' stroke-opacity='1' stroke-width='0.75' stroke-linejoin='round' stroke-linecap='round'/>\n    <defs>\n      <clipPath id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_2'>\n        <rect x='0.00' y='0.00' width='432.00' height='216.00'/>\n      <\/clipPath>\n    <\/defs>\n    <defs>\n      <clipPath id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3'>\n        <rect x='11.75' y='19.10' width='420.25' height='148.53'/>\n      <\/clipPath>\n    <\/defs>\n    <polyline points='11.75,167.64 432.00,167.64' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_2' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='none' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='round' stroke-linecap='butt'/>\n    <polyline points='11.75,123.36 432.00,123.36' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_3' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='none' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='round' stroke-linecap='butt'/>\n    <polyline points='11.75,79.09 432.00,79.09' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_4' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='none' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='round' stroke-linecap='butt'/>\n    <polyline points='11.75,34.82 432.00,34.82' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_5' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='none' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='round' stroke-linecap='butt'/>\n    <rect x='30.85' y='161.00' width='10.78' height='6.64' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_6' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='1988' title='1988&amp;lt;br&amp;gt;n obs: 3'/>\n    <rect x='54.80' y='161.00' width='10.78' height='6.64' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_7' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='1990' title='1990&amp;lt;br&amp;gt;n obs: 3'/>\n    <rect x='66.78' y='163.21' width='10.78' height='4.43' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_8' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='1991' title='1991&amp;lt;br&amp;gt;n obs: 2'/>\n    <rect x='90.73' y='163.21' width='10.78' height='4.43' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_9' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='1993' title='1993&amp;lt;br&amp;gt;n obs: 2'/>\n    <rect x='102.71' y='156.57' width='10.78' height='11.07' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_10' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='1994' title='1994&amp;lt;br&amp;gt;n obs: 5'/>\n    <rect x='114.69' y='136.65' width='10.78' height='30.99' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_11' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='1995' title='1995&amp;lt;br&amp;gt;n obs: 14'/>\n    <rect x='126.66' y='125.58' width='10.78' height='42.06' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_12' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='1996' title='1996&amp;lt;br&amp;gt;n obs: 19'/>\n    <rect x='138.64' y='123.36' width='10.78' height='44.27' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_13' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='1997' title='1997&amp;lt;br&amp;gt;n obs: 20'/>\n    <rect x='150.62' y='141.07' width='10.78' height='26.56' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_14' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='1998' title='1998&amp;lt;br&amp;gt;n obs: 12'/>\n    <rect x='162.59' y='121.15' width='10.78' height='46.49' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_15' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='1999' title='1999&amp;lt;br&amp;gt;n obs: 21'/>\n    <rect x='174.57' y='132.22' width='10.78' height='35.42' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_16' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2000' title='2000&amp;lt;br&amp;gt;n obs: 16'/>\n    <rect x='186.54' y='127.79' width='10.78' height='39.85' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_17' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2001' title='2001&amp;lt;br&amp;gt;n obs: 18'/>\n    <rect x='198.52' y='121.15' width='10.78' height='46.49' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_18' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2002' title='2002&amp;lt;br&amp;gt;n obs: 21'/>\n    <rect x='210.50' y='145.50' width='10.78' height='22.14' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_19' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2003' title='2003&amp;lt;br&amp;gt;n obs: 10'/>\n    <rect x='222.47' y='138.86' width='10.78' height='28.78' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_20' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2004' title='2004&amp;lt;br&amp;gt;n obs: 13'/>\n    <rect x='234.45' y='134.43' width='10.78' height='33.20' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_21' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2005' title='2005&amp;lt;br&amp;gt;n obs: 15'/>\n    <rect x='246.43' y='121.15' width='10.78' height='46.49' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_22' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2006' title='2006&amp;lt;br&amp;gt;n obs: 21'/>\n    <rect x='258.40' y='141.07' width='10.78' height='26.56' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_23' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2007' title='2007&amp;lt;br&amp;gt;n obs: 12'/>\n    <rect x='270.38' y='125.58' width='10.78' height='42.06' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_24' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2008' title='2008&amp;lt;br&amp;gt;n obs: 19'/>\n    <rect x='282.36' y='130.01' width='10.78' height='37.63' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_25' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2009' title='2009&amp;lt;br&amp;gt;n obs: 17'/>\n    <rect x='294.33' y='107.87' width='10.78' height='59.77' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_26' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2010' title='2010&amp;lt;br&amp;gt;n obs: 27'/>\n    <rect x='306.31' y='130.01' width='10.78' height='37.63' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_27' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2011' title='2011&amp;lt;br&amp;gt;n obs: 17'/>\n    <rect x='318.28' y='134.43' width='10.78' height='33.20' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_28' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2012' title='2012&amp;lt;br&amp;gt;n obs: 15'/>\n    <rect x='330.26' y='127.79' width='10.78' height='39.85' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_29' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2013' title='2013&amp;lt;br&amp;gt;n obs: 18'/>\n    <rect x='342.24' y='70.24' width='10.78' height='97.40' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_30' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2014' title='2014&amp;lt;br&amp;gt;n obs: 44'/>\n    <rect x='354.21' y='32.61' width='10.78' height='135.03' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_31' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2015' title='2015&amp;lt;br&amp;gt;n obs: 61'/>\n    <rect x='366.19' y='54.74' width='10.78' height='112.89' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_32' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2016' title='2016&amp;lt;br&amp;gt;n obs: 51'/>\n    <rect x='378.17' y='99.01' width='10.78' height='68.62' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_33' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2017' title='2017&amp;lt;br&amp;gt;n obs: 31'/>\n    <rect x='390.14' y='149.93' width='10.78' height='17.71' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_34' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2018' title='2018&amp;lt;br&amp;gt;n obs: 8'/>\n    <rect x='402.12' y='165.42' width='10.78' height='2.21' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_35' clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_3)' fill='#374E55' fill-opacity='1' stroke='none' data-id='2019' title='2019&amp;lt;br&amp;gt;n obs: 1'/>\n    <defs>\n      <clipPath id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4'>\n        <rect x='0.00' y='0.00' width='432.00' height='216.00'/>\n      <\/clipPath>\n    <\/defs>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='4.44' y='170.84' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_36' font-size='6.75pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>0<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='0.00' y='126.56' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_37' font-size='6.75pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>20<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='0.00' y='82.29' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_38' font-size='6.75pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>40<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='0.00' y='38.02' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_39' font-size='6.75pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>60<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='51.31' y='176.90' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_40' font-size='6.75pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>1990<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='171.07' y='176.90' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_41' font-size='6.75pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>2000<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='290.84' y='176.90' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_42' font-size='6.75pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>2010<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='410.60' y='176.90' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_43' font-size='6.75pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>2020<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='364.65' y='188.08' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_44' font-size='6.75pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>year of submission<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='0.00' y='16.33' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_45' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>Total<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='29.91' y='16.33' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_46' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>number<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='72.31' y='16.33' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_47' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>of<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='86.04' y='16.33' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_48' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>communications<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='174.97' y='16.33' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_49' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>submitted<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='230.27' y='16.33' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_50' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>to<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='243.73' y='16.33' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_51' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>the<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='263.34' y='16.33' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_52' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>CAT<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='288.57' y='16.33' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_53' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>Committee<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='348.44' y='16.33' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_54' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>per<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='368.40' y='16.33' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_55' font-size='9.75pt' font-weight='bold' fill='#333333' fill-opacity='1' font-family='Roboto Condensed'>year<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='11.75' y='205.65' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_56' font-size='6.00pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>data: juris.ohchr.org/; as of 25 Sep 2020.<\/text>\n    <\/g>\n    <g clip-path='url(#svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_cl_4)'>\n      <text x='11.75' y='214.29' id='svg_5b348b71-b7ea-4324-bea8-7bb315334d0b_el_57' font-size='6.00pt' fill='#7F7F7F' fill-opacity='1' font-family='Roboto Condensed'>analysis: Roland Schmidt | @zoowalk | https://werk.statt.codes<\/text>\n    <\/g>\n  <\/g>\n<\/svg>","js":null,"uid":"svg_5b348b71-b7ea-4324-bea8-7bb315334d0b","ratio":2,"settings":{"tooltip":{"css":".tooltip_SVGID_ { background-color:#323E4F;\n                               color: white;\n                               font-family: Roboto; ; position:absolute;pointer-events:none;z-index:999;}\n","offx":30,"offy":-30,"use_cursor_pos":true,"opacity":0.9,"usefill":false,"usestroke":false,"delay":{"over":200,"out":5000}},"hover":{"css":".hover_SVGID_ { fill:#FFA500;color:#FFA500 }\n","reactive":false},"hoverkey":{"css":".hover_key_SVGID_ { stroke:red; }\n","reactive":false},"hovertheme":{"css":".hover_theme_SVGID_ { fill:green; }\n","reactive":false},"hoverinv":{"css":""},"zoom":{"min":1,"max":1},"capture":{"css":".selected_SVGID_ { fill:red;stroke:gray; }\n","type":"multiple","only_shiny":true,"selected":[]},"capturekey":{"css":".selected_key_SVGID_ { stroke:gray; }\n","type":"single","only_shiny":true,"selected":[]},"capturetheme":{"css":".selected_theme_SVGID_ { stroke:gray; }\n","type":"single","only_shiny":true,"selected":[]},"toolbar":{"position":"topright","saveaspng":true,"pngname":"diagram"},"sizing":{"rescale":true,"width":1}}},"evals":[],"jsHooks":[]}</script>
+<p>After an early phase of almost no submissions, the annual number fluctuated roughly between 10 and 20 complaints for most of the time. This however changed in 2014 and for the subsequent two to three years. From 2013 to 2014, the number of submissions more than doubled to 44. In 2015, an all-time high of 61 was registered. Also in the subsequent year, the number of communications remained high with 51.</p>
+<div id="bump" class="section level3">
+<h3>2014 bump</h3>
+<p>This ‘2014 bump’ is quite a remarkable dynamic and one wonders what’s behind.</p>
+<p>As a first step let’s see whether we can identify state parties which experienced a particularly strong increase of submissions for the period 2014 to 2016. To do so, I first calculate each countries’ share of the annual total number of communications per year, and second, the year-to-year change of this share. Finally, since we are interested in the bump starting in 2014, I’ll filter out those countries with the highest change rate in this period. The table below shows the result:</p>
+<details closed>
+<p><summary>Code: State party’s share of submissions and change 2013-2015</summary></p>
+<pre class="r"><code>df_country_year &lt;- df_results_countries %&gt;% 
+  distinct(country_split, date_submission, communication_no) %&gt;% 
+  mutate(year_submission=lubridate::year(date_submission)) %&gt;% 
+  mutate(across(where(is.character), .fns=as.factor)) %&gt;% 
+  group_by(year_submission, country_split, .drop=F) %&gt;% 
+  summarise(n_year=n()) %&gt;% 
+  mutate(total_year=sum(n_year)) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(rel_year=n_year/total_year) %&gt;% 
+  group_by(country_split) %&gt;% 
+  arrange(year_submission, .by_group=T) %&gt;% 
+  mutate(change_year=rel_year-lag(rel_year)) %&gt;% 
+  ungroup()
+
+df_countries_peak &lt;- df_country_year %&gt;% 
+  mutate(rel_year_previous=lag(rel_year)) %&gt;% 
+  select(country_split, year_submission, contains(&quot;rel_year&quot;), change_year) %&gt;% 
+  filter(year_submission %in% c(2014, 2015)) %&gt;%
+  arrange(desc(change_year)) %&gt;% 
+  slice_head(n=5) %&gt;% 
+  mutate(across(where(is.numeric), .fns=~round(., digits=2)))
+
+library(gt)
+tb_countries_peak&lt;- df_countries_peak %&gt;% 
+  gt() %&gt;% 
+  cols_label(country_split=&quot;state party&quot;,
+             year_submission=&quot;year of submission&quot;,
+             rel_year=&quot;share&quot;,
+             rel_year_previous=&quot;share prev. year&quot;,
+             change_year=&quot;change&quot;) %&gt;% 
+  cols_align(columns=contains(&quot;submission&quot;),
+             align=&quot;center&quot;) %&gt;% 
+  cols_align(columns=contains(&quot;year&quot;),
+             align=&quot;center&quot;) %&gt;% 
+  cols_align(columns=contains(&quot;country&quot;),
+             align=&quot;left&quot;) %&gt;% 
+   tab_header(
+    title = md(&quot;**Change of annual share of submissions 2013-2015**&quot;),
+    subtitle = md(&quot;Top 4 only&quot;)
+  ) %&gt;% 
+  fmt_percent(
+    columns = vars(rel_year, rel_year_previous, change_year),
+    decimals = 1
+    )</code></pre>
+</details>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#evlohmdyow .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#evlohmdyow .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#evlohmdyow .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#evlohmdyow .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#evlohmdyow .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#evlohmdyow .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#evlohmdyow .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#evlohmdyow .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#evlohmdyow .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#evlohmdyow .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#evlohmdyow .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#evlohmdyow .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#evlohmdyow .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#evlohmdyow .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#evlohmdyow .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#evlohmdyow .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#evlohmdyow .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#evlohmdyow .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#evlohmdyow .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#evlohmdyow .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#evlohmdyow .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#evlohmdyow .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#evlohmdyow .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#evlohmdyow .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#evlohmdyow .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#evlohmdyow .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#evlohmdyow .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#evlohmdyow .gt_left {
+  text-align: left;
+}
+
+#evlohmdyow .gt_center {
+  text-align: center;
+}
+
+#evlohmdyow .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#evlohmdyow .gt_font_normal {
+  font-weight: normal;
+}
+
+#evlohmdyow .gt_font_bold {
+  font-weight: bold;
+}
+
+#evlohmdyow .gt_font_italic {
+  font-style: italic;
+}
+
+#evlohmdyow .gt_super {
+  font-size: 65%;
+}
+
+#evlohmdyow .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="evlohmdyow" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  <thead class="gt_header">
+    <tr>
+      <th colspan="5" class="gt_heading gt_title gt_font_normal" style><strong>Change of annual share of submissions 2013-2015</strong></th>
+    </tr>
+    <tr>
+      <th colspan="5" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>Top 4 only</th>
+    </tr>
+  </thead>
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">state party</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">year of submission</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">share</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">share prev. year</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">change</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr>
+      <td class="gt_row gt_left">Australia</td>
+      <td class="gt_row gt_center">2014</td>
+      <td class="gt_row gt_center">22.0&percnt;</td>
+      <td class="gt_row gt_center">0.0&percnt;</td>
+      <td class="gt_row gt_center">22.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left">Switzerland</td>
+      <td class="gt_row gt_center">2015</td>
+      <td class="gt_row gt_center">25.0&percnt;</td>
+      <td class="gt_row gt_center">4.0&percnt;</td>
+      <td class="gt_row gt_center">21.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left">Canada</td>
+      <td class="gt_row gt_center">2014</td>
+      <td class="gt_row gt_center">24.0&percnt;</td>
+      <td class="gt_row gt_center">10.0&percnt;</td>
+      <td class="gt_row gt_center">14.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left">Germany</td>
+      <td class="gt_row gt_center">2014</td>
+      <td class="gt_row gt_center">2.0&percnt;</td>
+      <td class="gt_row gt_center">0.0&percnt;</td>
+      <td class="gt_row gt_center">2.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left">Italy</td>
+      <td class="gt_row gt_center">2014</td>
+      <td class="gt_row gt_center">2.0&percnt;</td>
+      <td class="gt_row gt_center">0.0&percnt;</td>
+      <td class="gt_row gt_center">2.0&percnt;</td>
+    </tr>
+  </tbody>
+  
+  
+</table></div>
+<p>Complaints addressed to Australia in 2014 represented 22% of all complaints submitted that year. In the year prior, the corresponding share was 0. Similarly for the year 2015, Switzerland’s share of all complaints submitted that year amounted to 25% and only to 4% the year prior. Canada’s dynamic looks similar. The next country, Germany, only featured 2% of all complaints in 2014. The gap to Australia, Switzerland and Canada is obvious.</p>
+<p>The graph below complements the information conveyed in the table.</p>
+<details closed>
+<p><summary>Code: 2014 bump</summary></p>
+<pre class="r"><code>df_country_year_2 &lt;- df_country_year  %&gt;% 
+  filter(between(year_submission, 2013, 2015)) %&gt;% 
+  mutate(country.select=case_when(!country_split %in% c(&quot;Switzerland&quot;,
+                                                       &quot;Canada&quot;,
+                                                       &quot;Australia&quot;) ~ &quot;other&quot;,
+                                  TRUE ~ as.character(country_split))) %&gt;% 
+  mutate(country.select=fct_relevel(country.select, &quot;other&quot;, after=3)) %&gt;% 
+  group_by(year_submission, country.select) %&gt;% 
+  summarise(n_year=sum(n_year)) %&gt;% 
+  mutate(rel_year=n_year/sum(n_year))
+  
+
+pl_country_year &lt;-  df_country_year_2 %&gt;% 
+  ggplot()+
+  labs(title=glue::glue(&quot;&#39;2014 Bump:&#39; Relative contribution of &lt;span style=&#39;color:{paletteer_d(&#39;ggsci::default_jama&#39;, direction=1)[1]}&#39;&gt;Australia&lt;/span&gt;, &lt;span style=&#39;color:{paletteer_d(&#39;ggsci::default_jama&#39;, direction=1)[2]}&#39;&gt;Canada&lt;/span&gt;, &lt;span style=&#39;color:{paletteer_d(&#39;ggsci::default_jama&#39;, direction=1)[3]}&#39;&gt;Switzerland&lt;/span&gt; and &lt;span style=&#39;color:grey50&#39;&gt;all other &lt;/span&gt; state parties&quot;),
+         subtitle=&quot;Share of communications per addressed state party per year. Absolute numbers in brackets. Other countries in &quot;,
+       x=&quot;year of submission&quot;,
+       y=&quot;% of all sumbissions of a year&quot;,
+       caption=my_caption)+
+  geom_bar(aes(x=year_submission,
+                y=n_year,
+                fill=country.select),
+           position=&quot;fill&quot;,
+           stat=&quot;identity&quot;)+
+  geom_text(data=. %&gt;% filter(n_year &gt; 0),
+              aes(label=glue::glue(&quot;{percent(rel_year)} ({n_year})&quot;),
+                y=n_year,
+                group=country.select,
+                x=year_submission),
+            position=position_fill(vjust=.5),
+            #stat=&quot;identity&quot;,
+            size=5,
+            check_overlap = TRUE,
+            color=&quot;white&quot;)+
+   geom_text(data=. %&gt;% group_by(year_submission) %&gt;% 
+               summarize(total_year=sum(n_year)),
+             aes(x=year_submission,
+                 y=1.03,
+                 label = paste0(&quot;100%&quot;, &quot; (&quot;,total_year,&quot;)&quot;), 
+                 group = year_submission), 
+             size=5,
+             stat = &quot;identity&quot;)+
+  theme_post()+
+  theme(panel.grid.major.y = element_blank(),
+        plot.title = element_markdown(),
+        strip.text = element_text(size=15),
+        axis.text.x = element_blank(),
+        legend.position=&quot;none&quot;,
+        legend.direction=&quot;horizontal&quot;)+
+  scale_fill_manual(values=c(paletteer_d(&quot;ggsci::default_jama&quot;, 
+                                         direction=1)[1:3], 
+                             &quot;other&quot;=&quot;grey80&quot;))+
+  scale_y_continuous(labels = scales::label_percent(),
+                     expand=expansion(mult=c(0, .02)))+
+  scale_x_continuous(expand=expansion(mult=c(0,0.05)),
+                     breaks=unique(df_country_year$year_submission),
+                     position=&quot;bottom&quot;)+
+  facet_wrap(vars(year_submission),
+             scales=&quot;free_x&quot;,
+             nrow = 1)</code></pre>
+</details>
+<p><img src="/post/2020-08-16-un-treaty-bodies_files/figure-html/unnamed-chunk-22-1.svg" width="70%" style="display: block; margin: auto auto auto 0;" /></p>
+<p>Let’s now have a closer look at the cases of these three countries responsible for the 2014 ‘bump’. For a start, let’s simply create a list of the cases in question.</p>
+<details closed>
+<p><summary>Code: bump cases</summary></p>
+<pre class="r"><code>df_bump_cases &lt;- df_results_countries %&gt;% 
+  mutate(year_submission=lubridate::year(date_submission)) %&gt;% 
+  filter(country_split %in% c(&quot;Australia&quot;, &quot;Switzerland&quot;, &quot;Canada&quot;) &amp;
+           year_submission %in% c(2014, 2015, 2016)) %&gt;% 
+  mutate(communication=paste0(author, &quot; (&quot;,communication_no,&quot;)&quot;)) %&gt;% 
+  select(country_split, communication) %&gt;% 
+  pivot_wider(names_from=country_split,
+              values_from=communication) 
+
+CA &lt;- df_bump_cases$Canada %&gt;% unlist() %&gt;% tibble() %&gt;% rownames_to_column() %&gt;% rename(Canada=&quot;.&quot;)
+AU &lt;- df_bump_cases$Australia %&gt;% unlist() %&gt;% tibble() %&gt;% rownames_to_column() %&gt;% rename(Australia=&quot;.&quot;)
+CH &lt;- df_bump_cases$Switzerland %&gt;% unlist() %&gt;% tibble() %&gt;% rownames_to_column() %&gt;% rename(Switzerland=&quot;.&quot;)
+
+library(reactable)
+tb_AU_CA_CH &lt;- CA %&gt;% 
+  left_join(., AU, by=c(&quot;rowname&quot;)) %&gt;% 
+  left_join(., CH,by=c(&quot;rowname&quot;)) %&gt;% 
+  select(-rowname) %&gt;% 
+  reactable(., 
+             pagination = FALSE, highlight = TRUE, height = 250)</code></pre>
+</details>
+<div id="htmlwidget-3" class="reactable html-widget" style="width:auto;height:250px;"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"Canada":["Z.H. (604/2014)","A. (583/2014)","S.M. (630/2014)","S.S. (represented by counsel, Rajwinder Bhambi) (581/2014)","A.L. (588/2014)","N.S. (represented by counsel, Rajwinder Singh Bhambi) (582/2014)","R.R.L. (659/2015)","N.H.Z. (590/2014)","N.A.L. et al (617/2014)","Z.A.H. (represented by counsel, Rajwinder S. Bhambi) (687/2015)","K.D.S. (represented by counsel, Marie-Pierre Labbé) (597/2014)","M.S.A. and D.A. (711/2015)","S.S. and P.S. (represented by counsel, Rajwinder S. Bhambi) (702/2015)","S.S. (represented by counsel, Raj S. Bhambi) (715/2015)","J.S. (represented by counsel, Rajwinder S. Bhambi) (695/2015)","Joyce Nakato Nakawunde (not represented by counsel) (615/2014)","A.S. (represented by counsel, Rajwinder S. Bhambi) (689/2015)","M.S. (represented by counsel, Rajwinder S. Bhambi) (694/2015)","A.S. (represented by counsel, Mr. Rajwinder S. Bhambi) (679/2015)","K.B. (represented by counsel, Rachel Benaroch) (739/2016)","F.K.A. (represented by counsel, Mr. Zoheir Snasni) (784/2016)","R.D. et al. (777/2016)","P.S. (656/2015)","J.S. (represented by counsel) (665/2015)","G.S. (represented by counsel, Rajwinder Bhambi) (786/2016)","M.S. (represented by counsel, Rajwinder Bhambi) (787/2016)","X (represented by counsel, Sergei Voronov) (791/2016)","E.O.S. (not represented by counsel) (621/2014)","U.A. (represented by counsel, Rajwinder S. Bhambi) (767/2016)"],"Australia":["K. (591/2014)","R. K. (609/2014)","L.P. (666/2015)","Y.S. (represented by counsel, John Phillip Sweeney) (633/2014)","K.N. (represented by counsel, John Phillip Sweeney) (649/2015)","K.S. (603/2014)","S.R. (626/2014)","E.S. (652/2015)","K.V. (600/2014)","M.K.M. (represented by counsel, Michaela Byers) (681/2015)","Subakaran R. Thirugnanasampanthar (represented by counsel, Robert James de Vere McCaw) (614/2014)","Y.R. (represented by counsel) (713/2015)","S.S. (represented by counsel, John Sweeney) (720/2015)","G.E. (represented by D.N., counsellor/social worker at Companion House Assisting Survivors of Torture and Trauma) (725/2016)","H.K (701/2015)","T.K. (represented by counsel, John Sweeney) (707/2015)","K.V. (represented by counsel, John Sweeney) (714/2015)","Z.W. (represented by counsel, Frances Milne) (669/2015)","G.A. (represented by counsel, John Sweeney) (680/2015)","T.T.P. (represented by counsel, Mr. John Phillip Sweeney) (756/2016)","M.Z. (624/2014)","M.R.M.A. (represented by counsel, John Phillip Sweeney) (749/2016)","S.R. (766/2016)","K.L. (772/2016)","K.T. (represented by counsel, Shamili Kugathas) (788/2016)","S.H. (represented by counsel, John Sweeney) (761/2016)","V.M. (represented by counsel, John Sweeney) (723/2015)","J.N. (not represented by counsel) (806/2017)","M.B. (represented by counsel, John Sweeney) (646/2014)"],"Switzerland":["K.P.M. et al. (697/2015)","X (686/2015)","M.F. (represented by counsel, Mr. Tarig Hassan) (658/2015)","Y.M. (664/2015)","A.A. (762/2016)","N.A.A. (represented by counsel, Tarig Hassan) (639/2014)","Hugues Mbele (755/2016)","H.Y. (747/2016)","I.E. (represented by counsel, Tarig Hassan) (683/2015)","T.Z. (represented by counsel, Stephanie Motz) (688/2015)","T.A. and T.F. (represented by counsel, Tarig Hassan) (667/2015)","J.B. (represented by counsel, Boris Wijkström and Gabriella Tau) (721/2015)","Aref Mohammed Abdulkarim (represented by counsel, Mr. Tarig Hassan) (710/2015)","A.N. (represented by counsel, Centre Suisse pour la Défense des Droits des Migrants) (742/2016)","V.K. and S.K. (724/2016)","Z. (represented by counsel) (738/2016)","H.R.E.S. (represented by counsel, Angela Stettler and Urs Ebnöther) (783/2016)","B.M. (represented by counsel, Ms. Florence Rouiller) (584/2014)","Adam Harun (represented by counsels, Gabriella Tau et Boris Wijkström) (758/2016)","X and Y (represented by counsel Marcel Zirngast) (776/2016)","X (represented by counsel, Tarig Hassan) (765/2016)","X (represented by counsel, Roman Schuler) (775/2016)","J.D. (700/2015)","Z.K. and A.K. (represented by counsel, Stephanie Motz) (698/2015)","Delshad Ravanbakhsh Rasooli (represented by counsel) (673/2015)","A.Sh. et al. (represented by counsel, Angela Stettler) (717/2015)","X. (represented by counsel) (704/2015)",null,null]},"columns":[{"accessor":"Canada","name":"Canada","type":"character"},{"accessor":"Australia","name":"Australia","type":"character"},{"accessor":"Switzerland","name":"Switzerland","type":"character"}],"defaultPageSize":29,"paginationType":"numbers","showPageInfo":true,"minRows":1,"highlight":true,"height":"250px","dataKey":"600d5f8a30596f6210ffcfb9b609cf79","key":"600d5f8a30596f6210ffcfb9b609cf79"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="counsels" class="section level3">
+<h3>Counsels</h3>
+<details closed>
+<p><summary>Code: contribution of counsels</summary></p>
+<pre class="r"><code>df_counsel &lt;- df_results_countries %&gt;% 
+  mutate(year_submission=lubridate::year(date_submission)) %&gt;% 
+  # filter(country_split %in% c(&quot;Australia&quot;, &quot;Switzerland&quot;, &quot;Canada&quot;) &amp;
+  #          year_submission %in% c(2014, 2015, 2016)) %&gt;% 
+  group_by(country_split) %&gt;% 
+  mutate(country_sum=n()) %&gt;% 
+  mutate(counsel=str_detect(author, &quot;represented&quot;)) %&gt;% 
+  mutate(counsel_name=str_extract(author, regex(&quot;(?&lt;=counsel.?,).*(?=\\))&quot;)) %&gt;% 
+           str_remove_all(., &quot;,&quot;) %&gt;% 
+           str_remove_all(., &quot;Mr.|Mrs.|Ms.&quot;) %&gt;% 
+           str_trim()) %&gt;% 
+  mutate(counsel_name=case_when(str_detect(counsel_name, &quot;Sweeney&quot;) ~ &quot;John Sweeney&quot;,
+                                str_detect(counsel_name, &quot;Bhambi&quot;) ~ &quot;Rajwinder Bhambi&quot;,
+                                TRUE ~ as.character(counsel_name))) %&gt;% 
+  select(author, counsel_name, counsel, country_split, year_submission) %&gt;% 
+  mutate(counsel_name=case_when(counsel==FALSE &amp; is.na(counsel_name) ~ &quot;no counsel&quot;,
+                                counsel==TRUE &amp; is.na(counsel_name) ~ &quot;name not available&quot;,
+         TRUE ~ as.character(counsel_name))) %&gt;% 
+  group_by(year_submission) %&gt;% 
+  mutate(n_year=n()) %&gt;% 
+  ungroup()
+
+df_counsel_wide &lt;- df_counsel %&gt;% 
+  group_by(counsel, country_split, year_submission, n_year) %&gt;% 
+  count(counsel_name, name = &quot;n_counsel&quot;) %&gt;% 
+  arrange(country_split, -n_counsel) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(counsel_rel_year=n_counsel/n_year) %&gt;% 
+  select(country_split, everything(), -counsel) %&gt;% 
+  arrange(year_submission) %&gt;% 
+  filter(country_split %in% c(&quot;Australia&quot;, &quot;Canada&quot;, &quot;Switzerland&quot;)) %&gt;% 
+  filter(between(year_submission, 2013, 2016)) %&gt;% 
+  pivot_wider(id_cols=c(country_split, counsel_name),
+              names_from=year_submission,
+              values_from=c(n_counsel, counsel_rel_year),
+              values_fill=0) %&gt;% 
+  rowwise() %&gt;% 
+  mutate(sum_counsel=sum(c_across(cols=contains(&quot;n_counsel&quot;)))) %&gt;% 
+  arrange(country_split, -sum_counsel) %&gt;% 
+  select(-sum_counsel)
+
+tb_counsel &lt;- df_counsel_wide %&gt;%   
+  gt(groupname_col = &quot;country_split&quot;,  rowname_col  = &quot;counsel_name&quot;) %&gt;% 
+  tab_header(title=md(&quot;**&#39;2014 Bump&#39;: Number of complaints submitted by counsels**&quot;), 
+             subtitle = &quot;Only top 3 countries in terms of share of total number of complaints; 2014-2016&quot;) %&gt;% 
+  cols_label(
+    n_counsel_2013=&quot;2013&quot;,
+    n_counsel_2014=&quot;2014&quot;,
+    n_counsel_2015=&quot;2015&quot;,
+    n_counsel_2016=&quot;2016&quot;,
+    counsel_rel_year_2013=&quot;2013&quot;,
+    counsel_rel_year_2014=&quot;2014&quot;,
+    counsel_rel_year_2015=&quot;2015&quot;,
+    counsel_rel_year_2016=&quot;2016&quot;) %&gt;%
+  tab_spanner(label=&quot;submissions by counsel&quot;,
+              columns=contains(&quot;n_counsel&quot;)) %&gt;% 
+  tab_spanner(label=&quot;% of global total&quot;,
+              columns=contains(&quot;counsel_rel&quot;)) %&gt;% 
+  tab_options(heading.align = &quot;left&quot;,
+                row_group.font.weight = &quot;bold&quot;) %&gt;% 
+  fmt_percent(columns = contains(&quot;rel&quot;),
+              decimals = 1)
+  
+
+#spread multiple columns!</code></pre>
+</details>
+<p>When glancing through the submissions, I noted that the names of some counsels appeared quite frequently. To get a more systematic view on this matter see the table below. What it shows is the number of cases submitted by individual counsels each year in the time from 2013 to 2016 and the relative share of these submissions of the total number of cases submitted in these years (all countries).</p>
+<p>The most striking case here, in my opinion here, is John Sweeney. Sweeney submitted 2016 11. These submissions amounted to 22% of all submissions made to the Committee in that year.
+Similarly, although with somewhat lower numbers, Rajwinder Bhambi contributed as counsel 7 cases, equaling 0.1147541 of all 2015 cases. Tarig Hassan has to be mentioned in the case of Switzerland.</p>
+<p>This is not to say that these counsels were solely responsible for the bump in cases after 2013. After all, submissions without a counsel also featured high numbers for countries and years considered. Nevertheless, these counsel contributed a considerable numbers cases in the period from 2014 to 2015, and haven’t done so prior to these years.</p>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#itgeteyaor .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#itgeteyaor .gt_heading {
+  background-color: #FFFFFF;
+  text-align: left;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#itgeteyaor .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#itgeteyaor .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#itgeteyaor .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#itgeteyaor .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#itgeteyaor .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#itgeteyaor .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#itgeteyaor .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#itgeteyaor .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#itgeteyaor .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#itgeteyaor .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#itgeteyaor .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#itgeteyaor .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#itgeteyaor .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#itgeteyaor .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#itgeteyaor .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#itgeteyaor .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#itgeteyaor .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#itgeteyaor .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#itgeteyaor .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#itgeteyaor .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#itgeteyaor .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#itgeteyaor .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#itgeteyaor .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#itgeteyaor .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#itgeteyaor .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#itgeteyaor .gt_left {
+  text-align: left;
+}
+
+#itgeteyaor .gt_center {
+  text-align: center;
+}
+
+#itgeteyaor .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#itgeteyaor .gt_font_normal {
+  font-weight: normal;
+}
+
+#itgeteyaor .gt_font_bold {
+  font-weight: bold;
+}
+
+#itgeteyaor .gt_font_italic {
+  font-style: italic;
+}
+
+#itgeteyaor .gt_super {
+  font-size: 65%;
+}
+
+#itgeteyaor .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="itgeteyaor" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  <thead class="gt_header">
+    <tr>
+      <th colspan="9" class="gt_heading gt_title gt_font_normal" style><strong>'2014 Bump': Number of complaints submitted by counsels</strong></th>
+    </tr>
+    <tr>
+      <th colspan="9" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>Only top 3 countries in terms of share of total number of complaints; 2014-2016</th>
+    </tr>
+  </thead>
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1"></th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="4">
+        <span class="gt_column_spanner">submissions by counsel</span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="4">
+        <span class="gt_column_spanner">% of global total</span>
+      </th>
+    </tr>
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">2013</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">2014</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">2015</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">2016</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">2013</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">2014</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">2015</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">2016</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr class="gt_group_heading_row">
+      <td colspan="9" class="gt_group_heading">Australia</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">John Sweeney</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">3</td>
+      <td class="gt_row gt_center">6</td>
+      <td class="gt_row gt_center">11</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">6.7&percnt;</td>
+      <td class="gt_row gt_right">9.8&percnt;</td>
+      <td class="gt_row gt_right">21.6&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">no counsel</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">6</td>
+      <td class="gt_row gt_center">3</td>
+      <td class="gt_row gt_center">2</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">13.3&percnt;</td>
+      <td class="gt_row gt_right">4.9&percnt;</td>
+      <td class="gt_row gt_right">3.9&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">name not available</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">2</td>
+      <td class="gt_row gt_center">2</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">3.3&percnt;</td>
+      <td class="gt_row gt_right">3.9&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Robert James de Vere McCaw</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.2&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Frances Milne</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">1.6&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Michaela Byers</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">1.6&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Shamili Kugathas</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.0&percnt;</td>
+    </tr>
+    <tr class="gt_group_heading_row">
+      <td colspan="9" class="gt_group_heading">Canada</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Rajwinder Bhambi</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_center">2</td>
+      <td class="gt_row gt_center">7</td>
+      <td class="gt_row gt_center">3</td>
+      <td class="gt_row gt_right">5.0&percnt;</td>
+      <td class="gt_row gt_right">4.4&percnt;</td>
+      <td class="gt_row gt_right">11.5&percnt;</td>
+      <td class="gt_row gt_right">5.9&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">no counsel</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_center">6</td>
+      <td class="gt_row gt_center">3</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_right">5.0&percnt;</td>
+      <td class="gt_row gt_right">13.3&percnt;</td>
+      <td class="gt_row gt_right">4.9&percnt;</td>
+      <td class="gt_row gt_right">2.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">name not available</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">2</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">4.4&percnt;</td>
+      <td class="gt_row gt_right">1.6&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Marie-Pierre Labbé</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.2&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Rachel Benaroch</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Sergei Voronov</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Zoheir Snasni</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.0&percnt;</td>
+    </tr>
+    <tr class="gt_group_heading_row">
+      <td colspan="9" class="gt_group_heading">Switzerland</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">no counsel</td>
+      <td class="gt_row gt_center">2</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">5</td>
+      <td class="gt_row gt_center">3</td>
+      <td class="gt_row gt_right">10.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">8.2&percnt;</td>
+      <td class="gt_row gt_right">5.9&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Tarig Hassan</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_center">4</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.2&percnt;</td>
+      <td class="gt_row gt_right">6.6&percnt;</td>
+      <td class="gt_row gt_right">2.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">name not available</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">2</td>
+      <td class="gt_row gt_center">2</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">3.3&percnt;</td>
+      <td class="gt_row gt_right">3.9&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Stephanie Motz</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">2</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">3.3&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Florence Rouiller</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.2&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Angela Stettler</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">1.6&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Boris Wijkström and Gabriella Tau</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">1.6&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Angela Stettler and Urs Ebnöther</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Centre Suisse pour la Défense des Droits des Migrants</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Gabriella Tau et Boris Wijkström</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.0&percnt;</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Roman Schuler</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">0</td>
+      <td class="gt_row gt_center">1</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">0.0&percnt;</td>
+      <td class="gt_row gt_right">2.0&percnt;</td>
+    </tr>
+  </tbody>
+  
+  
+</table></div>
+</div>
+<div id="article-3-country-of-destination" class="section level3">
+<h3>Article 3 Country of destination</h3>
+<p>The final angle I want to take up to better understand the reasons behind the 2014-2016 bump is their country of destination. With the exception of one case, all submissions addressed to Australia, Canada, and Switzerland from 2014 to 2016 are non-refoulement cases (article 3). Hence, the cases are addressed to these state parties in order to avoid or raise a violation of a person’s transfer to another country where he or she risks being tortured.</p>
+<p>Unfortunately, the case details in the OHCHR database do not provide any systematic information on the identity of these target countries. The information is obviously contained in the decision text of the committee, but not in the database’s overview. Hence, to get this information, we have to dig into the actual text and extract country names. Unfold the code chunk to see the steps implemented. Here, I am particularly grateful to <span class="citation">@hrbrmstr</span> for basically providing me with a ready-made template when it comes to extracting the links to the decision texts.</p>
+<p>First, let’s define a function which extracts the English text of the decision in a html format.</p>
+<details open>
+<p><summary>Code: define function extracting links to decision texts</summary></p>
+<pre class="r"><code>fn_get_doc_link &lt;- function(details_url) {
+  
+  res &lt;- httr::GET(url = details_url)
+  out &lt;- httr::content(res, as = &quot;text&quot;, encoding = &quot;UTF-8&quot;)
+  pg &lt;- read_html(out)
+  table_exists &lt;- html_node(pg, &quot;section#download-listings &gt; table&quot;)
+  detail_cols &lt;- table_exists %&gt;% html_table() %&gt;% colnames() %&gt;% 
+    tolower() %&gt;% trimws()
+  detail_entries &lt;- html_nodes(pg, &quot;section#download-listings &gt; table &gt; tbody &gt; tr&quot;)
+  cols &lt;- html_nodes(detail_entries, &quot;td&quot;)
+  doc_link &lt;- html_nodes(cols[5], &quot;a&quot;) %&gt;% html_attr(&quot;href&quot;) #take only last column (html) of document table
+  ifelse(length(doc_link)&gt;0, doc_link, &quot;missing&quot;)
+
+ }</code></pre>
+</details>
+<p>Second, let’s define a function which extracts the text from these html documents.</p>
+<details open>
+<p><summary>Code: define function to get text</summary></p>
+<pre class="r"><code>fn_get_doc_text &lt;- function(doc_link) {
+  xml2::read_html(doc_link) %&gt;% 
+    rvest::html_text()
+  }</code></pre>
+</details>
+<p>In the next step, let’s apply both functions to all (!) article 3 cases.</p>
+<details open>
+<p><summary>Code: apply function to get text</summary></p>
+<pre class="r"><code># readr::write_rds(df_art_3, path=here::here(&quot;blog_data&quot;,&quot;un_treaty_bodies&quot;,&quot;df_art_3.rds&quot;))
+df_art_3 &lt;- read_rds(here::here(&quot;blog_data&quot;, &quot;un_treaty_bodies&quot;, &quot;df_art_3.rds&quot;))</code></pre>
+<p>=&gt; define regex pattern</p>
+<p>=&gt; search</p>
+<p>=&gt; read back</p>
+<pre class="r"><code>df_art_3_x &lt;- readr::read_rds(here::here(&quot;blog_data&quot;,&quot;un_treaty_bodies&quot;, &quot;df_art_3_countries.rds&quot;)) %&gt;% 
+  unnest_longer(target_countries)</code></pre>
+</div>
+</div>
+<div id="here" class="section level2">
+<h2>HERE</h2>
+<p>#extract sections of country names</p>
+<p>We have now a dataframe comprising the text of complaints invoking a violation of article 3 submitted to the Committee against Torture. From these decision texts we have now to identify and extract the country where the complainant argues to risk being/have been tortured. So how to do this?</p>
+<p>Below I inserted a screen shot of the first half-page of a decision by the Committee against Torture. As you can see, the document starts with some kind of a keyword index, including the ‘subject matter’ which reveals, in article 3 cases, the country to which a complainant was about to or actually was transferred to. Assuming now that the Committee stuck to this template, we should be able to 1) extract those rows of the document which start with ‘subject matter’ and 2) extract the country name from these rows.</p>
+<p><img src="/post/2020-08-16-un-treaty-bodies_files/subject_matter_art_3.PNG" /></p>
+<p>First, let’s extract those rows containing ‘subject matter’. This can be done by a relatively simple <code>regex("Subject matter.*?(?=Procedural)", dotall=T)</code>.</p>
+<details open>
+<p><summary>Code: apply function to get text</summary></p>
+<p>Unfortunately, however, the results are somewhat disappointing. In 45 out of 95 cases, no subject matter was detected.</p>
+<p>After looking into the text of those cases where the subject matter was missing, I noticed that the Committee’s decisions on these cases were not decisions on the admissibility or merits, but overwhelmingly discontinuation decisions. And for some reason, discontinuation decisions do not feature the name of the country where a complainant was about or actually transferred to. To check this observation, below a cross-tabulation of cases with(out) subject matter information and with(out) discontinuation decisions.</p>
+</details>
+<p>The crosstab shows that out of the 45 decisions without a subject matter (is.na()==TRUE), 38 were actually discontinued cases. This is obviously a considerable caveat and severely limits the ability to identify countries of destination in article 3 cases. Nevertheless, let’s continue with the 50 remaining cases and extract the country names.</p>
+<div id="str_extract_all" class="section level3">
+<h3>str_extract_all</h3>
+</div>
+<div id="fuzzy-join" class="section level3">
+<h3>fuzzy join</h3>
+<p>To do so, I make us of the the wonderful <code>countrycode</code> package by Vincent Arel-Bundock. Not only does it allow you to convert country names between different formats, it also includes a column of regex expressions to identify each country name. After some fine-tuning for my specific purpose, I use the regex expressions with the similarly wonderful <code>fuzzyjoin</code> package by <span class="citation">[@drob]</span>(<a href="https://twitter.com/drob" class="uri">https://twitter.com/drob</a>, target="_blank"). The <code>regex_left_join</code> function allows to basically merge two dataframes even if we do not have a perfect match between the two fields which we use to connect both dataframes. In this case, it allows us to add a country name to our dataframe with decisions from the 2014-2016 bump whenever the regex of a country names has a (fuzzy/regex) match.</p>
+<details closed>
+<p><summary>Code: # communications per article and year</summary></p>
+</details>
+<details closed>
+<p><summary>Code: # communications per country</summary></p>
+</details>
+</div>
+</div>
+<div id="combination-of-articles" class="section level2">
+<h2>Combination of articles</h2>
+<details closed>
+<p><summary>Code: # communications per country</summary></p>
+</details>
+</div>
+</div>
+<div id="number-of-pending-complaints" class="section level1">
+<h1>Number of pending complaints</h1>
+<details closed>
+<p><summary>Code: # communications per country</summary></p>
+</details>
+<details closed>
+<p><summary>Code: # communications per country</summary></p>
+</details>
+<details closed>
+<p><summary>Code: # communications per country</summary></p>
+</details>
+</div>
+<div id="duration-of-complaint" class="section level1">
+<h1>Duration of Complaint</h1>
+<details closed>
+<p><summary>Code: # communications per country</summary></p>
+</details>
+</div>
+<div id="duration-per-year-of-finalization" class="section level1">
+<h1>Duration per year of finalization</h1>
+</div>
+<div id="number-of-decisions-per-committtee-session" class="section level1">
+<h1>Number of decisions per committtee session</h1>
+<details closed>
+<p><summary>Code: # communications per country</summary></p>
+</details>
+</div>
+<div id="length-of-decisions" class="section level1">
+<h1>Length of decisions</h1>
+</div>
+<div id="outcome" class="section level1">
+<h1>Outcome</h1>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>I forwarded the list of errors to the OHCHR’s treaty body secretariat, so hopefully these errors will eventually be rectified in the OHCHR’s website.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
