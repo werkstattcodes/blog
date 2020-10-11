@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Wed, 22 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 10 Oct 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -15,27 +15,90 @@
     <item>
       <title>Austria</title>
       <link>/tags/austria/</link>
-      <pubDate>Wed, 22 Jul 2020 00:00:00 +0000</pubDate>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/austria/</guid>
       <description></description>
     </item>
     
     <item>
+      <title>elections</title>
+      <link>/tags/elections/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/elections/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>gt</title>
+      <link>/tags/gt/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/gt/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>OCR</title>
       <link>/tags/ocr/</link>
-      <pubDate>Wed, 22 Jul 2020 00:00:00 +0000</pubDate>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/ocr/</guid>
       <description></description>
     </item>
     
     <item>
+      <title>reactable</title>
+      <link>/tags/reactable/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/reactable/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>regex</title>
+      <link>/tags/regex/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/regex/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Corona virus</title>
+      <link>/tags/corona-virus/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/corona-virus/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>stringr</title>
+      <link>/tags/stringr/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/stringr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>web scraping</title>
       <link>/tags/web-scraping/</link>
-      <pubDate>Tue, 21 Jul 2020 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/web-scraping/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>human rights</title>
+      <link>/tags/human-rights/</link>
+      <pubDate>Sun, 16 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/human-rights/</guid>
       <description></description>
     </item>
     
@@ -54,15 +117,6 @@
       <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/climate/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Corona virus</title>
-      <link>/tags/corona-virus/</link>
-      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/corona-virus/</guid>
       <description></description>
     </item>
     
@@ -90,24 +144,6 @@
       <pubDate>Mon, 02 Mar 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/plotly/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>elections</title>
-      <link>/tags/elections/</link>
-      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/elections/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>stringr</title>
-      <link>/tags/stringr/</link>
-      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/stringr/</guid>
       <description></description>
     </item>
     
