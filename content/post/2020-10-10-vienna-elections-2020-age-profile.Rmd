@@ -193,7 +193,7 @@ Again, as so often, the trickiest part is to get the data ‘liberated’ from t
 
 When it comes to extracting the data from the linked pdf, a difficulty may arise due to the two-column format of the document. Hence, simple row-wise extraction doesn’t help much since it would put candidates together which could be from different parties. Similarly, simply isolating the two columns and extracting candidates would also not do the trick since breaks betwee parties, districts etc run over two, and not one column. To illustrate this, I resorted to cutting edge technology and drew the two arrows below:
 
-![](/post/2020-10-05-vienna-elections-2020-age-profile_files/Inkedtext_flow_LI_Moment.jpg){width=50% height=50%}
+![](/post/2020-10-10-vienna-elections-2020-age-profile_files/Inkedtext_flow_LI_Moment.jpg){width=50% height=50%}
 
 Luckily, the [`tabulizer` package](https://docs.ropensci.org/tabulizer/){target="_blank"} is not only very powerful when it comes to extracting text/data from a pdf, it is also sophisticated enough to take into consideration the text flow highlighted above. I am not familiar with the underlying heuristic, but I assume it is contingent on consistently formatted section headings. Hence, empowered with this tool, retrieving the text becomes rather effortless. The subsequent steps are a battery of regular expressions to extract the specific data we are interested in. To see the code, unfold the snippets below.
 
@@ -1449,6 +1449,6 @@ The graph shows that almost all parties feature a smaller share of non-resident 
 
 # Wrap-up
 
-So that's it for now. Again, this has been largely about retrieving and crunching numbers, but I guess some bits are worth entertaining more substantively.
+So that's it for now. Again, this has been largely about retrieving and crunching numbers, but I guess some bits are worth entertaining more substantively..
 
 
