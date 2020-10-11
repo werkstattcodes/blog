@@ -2,7 +2,7 @@
 title: 'Vienna Elections 2020: Age profile of electoral candidates'
 author: ro
 date: '2020-10-10'
-draft: true
+draft: false
 tags:
   - Austria
   - elections
