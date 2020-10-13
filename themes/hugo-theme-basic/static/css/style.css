@@ -173,7 +173,7 @@ a:visited {
 /*define links in text*/
 section a:link:not(toc-h1):not(toc-h2):not(toc-h3) {
     /*color: var(--accent) !important;*/
-    color: #475D81;
+    color: black;
     /* background-color: #475D81; /*#29AB87;*/
     font-style: normal;
 
@@ -183,7 +183,7 @@ section a:link:not(toc-h1):not(toc-h2):not(toc-h3) {
 section a:hover:not(toc-h1):not(toc-h2):not(toc-h3):not(f5) {
     /*color: var(--accent) !important;*/
     color: white;
-    background-color: #475D81; /*#29AB87;*/
+    background-color: orange;/*#29AB87;*/
     font-style: bold;
 
 }

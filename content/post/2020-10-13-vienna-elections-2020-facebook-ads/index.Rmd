@@ -1,0 +1,44 @@
+---
+title: 'Vienna Elections 2020: Facebook Ads'
+author: "rs"
+date: '2020-10-13'
+slug: []
+draft: yes
+categories: []
+tags:
+- social media
+- Austria
+description: ''
+---
+
+# Context
+
+Here's a post which I probably should have written right before Vienna's local elections, and not after. But better late then never: a descriptive go at candidates' add campaign on facebook in the run-up to the recent elections.
+
+```{r}
+
+```
+
+# Getting the data
+
+# Scope conditions
+
+# Number and values of ads
+
+## Number of ads
+
+## Spending
+
+## Running ads per day
+
+# Impressions
+
+## Per Candidate
+
+## Per Spending Interval
+
+# Gender and age of audience
+
+## Age group
+
+## Gender

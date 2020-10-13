@@ -1,15 +1,15 @@
 ---
 title: 'Vienna Elections 2020: Age profile of electoral candidates'
-author: ro
+author: "ro"
 date: '2020-10-10'
-draft: false
+draft: no
 tags:
-  - Austria
-  - elections
-  - OCR
-  - regex
-  - reactable
-  - gt
+- Austria
+- elections
+- OCR
+- regex
+- reactable
+- gt
 slug: vienna-elections-2020-age-profile
 description: ''
 ---
@@ -714,7 +714,7 @@ tb_list_age <- df_list_age %>%
    tab_source_note(
     source_note = my_caption)
 
-gtsave(tb_list_age, "tb_list_age.png", path = here::here("blog_data"))
+# gtsave(tb_list_age, "tb_list_age.png", path = here::here("blog_data"))
 
 
 
