@@ -1,0 +1,325 @@
+---
+title: Recreating NYT election map
+author: rs
+date: '2020-11-16'
+slug: []
+categories: []
+tags:
+- map
+- USA
+- sf
+- geocoding
+- patchwork
+description: 'Recreating an electoral map of the NYT'
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+<link href="index_files/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="index_files/anchor-sections/anchor-sections.js"></script>
+
+
+<div id="context" class="section level1">
+<h1>CONTEXT</h1>
+<p>While following the NYT’s coverage of the US presidential elections, I became once again intrigued by their data visualizations. One type of visualization which I found particularly remarkable was the map with arrows indicting how far a state’s counties shifted to democrats or republicans. See <a href="https://www.nytimes.com/interactive/2020/11/07/us/elections/pennsylvania-counties-battleground-state.html" target="_blank">here</a> on the NYT’s website.</p>
+<p><img src="index_files/Capture.PNG" /></p>
+<p>This prompted me to give it a try with <code>ggplot</code> and see how far I could replicate the map. Below the relevant steps. Thanks also to the respondents of my pertaining <a href="https://twitter.com/zoowalk/status/1325486039687782400" target="_blank">tweet</a>.</p>
+<p>I hope the code speaks largely for itself. Hence, only a few additional comments.</p>
+</div>
+<div id="setup" class="section level1">
+<h1>SETUP</h1>
+<details closed>
+<p><summary>Load packages</summary></p>
+<p>Load the relevant packages.</p>
+<pre class="r"><code>library(jsonlite)
+library(ggtext)
+library(extrafont)
+loadfonts(device = &quot;win&quot;, quiet = T)
+library(sf)
+library(patchwork)
+library(knitr)
+library(svglite)
+library(tidyverse)
+
+plot_bg_color &lt;- readr::read_file(file=here::here(&quot;themes&quot;, &quot;hugo-theme-basic&quot;, &quot;static&quot;, &quot;css&quot;,
+                                                  &quot;style.css&quot;)) %&gt;% 
+  str_extract(., regex(&quot;(?&lt;=background-color:).*?(?=;)&quot;)) %&gt;% str_trim()</code></pre>
+<details closed>
+<p><summary>Code: Define rmarkdown options</summary></p>
+<pre class="r"><code>knit_hooks$set(wrap = function(before, options, envir) {
+  if (before) {
+    paste0(&quot;&lt;&quot;, options$wrap, &quot;&gt;&quot;)
+  } else {
+    paste0(&quot;&lt;/&quot;, options$wrap, &quot;&gt;&quot;)
+  }
+})
+
+knitr::opts_chunk$set(
+    fig.align = &quot;left&quot;,
+    message = FALSE,
+    warning = FALSE,
+    dev = &quot;svglite&quot;,
+#   dev.args = list(type = &quot;CairoPNG&quot;),
+    dpi = 300,
+    out.width = &quot;100%&quot;
+)
+options(width = 180, dplyr.width = 150)</code></pre>
+</details>
+</div>
+<div id="create-map" class="section level1">
+<h1>CREATE MAP</h1>
+<div id="get-electoral-results" class="section level2">
+<h2>Get electoral results</h2>
+<details open>
+<p><summary>Code: Get election results </summary></p>
+<pre class="r"><code># 2020 results ------------------------------------------------------------
+
+results &lt;- &quot;https://www.nbcnews.com/politics/2020-elections/pennsylvania-president-results?format=json&quot;
+df_results &lt;- jsonlite::fromJSON(results, flatten=T)
+
+Biden &lt;- df_results$candidateCountyResults$countyResults[[1]]
+Biden &lt;- Biden %&gt;%
+  mutate(candidate=&quot;Biden&quot;,
+         party=&quot;democrat&quot;)
+
+Trump &lt;- df_results$candidateCountyResults$countyResults[[2]]
+Trump &lt;- Trump %&gt;%
+  mutate(candidate=&quot;Trump&quot;,
+         party=&quot;republican&quot;)
+
+df_2020 &lt;- bind_rows(Biden, Trump) %&gt;% 
+  mutate(year=2020) %&gt;% 
+  select(year, county=countyName, party, candidate, vote_share=percentOfVote,
+         vote_absolute=votesReceived,
+         -isLeading, county=countyName)
+
+
+# 2016 results ------------------------------------------------------------
+
+df_2016 &lt;- readxl::read_xlsx(here::here(&quot;blog_data&quot;, &quot;nyt_map&quot;,&quot;results2016.xlsx&quot;)) %&gt;% 
+  select(year, state, county, candidate, party, contains(&quot;votes&quot;)) %&gt;% 
+  filter(year==2016 &amp; state==&quot;Pennsylvania&quot;) %&gt;% 
+  group_by(county) %&gt;% 
+  mutate(vote_share=candidatevotes/totalvotes*100) %&gt;% 
+  select(year, county, party, candidate, vote_absolute=candidatevotes, vote_share) %&gt;% 
+  ungroup()
+
+# combine -----------------------------------------------------------------
+
+df_all &lt;- bind_rows(df_2016, df_2020) %&gt;% 
+  filter(party %in% c(&quot;democrat&quot;, &quot;republican&quot;)) %&gt;% 
+  ungroup()
+
+# Since there are also other candidates than Trump and Biden (yes, really), its not ok ok to simply use the difference between their 2020 and 2016 results. There are counties in which both candidates increased their vote share. Hence, whether a county became more democrat or republican has to be calculated on the basis of their joint votes (share).
+
+#change
+df_all &lt;- df_all %&gt;% 
+  group_by(county, party) %&gt;% 
+  arrange(desc(year), .by_group=T) %&gt;% 
+  mutate(change=vote_share-lead(vote_share)) %&gt;% 
+  group_by(year, county) %&gt;% 
+  mutate(vote_share_combined=sum(vote_share)) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(vote_share_party=vote_share/vote_share_combined*100) %&gt;% 
+  group_by(county, party) %&gt;% 
+  arrange(desc(year), .by_group = T) %&gt;% 
+  mutate(change_parties=vote_share_party-lead(vote_share_party),
+         change_vote_absolute=vote_absolute-lead(vote_absolute))
+
+df_change &lt;- df_all %&gt;% 
+  filter(change_parties&gt;0) %&gt;% 
+  mutate(change_parties=case_when(party==&quot;democrat&quot; ~ change_parties*-1, #democrat arrows to left
+                                  TRUE ~ as.numeric(change_parties)))</code></pre>
+</details>
+</div>
+<div id="create-map-1" class="section level2">
+<h2>Create map</h2>
+<details open>
+<p><summary>Code: Create maps</summary></p>
+<pre class="r"><code>#import shapefile
+#https://data-pennshare.opendata.arcgis.com/datasets/pennsylvania-county-boundaries
+pa &lt;- st_read(here::here(&quot;blog_data&quot;, &quot;nyt_map&quot;,&quot;shapefile&quot;,
+                         &quot;county_boundary.shp&quot;),
+              quiet=T) %&gt;% 
+  st_transform(32617)
+
+
+#extract x and y positions from the geometry column
+sf_cent &lt;- st_centroid(pa) %&gt;% 
+  mutate(point_x=map_dbl(geometry, pluck, 1),
+         point_y=map_dbl(geometry, pluck, 2))</code></pre>
+</details>
+<p>Calculate center of each county for the position of the arrows (=centroids for each polygon).</p>
+<details open>
+<p><summary>Code: Calculate centroids</summary></p>
+<pre class="r"><code># data --------------------------------------------------------------------
+
+scale_factor &lt;- 10^3.900
+
+sf_cent2 &lt;- sf_cent %&gt;% 
+  left_join(., df_change %&gt;% select(county, party, change_parties, change_vote_absolute) %&gt;% 
+              mutate(county=stringr::str_to_upper(county)),
+            by=c(&quot;COUNTY_NAM&quot;=&quot;county&quot;)) %&gt;% 
+  mutate(x_change=change_parties*sin(20),
+         y_change=abs(change_parties)*cos(20)) %&gt;% 
+  mutate(point_x_end=point_x+(x_change*scale_factor),
+         point_y_end=(y_change*scale_factor)+point_y)</code></pre>
+</details>
+<p>Use the <code>googleway</code> package to get the long/lat details for Philly and Pittsburgh (see <a href="https://werk.statt.codes/post/primary-schools-in-vienna/" target="_blank">here</a> for another blog where I used the package quite heavily.)</p>
+<details open>
+<p><summary>Code: Geocode cities</summary></p>
+<pre class="r"><code># data for pittsburgh and philadelphia ------------------------------------
+
+library(googleway)
+cities &lt;- c(&quot;Philadelphia&quot;, &quot;Pittsburgh&quot;)
+df_cities &lt;- map_dfr(cities, ~google_geocode(address=.x, 
+                                             key=Sys.getenv(&quot;googleway&quot;),
+                                             simplify = T)) 
+
+df_cities_geom &lt;- df_cities$results$geometry$location
+
+df_cities_add &lt;- df_cities$results$formatted_address %&gt;% enframe(., name=NULL, value=&quot;city&quot;)
+
+df_cities &lt;- bind_cols(df_cities_geom, df_cities_add)
+
+sf_cities &lt;- st_as_sf(df_cities, coords = c(&quot;lng&quot;, &quot;lat&quot;), remove = FALSE, 
+         crs = 4326, agr = &quot;constant&quot;) %&gt;% 
+  st_transform(32617)</code></pre>
+</details>
+<div id="main-map" class="section level3">
+<h3>Main map</h3>
+<p>Create the main plot with the map.</p>
+<details open>
+<p><summary>Code: map</summary></p>
+<pre class="r"><code># plot --------------------------------------------------------------------
+
+pl_map &lt;- ggplot()+
+  labs(
+    # title = &#39;The Vote in Battleground States&lt;br&gt;
+    #    &lt;span style=&quot;color:#606060;font-size:35pt;font-family:Times;&quot;&gt;Pennsylvania&lt;/span&gt;&#39;,
+    caption=&quot;graph remake: Roland Schmidt| @zoowalk|  https://werk.statt.codes\noriginal: https://nyti.ms/3lftRDe&quot;
+  )+
+  geom_sf(data=pa, 
+          size=.1,
+          fill=&quot;white&quot;)+
+  geom_sf(data = sf_cities, 
+          size=2,
+          color = &#39;grey50&#39;) +
+  geom_sf_text(data = sf_cities,
+                aes(label=city %&gt;% 
+                      str_extract(., regex(&quot;[:alpha:]*&quot;))),
+               nudge_y = -10^4.2,
+               size=3.2,
+               family=&quot;Arial&quot;,
+               color=&quot;grey50&quot;)+
+  geom_segment(data=sf_cent2,
+               aes(x=point_x,
+                   xend=point_x_end,
+                   y=point_y,
+                   yend=point_y_end,
+                   color=party,
+                   size=change_vote_absolute/(1000^100)),
+               linejoin=&quot;mitre&quot;,
+               arrow=arrow(length=unit(0.2, &quot;cm&quot;),
+                           angle=15,
+                           type=&quot;closed&quot;))+
+  scale_x_continuous(expand=expansion(mult=c(.1,.3)))+
+  scale_size_continuous(range=c(0,3))+
+  scale_color_manual(values=c(democrat=&quot;#3f95b0&quot;, republican=&quot;#ba6b67&quot;))+
+  theme_void()+
+  theme(plot.background = element_rect(fill=plot_bg_color),
+   plot.title = element_markdown(hjust = .5,
+                                 lineheight = 3,
+                                 color=&quot;#606060&quot;
+                                 ),
+   plot.caption = element_text(hjust=0, 
+                               family = &quot;Arial&quot;,
+                               lineheight = 1,
+                               color=&quot;#606060&quot;),
+        legend.position = &quot;none&quot;)</code></pre>
+</details>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.svg" width="100%" style="display: block; margin: auto auto auto 0;" /></p>
+</div>
+<div id="legend" class="section level3">
+<h3>Legend</h3>
+<p>Create a second plot which shows the legend in the graph.</p>
+<details open>
+<p><summary>Code: legend inset</summary></p>
+<pre class="r"><code># inset -------------------------------------------------------------------
+
+df_inset &lt;- data.frame(
+  stringsAsFactors = FALSE,
+             party = c(&quot;republican&quot;, &quot;democrat&quot;),
+            x = c(.5L, -.5L),
+              xend = c(3L, -3L),
+            y = c(0L, 0L),
+              yend = c(.5L, .5L)
+)
+
+pl_inset &lt;-  df_inset %&gt;% 
+ggplot()+
+  labs(title=&quot;Shift from 2016&quot;,
+       subtitle=&quot;In counties that have reported\n almost all of their votes&quot;)+
+  geom_segment(aes(x=x,
+                   xend=xend,
+                   y=y,
+                   yend=yend,
+                   color=party),
+               size=1,
+               linejoin=&quot;mitre&quot;,
+               arrow=arrow(length=unit(0.2, &quot;cm&quot;),
+                           angle=20,
+                           type=&quot;closed&quot;)
+               )+
+  geom_text(x=.5, y=-.3, 
+            label=&quot;More\nRepublican&quot;, 
+            hjust=0, 
+            lineheight=0.8,
+            size=3,
+            color=&quot;grey60&quot;, 
+            family=&quot;Arial&quot;)+
+  geom_text(x=-.5, y=-.3, label=&quot;More\nDemocratic&quot;, 
+            lineheight=0.8,
+            hjust=1, 
+            size=3,
+            color=&quot;grey60&quot;, 
+            family=&quot;Arial&quot;)+
+  scale_color_manual(values=c(democrat=&quot;#3f95b0&quot;, republican=&quot;#ba6b67&quot;))+
+  scale_x_continuous(expand=expansion(ad=c(1,1)), limits=c(-7,7))+
+  scale_y_continuous(limits=c(-1,.5), expand=expansion(add=c(0.5, 0.2)))+
+  theme_void()+
+  theme(legend.position=&quot;none&quot;,
+        plot.title = element_text(hjust = 0.5,
+                                  family = &quot;Arial&quot;,
+                                  face=&quot;bold&quot;,
+                                  color=&quot;#606060&quot;,
+                                  margin = margin(b=0, unit=&quot;cm&quot;),
+                                  size=13),
+        plot.subtitle = element_text(hjust=0.5,
+                                     margin = margin(t=0.1, unit=&quot;cm&quot;),
+                                     size=10,
+                                     color=&quot;grey60&quot;,
+                                     family = &quot;Arial&quot;))</code></pre>
+</details>
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.svg" width="100%" style="display: block; margin: auto auto auto 0;" /></p>
+</div>
+<div id="result" class="section level3">
+<h3>Result</h3>
+<p>Insert the ‘legend plot’ as an inset by using the latest release of the <code>patchwork</code> package.</p>
+<details open>
+<p><summary>Code: Combine plots</summary></p>
+<pre class="r"><code># combine plots -----------------------------------------------------------
+
+pl_combined &lt;- pl_map+inset_element(pl_inset, top=0.9, bottom=0.6, left=0.75, right=1, align_to=&quot;full&quot;)</code></pre>
+</details>
+<p>Here’s the result.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.svg" width="100%" height="110%" style="background-color: #9ecff7;" style="display: block; margin: auto auto auto 0;" /></p>
+<p>And here the original for comparison:</p>
+<p><img src="index_files/Capture.PNG" /></p>
+</div>
+</div>
+</div>
+<div id="pending-details" class="section level1">
+<h1>PENDING DETAILS</h1>
+<p>For my liking, the plot comes pretty close to the one of the NYT, but a few details are still off: I couldn’t find a way how to remove the white frame around the plot, despite trying out a few suggested solutions (apart from saving and cropping the image); see <a href="https://community.rstudio.com/t/ggsave-aspect-ratio-whitespace-use-case-favicon-for-blogdown/6793/7" target="_blank">here</a>, <a href="https://www.pmassicotte.com/post/removing-borders-around-ggplot2-graphs/" target="_blank">here</a>, and <a href="https://stackoverflow.com/questions/58723151/remove-white-margin-surrounding-geom-sf-objects-in-r-shiny-ggplot-with-renderp" target="_blank">here</a>; furthermore, the width of the arrows is not identical to those of the NYT. I assumed that the width would be weighted by the absolute number of votes, but apparently that’s not what the NYT used. Without any further details available (which I think should be actually mentioned on their site), I can only guess here.</p>
+<p>Overall tough, while the graph is not 100 % identical with the NYT’s versions, its sufficiently close for my purpose here and available time. And more importantly to me, the basic concept how to create such graphs is now clear to me.</p>
+</div>
