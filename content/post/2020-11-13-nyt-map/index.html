@@ -1,9 +1,10 @@
 ---
 title: Recreating NYT election map
-author: rs
-date: '2020-11-16'
+author: ro
+date: '2020-11-18'
 slug: []
 categories: []
+draft: no
 tags:
 - map
 - USA
@@ -53,6 +54,9 @@ plot_bg_color &lt;- readr::read_file(file=here::here(&quot;themes&quot;, &quot;h
   }
 })
 
+knitr::knit_hooks$set(crop = knitr::hook_pdfcrop)
+
+
 knitr::opts_chunk$set(
     fig.align = &quot;left&quot;,
     message = FALSE,
@@ -94,7 +98,7 @@ df_2020 &lt;- bind_rows(Biden, Trump) %&gt;%
 
 
 # 2016 results ------------------------------------------------------------
-
+# source: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VOQCHQ#
 df_2016 &lt;- readxl::read_xlsx(here::here(&quot;blog_data&quot;, &quot;nyt_map&quot;,&quot;results2016.xlsx&quot;)) %&gt;% 
   select(year, state, county, candidate, party, contains(&quot;votes&quot;)) %&gt;% 
   filter(year==2016 &amp; state==&quot;Pennsylvania&quot;) %&gt;% 
@@ -105,14 +109,14 @@ df_2016 &lt;- readxl::read_xlsx(here::here(&quot;blog_data&quot;, &quot;nyt_map&
 
 # combine -----------------------------------------------------------------
 
-df_all &lt;- bind_rows(df_2016, df_2020) %&gt;% 
+df_combined &lt;- bind_rows(df_2016, df_2020) %&gt;% 
   filter(party %in% c(&quot;democrat&quot;, &quot;republican&quot;)) %&gt;% 
   ungroup()
 
-# Since there are also other candidates than Trump and Biden (yes, really), its not ok ok to simply use the difference between their 2020 and 2016 results. There are counties in which both candidates increased their vote share. Hence, whether a county became more democrat or republican has to be calculated on the basis of their joint votes (share).
+# Since there are also other candidates than Trump and Biden (yes, really), its not ok to simply use the difference between their 2020 and 2016 results. There are counties in which both candidates increased their vote share. Hence, whether a county became more democrat or republican has to be calculated on the basis of their joint votes (share).
 
 #change
-df_all &lt;- df_all %&gt;% 
+df_all &lt;- df_combined %&gt;% 
   group_by(county, party) %&gt;% 
   arrange(desc(year), .by_group=T) %&gt;% 
   mutate(change=vote_share-lead(vote_share)) %&gt;% 
@@ -122,13 +126,31 @@ df_all &lt;- df_all %&gt;%
   mutate(vote_share_party=vote_share/vote_share_combined*100) %&gt;% 
   group_by(county, party) %&gt;% 
   arrange(desc(year), .by_group = T) %&gt;% 
-  mutate(change_parties=vote_share_party-lead(vote_share_party),
-         change_vote_absolute=vote_absolute-lead(vote_absolute))
+  mutate(nchange_parties=vote_share_party-lead(vote_share_party),
+         change_vote_absolute=vote_absolute-lead(vote_absolute)) %&gt;% 
+  ungroup()</code></pre>
+<pre class="r"><code>df_change &lt;- df_combined %&gt;% 
+  pivot_longer(cols=contains(&quot;vote&quot;),
+               names_to = &quot;indicator&quot;) %&gt;% 
+  group_by(county, party, indicator) %&gt;% 
+  arrange(desc(year), .by_group = T) %&gt;% 
+  mutate(change=value-lead(value) %&gt;% 
+           round(., digits = 2)) %&gt;% 
+  ungroup()
 
-df_change &lt;- df_all %&gt;% 
-  filter(change_parties&gt;0) %&gt;% 
-  mutate(change_parties=case_when(party==&quot;democrat&quot; ~ change_parties*-1, #democrat arrows to left
-                                  TRUE ~ as.numeric(change_parties)))</code></pre>
+
+df_change &lt;- df_change %&gt;% 
+  filter(year==&quot;2020&quot;) %&gt;% 
+  group_by(county, indicator) %&gt;% 
+  arrange(desc(party), .by_group = T) %&gt;% 
+  summarise(party_diff=change-lead(change)) %&gt;% 
+  filter(!is.na(party_diff)) %&gt;% 
+  pivot_wider(id_cols = &quot;county&quot;,
+              values_from = &quot;party_diff&quot;,
+              names_from=&quot;indicator&quot;,
+              names_glue=&quot;diff_change_{indicator}&quot;) %&gt;% 
+  mutate(party=case_when(diff_change_vote_share &lt; 0 ~ &quot;democrat&quot;,
+                         diff_change_vote_share &gt; 0 ~ &quot;republican&quot;))</code></pre>
 </details>
 </div>
 <div id="create-map-1" class="section level2">
@@ -148,19 +170,21 @@ sf_cent &lt;- st_centroid(pa) %&gt;%
   mutate(point_x=map_dbl(geometry, pluck, 1),
          point_y=map_dbl(geometry, pluck, 2))</code></pre>
 </details>
-<p>Calculate center of each county for the position of the arrows (=centroids for each polygon).</p>
+<p>Calculate center of each county for the starting position of the arrows (=centroids for each polygon) as well as the length of the arrows. The arrows of in the NYT’s plot have an angle of 20 degrees (e.g. the measurement tool in Gimp allows you to get the angle). With this angle and the desired length (=difference of % changes of republicans and democrats) we can calculate the horizontal and vertical distance of the arrows’ end from their starting position. The cos and sin functions are our friends here (remember from high school…, if not see <a href="https://en.wikipedia.org/wiki/Trigonometric_functions" target="_blank">here</a>).</p>
 <details open>
 <p><summary>Code: Calculate centroids</summary></p>
 <pre class="r"><code># data --------------------------------------------------------------------
 
-scale_factor &lt;- 10^3.900
+scale_factor &lt;- 10^3.65
 
 sf_cent2 &lt;- sf_cent %&gt;% 
-  left_join(., df_change %&gt;% select(county, party, change_parties, change_vote_absolute) %&gt;% 
+  # left_join(., df_change %&gt;% select(county, party, change_parties, change_vote_absolute) %&gt;% 
+  left_join(., df_change %&gt;% 
+              # select(county, party, change_parties) %&gt;% 
               mutate(county=stringr::str_to_upper(county)),
             by=c(&quot;COUNTY_NAM&quot;=&quot;county&quot;)) %&gt;% 
-  mutate(x_change=change_parties*sin(20),
-         y_change=abs(change_parties)*cos(20)) %&gt;% 
+  mutate(x_change=diff_change_vote_share*sin(20),
+         y_change=abs(diff_change_vote_share)*cos(20)) %&gt;% 
   mutate(point_x_end=point_x+(x_change*scale_factor),
          point_y_end=(y_change*scale_factor)+point_y)</code></pre>
 </details>
@@ -196,13 +220,13 @@ pl_map &lt;- ggplot()+
   labs(
     # title = &#39;The Vote in Battleground States&lt;br&gt;
     #    &lt;span style=&quot;color:#606060;font-size:35pt;font-family:Times;&quot;&gt;Pennsylvania&lt;/span&gt;&#39;,
-    caption=&quot;graph remake: Roland Schmidt| @zoowalk|  https://werk.statt.codes\noriginal: https://nyti.ms/3lftRDe&quot;
+    caption=&quot;graph remake: Roland Schmidt|@zoowalk|https://werk.statt.codes\noriginal: https://nyti.ms/3lftRDe&quot;
   )+
   geom_sf(data=pa, 
           size=.1,
           fill=&quot;white&quot;)+
   geom_sf(data = sf_cities, 
-          size=2,
+          size=1.5,
           color = &#39;grey50&#39;) +
   geom_sf_text(data = sf_cities,
                 aes(label=city %&gt;% 
@@ -216,8 +240,8 @@ pl_map &lt;- ggplot()+
                    xend=point_x_end,
                    y=point_y,
                    yend=point_y_end,
-                   color=party,
-                   size=change_vote_absolute/(1000^100)),
+                   size=abs(diff_change_vote_absolute),
+                   color=party),
                linejoin=&quot;mitre&quot;,
                arrow=arrow(length=unit(0.2, &quot;cm&quot;),
                            angle=15,
@@ -231,13 +255,14 @@ pl_map &lt;- ggplot()+
                                  lineheight = 3,
                                  color=&quot;#606060&quot;
                                  ),
+   plot.margin = margin(0,0,0,0, unit=&quot;cm&quot;),
    plot.caption = element_text(hjust=0, 
                                family = &quot;Arial&quot;,
                                lineheight = 1,
-                               color=&quot;#606060&quot;),
+                               color=&quot;grey60&quot;),
         legend.position = &quot;none&quot;)</code></pre>
 </details>
-<p><img src="index_files/figure-html/unnamed-chunk-7-1.svg" width="100%" style="display: block; margin: auto auto auto 0;" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.svg" width="100%" style="display: block; margin: auto auto auto 0;" /></p>
 </div>
 <div id="legend" class="section level3">
 <h3>Legend</h3>
@@ -266,7 +291,7 @@ ggplot()+
                    color=party),
                size=1,
                linejoin=&quot;mitre&quot;,
-               arrow=arrow(length=unit(0.2, &quot;cm&quot;),
+               arrow=arrow(length=unit(0.1, &quot;cm&quot;),
                            angle=20,
                            type=&quot;closed&quot;)
                )+
@@ -300,11 +325,11 @@ ggplot()+
                                      color=&quot;grey60&quot;,
                                      family = &quot;Arial&quot;))</code></pre>
 </details>
-<p><img src="index_files/figure-html/unnamed-chunk-9-1.svg" width="100%" style="display: block; margin: auto auto auto 0;" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.svg" width="100%" style="display: block; margin: auto auto auto 0;" /></p>
 </div>
 <div id="result" class="section level3">
 <h3>Result</h3>
-<p>Insert the ‘legend plot’ as an inset by using the latest release of the <code>patchwork</code> package.</p>
+<p>Insert the ‘legend plot’ as an inset by using the latest release of the <code>patchwork</code> package (see details <a href="https://www.data-imaginist.com/2020/insetting-a-new-patchwork-version/" target="_blank">here</a>).</p>
 <details open>
 <p><summary>Code: Combine plots</summary></p>
 <pre class="r"><code># combine plots -----------------------------------------------------------
@@ -312,7 +337,7 @@ ggplot()+
 pl_combined &lt;- pl_map+inset_element(pl_inset, top=0.9, bottom=0.6, left=0.75, right=1, align_to=&quot;full&quot;)</code></pre>
 </details>
 <p>Here’s the result.</p>
-<p><img src="index_files/figure-html/unnamed-chunk-11-1.svg" width="100%" height="110%" style="background-color: #9ecff7;" style="display: block; margin: auto auto auto 0;" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.svg" width="100%" height="110%" style="display: block; margin: auto auto auto 0;" /></p>
 <p>And here the original for comparison:</p>
 <p><img src="index_files/Capture.PNG" /></p>
 </div>
@@ -320,6 +345,8 @@ pl_combined &lt;- pl_map+inset_element(pl_inset, top=0.9, bottom=0.6, left=0.75,
 </div>
 <div id="pending-details" class="section level1">
 <h1>PENDING DETAILS</h1>
-<p>For my liking, the plot comes pretty close to the one of the NYT, but a few details are still off: I couldn’t find a way how to remove the white frame around the plot, despite trying out a few suggested solutions (apart from saving and cropping the image); see <a href="https://community.rstudio.com/t/ggsave-aspect-ratio-whitespace-use-case-favicon-for-blogdown/6793/7" target="_blank">here</a>, <a href="https://www.pmassicotte.com/post/removing-borders-around-ggplot2-graphs/" target="_blank">here</a>, and <a href="https://stackoverflow.com/questions/58723151/remove-white-margin-surrounding-geom-sf-objects-in-r-shiny-ggplot-with-renderp" target="_blank">here</a>; furthermore, the width of the arrows is not identical to those of the NYT. I assumed that the width would be weighted by the absolute number of votes, but apparently that’s not what the NYT used. Without any further details available (which I think should be actually mentioned on their site), I can only guess here.</p>
-<p>Overall tough, while the graph is not 100 % identical with the NYT’s versions, its sufficiently close for my purpose here and available time. And more importantly to me, the basic concept how to create such graphs is now clear to me.</p>
+<p>For my liking, the plot comes pretty close to the one of the NYT, but a few details are still off.
+<em>Width of arrows</em>: I assumed that the width would be weighted by the absolute number of votes, but apparently that’s not what the NYT used. Without any further details available (which I think should be actually mentioned on their site), I can only guess here. <em>Length of arrows</em>: There are also a few counties in which the length doesn’t really mirror the arrows in the NYT’s plot. I am not entirely clear why this is. I strongl assume that’s due to differences in the underlying election results, meaning different points in time.</p>
+<p>On a purely aesthetic front, I couldn’t find a way how to <em>remove the white frame around the plot</em>, despite trying out a few suggested solutions; see <a href="https://community.rstudio.com/t/ggsave-aspect-ratio-whitespace-use-case-favicon-for-blogdown/6793/7" target="_blank">here</a>, <a href="https://www.pmassicotte.com/post/removing-borders-around-ggplot2-graphs/" target="_blank">here</a>, and <a href="https://stackoverflow.com/questions/58723151/remove-white-margin-surrounding-geom-sf-objects-in-r-shiny-ggplot-with-renderp" target="_blank">here</a>. The <a href="https://bookdown.org/yihui/rmarkdown-cookbook/crop-plot.html" target="_blank"><code>crop</code> chunk option</a> can do the trick, but in this case, with the output an svg, the final result looked quite blurred.</p>
+<p>Overall tough, while the graph is not 100 % identical with the NYT’s versions, its sufficiently close for my purpose and available time. And more importantly to me, the basic concept how to create such graphs is now clear to me.</p>
 </div>
