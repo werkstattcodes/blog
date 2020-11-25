@@ -1,0 +1,299 @@
+---
+title: Static maps with mapbox background images (snapbox)
+author: ro
+date: '2020-11-25'
+slug: []
+categories: []
+tags: 
+- maps
+- Austria
+- sf
+- snapbox
+- mapbox
+description: ''
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+<link href="index_files/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="index_files/anchor-sections/anchor-sections.js"></script>
+
+
+<div id="context" class="section level1">
+<h1>CONTEXT</h1>
+<p>Partly triggered by my <a href="https://werk.statt.codes/post/recreating-nyt-election-map/" target="_blank">last post</a> on replicating NYT’s electoral maps, I came across the nascent/experimental <code>snapbox</code> package (<a href="https://github.com/anthonynorth/snapbox" target="_blank">link</a>) by Anthony North and Miles McBain. The package provides a convenient way to add mapbox tiles as basemaps to maps created with ggplot (did I mention ‘maps’?`).</p>
+<p>The package is quite straightforward and not much to explain about. What caused me some hassles though was to figure out how to combine the basemap with my data, plotted with <code>geom_segment</code> or <code>geom_sf</code>. The critical issue here is to ensure that the maps projection of the coordiante system are the same. Hence, this post is somewhat a note to myself, graphs are not polished and I don’t dig into substantive matters. For the purpose of demonstration, I’ll use electoral data from the city of Vienna and want to highlight how the number of eligible voters per precinct (‘Wahlsprengel’) changed between 2015 and 2020.</p>
+</div>
+<div id="setup" class="section level1">
+<h1>SETUP</h1>
+<details closed>
+<p><summary>Code: Load packages </summary></p>
+<pre class="r"><code>library(snapbox)
+library(sf)
+library(tidyverse)
+#library(magick)
+knitr::knit_hooks$set(crop = knitr::hook_pdfcrop) #allows to crop white frame from ggplots.
+#for details see https://bookdown.org/yihui/rmarkdown-cookbook/crop-plot.html
+plot_bg_color &lt;- readr::read_file(file=here::here(&quot;themes&quot;, &quot;hugo-theme-basic&quot;, &quot;static&quot;, &quot;css&quot;,
+                                                  &quot;style.css&quot;)) %&gt;% 
+  str_extract(., regex(&quot;(?&lt;=background-color:).*?(?=;)&quot;)) %&gt;% str_trim()</code></pre>
+</details>
+</div>
+<div id="electoral-data" class="section level1">
+<h1>ELECTORAL DATA</h1>
+<p>Get the election results from 2015 and 2020, retrieve the number of eligible voters per precinct (`wber``), and calculate the change.</p>
+<details open>
+<p><summary>Code: Get electoral data + change in number of elegible voters </summary></p>
+<pre class="r"><code># https://www.data.gv.at/katalog/dataset/stadt-wien_wahleninwiengemeinderatswahlen/resource/a526df98-c307-4dee-8233-43b02856d1d7
+# https://www.wien.gv.at/politik/wahlen/hilfetext/rohdaten.html
+res20 &lt;- readr::read_csv2(file = &quot;https://www.wien.gv.at/politik/wahlen/ogd/gr201_99999999_9999_spr.csv&quot;)
+res15 &lt;- readr::read_csv2(file = &quot;https://www.wien.gv.at/politik/wahlen/ogd/gr151_99999999_9999_spr.csv&quot;)
+
+res &lt;- bind_rows(elections=list(&#39;2020&#39;=res20, &#39;2015&#39;=res15), .id=&quot;election&quot;) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  janitor::remove_empty(&quot;cols&quot;) %&gt;% 
+  mutate(election=as.numeric(election)) %&gt;% 
+  mutate(indicator_sprengel=bz*1000+spr, .after=spr) %&gt;% 
+  select(election:wber) 
+
+
+# change of eligible voters ----------------------------------------------------------
+
+df_wber_diff &lt;- res %&gt;% 
+  filter(wber&gt;0) %&gt;% #remove &#39;technical&#39; precincts for mail &amp; absentee voting 
+  select(-contains(&quot;nuts&quot;)) %&gt;% 
+  group_by(indicator_sprengel) %&gt;% 
+  arrange(desc(election), .by_group=T) %&gt;% 
+  mutate(wber_diff=wber-lead(wber)) %&gt;% 
+  filter(election==2020) %&gt;% 
+  mutate(wber_diff_rel=wber_diff/wber) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(change_indicator=case_when(wber_diff_rel&gt;0 ~ &quot;increase&quot;,
+                                    wber_diff_rel&lt;0 ~ &quot;decrease&quot;,
+                                    TRUE ~ as.character(&quot;stable&quot;)))</code></pre>
+</details>
+<pre><code>## # A tibble: 1,483 x 4
+##    indicator_sprengel wber_diff wber_diff_rel change_indicator
+##                 &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt; &lt;chr&gt;           
+##  1               1001       -43       -0.0640 decrease        
+##  2               1002       -34       -0.0521 decrease        
+##  3               1003       -36       -0.0574 decrease        
+##  4               1004        -8       -0.0247 decrease        
+##  5               1005       -76       -0.104  decrease        
+##  6               1006       -43       -0.0814 decrease        
+##  7               1007       -74       -0.138  decrease        
+##  8               1008       -17       -0.0297 decrease        
+##  9               1009       -48       -0.0650 decrease        
+## 10               1010       -31       -0.0442 decrease        
+## # ... with 1,473 more rows</code></pre>
+<p>Let’s have a quick look at the distribution of the change rates:</p>
+<details closed>
+<p><summary>Code: Distribution of changes</summary></p>
+<pre class="r"><code>pl_dist &lt;- df_wber_diff %&gt;% 
+  ggplot()+
+  ggridges::geom_density_line(aes(x=wber_diff_rel))+
+  labs(x=&quot;% change number of eligible voters 2020 vs 2015&quot;)+
+  theme(axis.text.y=element_blank())
+
+table(df_wber_diff$change_indicator)</code></pre>
+<pre><code>## 
+## decrease increase   stable 
+##      978      451       54</code></pre>
+</details>
+<pre><code>## 
+## decrease increase   stable 
+##      978      451       54</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>So, while the purpose of this post is not to dig into substantive matters, I was a bit surprised to see that a large majority of precincts features a decreased number of eligible voters.</p>
+</div>
+<div id="map" class="section level1">
+<h1>MAP</h1>
+<div id="get-boundaries-of-precincts" class="section level2">
+<h2>Get boundaries of precincts</h2>
+<p>Get the shapefile of the precincts’ boundaries.</p>
+<details open>
+<p><summary>Code: Get shape with boundaries of precincts </summary></p>
+<pre class="r"><code># https://www.data.gv.at/katalog/dataset/79c1030d-5cf6-4d58-ade6-02f66fb4dffb
+precincts &lt;- st_read(here::here(&quot;blog_data&quot;,&quot;static_map_snapbox&quot;,&quot;shapefile&quot;,&quot;WAHLSPRGR2020OGDPolygon.shp&quot;),
+              quiet=T) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  mutate(sprengel=as.numeric(sprengel))
+
+ggplot()+
+  geom_sf(data=precincts)</code></pre>
+<img src="index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+</details>
+<p>Now let’s calculate the center of each precinct. Note that I transform the coordination projection from WGS84 to 3857. The latter is ‘a Spherical Mercator projection coordinate system popularized by web services such as Google and later OpenStreetMap.’<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>
+After the transformation I take the x and y values from the centroids’ geometry. The function <code>st_centroid</code> gives us the centre of each polygon.</p>
+<details open>
+<p><summary>Code: Get centroids for precincts</summary></p>
+<pre class="r"><code>st_crs(precincts)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: WGS 84 
+##   wkt:
+## GEOGCRS[&quot;WGS 84&quot;,
+##     DATUM[&quot;World Geodetic System 1984&quot;,
+##         ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##         ID[&quot;EPSG&quot;,6326]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##         ID[&quot;EPSG&quot;,8901]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;geodetic longitude&quot;,east,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;geodetic latitude&quot;,north,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]]]</code></pre>
+<pre class="r"><code>cent_precincts &lt;- precincts %&gt;% 
+  st_transform(., crs=3857) %&gt;% 
+  st_centroid() %&gt;% 
+  mutate(point_x=map_dbl(geometry, pluck, 1),
+         point_y=map_dbl(geometry, pluck, 2))
+
+ggplot()+
+  geom_sf(data=precincts)+
+  geom_sf(data=cent_precincts,
+          size=0.1)</code></pre>
+<img src="index_files/figure-html/unnamed-chunk-7-1.png" width="672" />
+</details>
+</div>
+<div id="add-change-indicators-arrows" class="section level2">
+<h2>Add change indicators (arrows)</h2>
+<p>Calculate the length of the arrow indicating the change: Here the arrows should have an angle of 20 degrees; positive changes point towards the right, negative changes towards the left. With the sin and cos function we calculate the horizontal and vertical distance from the centroids. In addition, to make the arrows sufficiently long to be visible, I multiply them with a scale factor. Note that I add <code>coord_sf()</code> to the plot which ‘ensures that all layers use a common CRS.’<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
+<details open>
+<p><summary>Code: Calculate length of arrows indicating change </summary></p>
+<pre class="r"><code>scale_factor &lt;- 10^3
+
+df_change &lt;- cent_precincts %&gt;% 
+  left_join(., df_wber_diff,
+            by=c(&quot;sprengel&quot;=&quot;indicator_sprengel&quot;)) %&gt;% 
+  mutate(x_change=wber_diff_rel*sin(20),
+         y_change=abs(wber_diff_rel)*cos(20)) %&gt;% 
+  mutate(point_x_end=point_x+(x_change*scale_factor), .after=point_x) %&gt;% 
+  mutate(point_y_end=(y_change*scale_factor)+point_y, .after=point_y) 
+
+pl_change &lt;- ggplot()+
+  geom_sf(data=precincts,
+          size=0.1,
+          fill=&quot;transparent&quot;)+
+  geom_segment(data=df_change,
+               aes(x=point_x,
+                   xend=point_x_end,
+                   y=point_y,
+                   yend=point_y_end,
+                   color=change_indicator),
+               linejoin=&quot;mitre&quot;,
+               arrow=arrow(length=unit(0.05, &quot;cm&quot;),
+                           angle=15,
+                           type=&quot;closed&quot;),
+               size=0.5)+
+  scale_color_manual(values=c(&quot;increase&quot;=&quot;darkgreen&quot;,
+                              &quot;decrease&quot;=&quot;maroon&quot;,
+                              &quot;stable&quot;=&quot;orange&quot;))+
+  coord_sf(crs=3857)+
+  theme_void()</code></pre>
+</details>
+<pre><code>## Warning: Removed 48 rows containing missing values (geom_segment).</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+<div id="add-mapbox-basemap" class="section level2">
+<h2>Add mapbox basemap</h2>
+<p>Now, let’s add a mapbox basemap by using the <code>layer_mapbox</code> function of <code>snapbox</code>. To so, we first have to define the scope or boundary of the basemap. I do this by extracting the minimum and maximum x and y values from our map of the precincts. And then create a bbox object. Note that this boundary box is has the 4326 projection. The basemap for this boundary box is then added to the plot by using the layer_mapbox function. Note that you need an <a href="https://docs.mapbox.com/help/how-mapbox-works/access-tokens/" target="_blank">API-key</a> to access basemaps of mapbox.</p>
+<p>Et voila.</p>
+<details open>
+<p><summary>Code: Add mapbox basemap</summary></p>
+<pre class="r"><code>#get boundaries of plot
+
+#map boundaries: get max/min x, y values
+d &lt;- precincts$geometry
+d &lt;- attributes(d)$bbox
+my_xmin &lt;- d[[1]]
+my_ymin &lt;- d[[2]]
+my_xmax &lt;- d[[3]]
+my_ymax &lt;- d[[4]]
+my_xmin</code></pre>
+<pre><code>## [1] 16.18183</code></pre>
+<pre class="r"><code>my_ymin</code></pre>
+<pre><code>## [1] 48.1179</code></pre>
+<pre class="r"><code>my_xmax</code></pre>
+<pre><code>## [1] 16.57751</code></pre>
+<pre class="r"><code>my_ymax</code></pre>
+<pre><code>## [1] 48.32267</code></pre>
+<pre class="r"><code>#get basemap
+background_image &lt;- st_bbox(
+  c(xmin = my_xmin, ymin = my_ymin, xmax = my_xmax, ymax = my_ymax),
+  crs=4326) 
+
+#combine
+pl_combined &lt;- ggplot()+
+  layer_mapbox(background_image,
+               map_style = mapbox_galley_pencil(),
+               mapbox_api_access_token = Sys.getenv(&quot;MAPBOX_ACCESS_TOKEN&quot;),
+               scale_ratio = 1)+
+  geom_sf(data=precincts,
+          size=0.2,
+          fill=&quot;transparent&quot;)+
+  geom_segment(data=df_change,
+               aes(x=point_x,
+                   xend=point_x_end,
+                   y=point_y,
+                   yend=point_y_end,
+                   color=change_indicator),
+               linejoin=&quot;mitre&quot;,
+               arrow=arrow(length=unit(0.05, &quot;cm&quot;),
+                           angle=15,
+                           type=&quot;closed&quot;),
+               size=0.5)+
+  scale_color_manual(values=c(&quot;increase&quot;=&quot;darkgreen&quot;,
+                              &quot;decrease&quot;=&quot;maroon&quot;,
+                              &quot;stable&quot;=&quot;orange&quot;))+
+  coord_sf(crs=3857)+
+  theme_void()+
+  theme(legend.position = &quot;none&quot;)</code></pre>
+</details>
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>You can quickly change the background image by specifying a different <code>map_style</code> value, e.g. below
+I use the <em>decimal style</em>. And also combine with a different aesthetic, e.g. using fill to color the precincts according to their respective change.</p>
+<details closed>
+<p><summary>Code: Gradient fill of precincts</summary></p>
+<pre class="r"><code>df_fill &lt;- precincts %&gt;% 
+  left_join(., df_change %&gt;% select(sprengel, wber_diff_rel) %&gt;% as.data.frame(),
+            by=c(&quot;sprengel&quot;=&quot;sprengel&quot;))
+
+
+pl_combined2&lt;- ggplot()+
+  layer_mapbox(background_image,
+               map_style = mapbox_gallery_north_star(),
+               mapbox_api_access_token = Sys.getenv(&quot;MAPBOX_ACCESS_TOKEN&quot;),
+               scale_ratio = 1)+
+  geom_sf(data=df_fill,
+          aes(fill=wber_diff_rel),
+          size=0.2)+
+
+  scale_fill_gradient2(low=&quot;red&quot;, high=&quot;green&quot;, mid=&quot;white&quot;,
+                       breaks=scales::pretty_breaks(n=4)(min(df_fill$wber_diff_rel, na.rm = T):
+                                                   abs(min(df_fill$wber_diff_rel, na.rm=T))),
+                                                 guide = &quot;colourbar&quot;,
+                       name=&quot;% change eligible voters 2015-2020&quot;,
+                       limits=c(min(df_fill$wber_diff_rel, na.rm=T), abs(min(df_fill$wber_diff_rel, na.rm=T))))+
+
+  coord_sf(crs=3857)+
+  theme_void()+
+  theme(plot.background = element_rect(fill=plot_bg_color, color=plot_bg_color),
+        legend.title = element_text(size=7, vjust=1),
+        legend.text = element_text(size=5),
+        legend.position = &quot;bottom&quot;,
+        legend.justification = &quot;left&quot;)+
+  guides(fill = guide_colourbar(barwidth = 3, barheight = .2, title.position = &quot;top&quot;))</code></pre>
+</details>
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" width="2100" style="display: block; margin: auto auto auto 0;" /></p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>See <a href="https://wiki.openstreetmap.org/wiki/EPSG:3857#:~:text=EPSG%3A3857%20is%20a%20Spherical,as%20Google%20and%20later%20OpenStreetMap." target="_blank">here</a>.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>See <a href="https://ggplot2.tidyverse.org/reference/ggsf.html" target="_blank">here.</a><a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

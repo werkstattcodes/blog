@@ -184,7 +184,7 @@ section a:link:not(toc-h1):not(toc-h2):not(toc-h3) {
 section a:hover:not(toc-h1):not(toc-h2):not(toc-h3):not(f5) {
     /*color: var(--accent) !important;*/
     color: white;
-    background-color: orange;/*#29AB87;*/
+    background-color: maroon;/*orange;*/
     font-style: bold;
 
 }
