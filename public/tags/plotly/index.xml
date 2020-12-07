@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>plotly on werk.statt.codes</title>
-    <link>/tags/plotly/</link>
+    <link>https://werk.statt.codes/tags/plotly/</link>
     <description>Recent content in plotly on werk.statt.codes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
     <lastBuildDate>Mon, 02 Mar 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/plotly/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://werk.statt.codes/tags/plotly/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Segregation in Vienna&#39;s primary schools?</title>
-      <link>/post/primary-schools-in-vienna/</link>
+      <link>https://werk.statt.codes/post/primary-schools-in-vienna/</link>
       <pubDate>Mon, 02 Mar 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/primary-schools-in-vienna/</guid>
+      <guid>https://werk.statt.codes/post/primary-schools-in-vienna/</guid>
       <description>ContextOur daughter will turn six this summer and in Austria this means that she will start attending school in autumn. While in most parts of Austria’s countryside it’s a rather foregone conclusion to which school a new pupil will go (since there is mostly only one school ‘in town’), choosing a school for your kid in a city like Vienna can become a somewhat protracted decision making process with numerous schools in the vicinity to select from.</description>
     </item>
     

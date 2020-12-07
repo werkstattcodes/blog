@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>elections on werk.statt.codes</title>
-    <link>/tags/elections/</link>
+    <link>https://werk.statt.codes/tags/elections/</link>
     <description>Recent content in elections on werk.statt.codes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
     <lastBuildDate>Sat, 10 Oct 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/elections/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://werk.statt.codes/tags/elections/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Vienna Elections 2020: Age profile of electoral candidates</title>
-      <link>/post/vienna-elections-2020-age-profile/</link>
+      <link>https://werk.statt.codes/post/vienna-elections-2020-age-profile/</link>
       <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/vienna-elections-2020-age-profile/</guid>
+      <guid>https://werk.statt.codes/post/vienna-elections-2020-age-profile/</guid>
       <description>SetupCode: Load packages
 library(tidyverse)library(here)library(extrafont)loadfonts(device = &amp;quot;win&amp;quot;, quiet = T)library(hrbrthemes)hrbrthemes::update_geom_font_defaults(family = &amp;quot;Roboto Condensed&amp;quot;,size = 3.5,color = &amp;quot;grey50&amp;quot;)library(scales)library(knitr)library(paletteer)library(ggtext)library(glue)library(pdftools)library(svglite)library(tictoc)library(tidytext)library(gt)library(reactable)library(ggforce)library(ggiraph)library(htmltools)Code: Define rmarkdown options
 knit_hooks$set(wrap = function(before, options, envir) {if (before) {paste0(&amp;quot;&amp;lt;&amp;quot;, options$wrap, &amp;quot;&amp;gt;&amp;quot;)} else {paste0(&amp;quot;&amp;lt;/&amp;quot;, options$wrap, &amp;quot;&amp;gt;&amp;quot;)}})knitr::opts_chunk$set(fig.</description>
@@ -25,28 +25,28 @@ knit_hooks$set(wrap = function(before, options, envir) {if (before) {paste0(&a
     
     <item>
       <title>Austrian General Elections 2019: Preference votes</title>
-      <link>/post/vorzugsstimmen/</link>
+      <link>https://werk.statt.codes/post/vorzugsstimmen/</link>
       <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/vorzugsstimmen/</guid>
+      <guid>https://werk.statt.codes/post/vorzugsstimmen/</guid>
       <description>ContextOn 29 September, Austria held its general elections to the national assembly (Nationalrat). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (the government formation train is finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate.</description>
     </item>
     
     <item>
       <title>Women in parliament</title>
-      <link>/post/women-in-parliament/</link>
+      <link>https://werk.statt.codes/post/women-in-parliament/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/women-in-parliament/</guid>
+      <guid>https://werk.statt.codes/post/women-in-parliament/</guid>
       <description>ContextSo, Austria has a new parliament. Following the elections in September, the new lower house got constituted yesterday and as a few noted it is more diverse than previous ones. Here’s a nice visualization if you want to get a quick overview. Among others, it was the share of women in parliament which was particularly often noted. None of Austria’s previous lower houses had an as high share of women at the start of a new legislative period.</description>
     </item>
     
     <item>
       <title>European Parliament Elections 2019: Facebook ads of Austrian candidates</title>
-      <link>/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</link>
+      <link>https://werk.statt.codes/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</link>
       <pubDate>Thu, 25 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</guid>
+      <guid>https://werk.statt.codes/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</guid>
       <description>For the analysis of the use of political ads on facebook in the run-up to the European Parliament elections 2019 in Austria see here.</description>
     </item>
     

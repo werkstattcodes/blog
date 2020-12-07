@@ -3,197 +3,237 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/tags/austria/</loc>
+    <loc>https://werk.statt.codes/tags/austria/</loc>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/facebook/</loc>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/post/</loc>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/social-media/</loc>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/</loc>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/post/test-svg-position/</loc>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/post/viennaelections_facebook/</loc>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/map/</loc>
+    <lastmod>2020-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/mapbox/</loc>
+    <lastmod>2020-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/maps/</loc>
+    <lastmod>2020-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/sf/</loc>
+    <lastmod>2020-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/snapbox/</loc>
+    <lastmod>2020-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/post/static-maps-with-mapbox-background-images-snapbox/</loc>
+    <lastmod>2020-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/geocoding/</loc>
+    <lastmod>2020-11-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/patchwork/</loc>
+    <lastmod>2020-11-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/post/recreating-nyt-election-map/</loc>
+    <lastmod>2020-11-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/post/testing-resolution-of-plots/</loc>
+    <lastmod>2020-11-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/usa/</loc>
+    <lastmod>2020-11-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/elections/</loc>
     <lastmod>2020-10-10T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/elections/</loc>
+    <loc>https://werk.statt.codes/tags/gt/</loc>
     <lastmod>2020-10-10T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/gt/</loc>
+    <loc>https://werk.statt.codes/tags/ocr/</loc>
     <lastmod>2020-10-10T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/ocr/</loc>
+    <loc>https://werk.statt.codes/tags/reactable/</loc>
     <lastmod>2020-10-10T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/</loc>
+    <loc>https://werk.statt.codes/tags/regex/</loc>
     <lastmod>2020-10-10T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/reactable/</loc>
+    <loc>https://werk.statt.codes/post/vienna-elections-2020-age-profile/</loc>
     <lastmod>2020-10-10T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/regex/</loc>
-    <lastmod>2020-10-10T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
-    <lastmod>2020-10-10T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/vienna-elections-2020-age-profile/</loc>
-    <lastmod>2020-10-10T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/corona-virus/</loc>
-    <lastmod>2020-09-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/stringr/</loc>
-    <lastmod>2020-09-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/submissions_epidemic_law/</loc>
-    <lastmod>2020-09-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/web-scraping/</loc>
-    <lastmod>2020-09-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/human-rights/</loc>
-    <lastmod>2020-08-16T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/un-treaty-bodies/</loc>
-    <lastmod>2020-08-16T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report-bundesrat/</loc>
-    <lastmod>2020-07-22T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report/</loc>
+    <loc>https://werk.statt.codes/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report/</loc>
     <lastmod>2020-07-21T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/bosnia/</loc>
-    <lastmod>2020-07-01T00:00:00+00:00</lastmod>
+    <loc>https://werk.statt.codes/tags/web-scraping/</loc>
+    <lastmod>2020-07-21T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/bosnia-house-of-peoples/</loc>
-    <lastmod>2020-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/climate/</loc>
+    <loc>https://werk.statt.codes/tags/climate/</loc>
     <lastmod>2020-06-08T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/shiny/</loc>
+    <loc>https://werk.statt.codes/tags/corona-virus/</loc>
     <lastmod>2020-06-08T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/update-on-mobility-patterns/</loc>
+    <loc>https://werk.statt.codes/tags/shiny/</loc>
     <lastmod>2020-06-08T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/google-s-mobility-reportsmd/</loc>
+    <loc>https://werk.statt.codes/post/update-on-mobility-patterns/</loc>
+    <lastmod>2020-06-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/post/google-s-mobility-reportsmd/</loc>
     <lastmod>2020-04-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/covid-19-corona-virus-quick-look-at-some-data/</loc>
+    <loc>https://werk.statt.codes/post/covid-19-corona-virus-quick-look-at-some-data/</loc>
     <lastmod>2020-04-23T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/google-trends/</loc>
+    <loc>https://werk.statt.codes/tags/google-trends/</loc>
     <lastmod>2020-04-23T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/plotly/</loc>
+    <loc>https://werk.statt.codes/tags/plotly/</loc>
     <lastmod>2020-03-02T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/primary-schools-in-vienna/</loc>
+    <loc>https://werk.statt.codes/post/primary-schools-in-vienna/</loc>
     <lastmod>2020-03-02T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</loc>
+    <loc>https://werk.statt.codes/tags/bosnia/</loc>
     <lastmod>2020-02-07T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/bih-voting-behavior-of-mps-in-house-of-representatives-part2/</loc>
-    <lastmod>2020-01-13T00:00:00+00:00</lastmod>
+    <loc>https://werk.statt.codes/post/bih-voting-behavior-of-mps-in-house-of-representatives/</loc>
+    <lastmod>2020-02-07T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/vorzugsstimmen/</loc>
+    <loc>https://werk.statt.codes/post/vorzugsstimmen/</loc>
     <lastmod>2019-11-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/tidyrpivot/</loc>
+    <loc>https://werk.statt.codes/tags/stringr/</loc>
     <lastmod>2019-11-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/ggplot/</loc>
+    <loc>https://werk.statt.codes/tags/tidyrpivot/</loc>
+    <lastmod>2019-11-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://werk.statt.codes/tags/ggplot/</loc>
     <lastmod>2019-10-24T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/ggrepel/</loc>
+    <loc>https://werk.statt.codes/tags/ggrepel/</loc>
     <lastmod>2019-10-24T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/women-in-parliament/</loc>
+    <loc>https://werk.statt.codes/post/women-in-parliament/</loc>
     <lastmod>2019-10-24T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/link-to-previous-posts/</loc>
+    <loc>https://werk.statt.codes/post/link-to-previous-posts/</loc>
     <lastmod>2019-10-23T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/about/</loc>
+    <loc>https://werk.statt.codes/about/</loc>
     <lastmod>2019-10-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/</loc>
+    <loc>https://werk.statt.codes/</loc>
     <lastmod>2019-10-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</loc>
-    <lastmod>2019-07-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/social-media/</loc>
+    <loc>https://werk.statt.codes/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</loc>
     <lastmod>2019-07-25T00:00:00+00:00</lastmod>
   </url>
   

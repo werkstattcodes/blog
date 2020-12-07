@@ -2,101 +2,100 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Austria on werk.statt.codes</title>
-    <link>/tags/austria/</link>
+    <link>https://werk.statt.codes/tags/austria/</link>
     <description>Recent content in Austria on werk.statt.codes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Sat, 10 Oct 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 05 Dec 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/austria/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://werk.statt.codes/tags/austria/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>Vienna Elections 2020: Facebook Ads</title>
+      <link>https://werk.statt.codes/post/viennaelections_facebook/</link>
+      <pubDate>Sat, 05 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/post/viennaelections_facebook/</guid>
+      <description>SetupCode: Load packages
+# load packages -----------------------------------------------------------library(tidyverse)library(tictoc)library(lubridate)library(scales)library(ggiraph)library(tidytext)library(ragg)library(extrafont)#extrafont::font_import()loadfonts(device = &amp;quot;win&amp;quot;, quiet = T)library(hrbrthemes)hrbrthemes::update_geom_font_defaults(family = &amp;quot;Roboto Condensed&amp;quot;,size = 3.5,color = &amp;quot;grey50&amp;quot;)library(ggtext)library(gt)library(reactable)library(readxl)library(htmltools)library(paletteer)library(lemon)library(plotly)options(scipen = 999)library(kableExtra)Code: themes, color codes 
+# DEFINITIONS -------------------------------------------------------------# blog theme --------------------------------------------------------------theme_post &amp;lt;- function() {hrbrthemes::theme_ipsum_rc() +theme(plot.</description>
+    </item>
+    
+    <item>
+      <title>Static maps with mapbox background images (snapbox)</title>
+      <link>https://werk.statt.codes/post/static-maps-with-mapbox-background-images-snapbox/</link>
+      <pubDate>Wed, 25 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/post/static-maps-with-mapbox-background-images-snapbox/</guid>
+      <description>CONTEXTPartly triggered by my last post on replicating NYT’s electoral maps, I came across the nascent/experimental snapbox package (link) by Anthony North and Miles McBain. The package provides a convenient way to add mapbox tiles as basemaps to maps created with ggplot (did I mention ‘maps’?`).
+The package is quite straightforward and not much to explain about. What caused me some hassles though was to figure out how to combine the basemap with my data, plotted with geom_segment or geom_sf.</description>
+    </item>
+    
+    <item>
       <title>Vienna Elections 2020: Age profile of electoral candidates</title>
-      <link>/post/vienna-elections-2020-age-profile/</link>
+      <link>https://werk.statt.codes/post/vienna-elections-2020-age-profile/</link>
       <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/vienna-elections-2020-age-profile/</guid>
+      <guid>https://werk.statt.codes/post/vienna-elections-2020-age-profile/</guid>
       <description>SetupCode: Load packages
 library(tidyverse)library(here)library(extrafont)loadfonts(device = &amp;quot;win&amp;quot;, quiet = T)library(hrbrthemes)hrbrthemes::update_geom_font_defaults(family = &amp;quot;Roboto Condensed&amp;quot;,size = 3.5,color = &amp;quot;grey50&amp;quot;)library(scales)library(knitr)library(paletteer)library(ggtext)library(glue)library(pdftools)library(svglite)library(tictoc)library(tidytext)library(gt)library(reactable)library(ggforce)library(ggiraph)library(htmltools)Code: Define rmarkdown options
 knit_hooks$set(wrap = function(before, options, envir) {if (before) {paste0(&amp;quot;&amp;lt;&amp;quot;, options$wrap, &amp;quot;&amp;gt;&amp;quot;)} else {paste0(&amp;quot;&amp;lt;/&amp;quot;, options$wrap, &amp;quot;&amp;gt;&amp;quot;)}})knitr::opts_chunk$set(fig.</description>
     </item>
     
     <item>
-      <title>Submissions to Austria&#39;s amendment of epidemic law</title>
-      <link>/post/submissions_epidemic_law/</link>
-      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/post/submissions_epidemic_law/</guid>
-      <description>SetupCode: Load packages
-library(tidyverse)library(here)library(extrafont)loadfonts(device = &amp;quot;win&amp;quot;, quiet = T)library(hrbrthemes)hrbrthemes::update_geom_font_defaults(family = &amp;quot;Roboto Condensed&amp;quot;,size = 3.5,color = &amp;quot;grey50&amp;quot;)library(scales)library(knitr)library(paletteer)library(ggtext)library(glue)library(pdftools)library(rvest)library(janitor)library(patchwork)library(svglite)library(countrycode)library(tictoc)library(furrr)library(gt)library(reactable)plan(multisession, workers = 3)Code: Define rmarkdown options
-knit_hooks$set(wrap = function(before, options, envir) {if (before) {paste0(&amp;quot;&amp;lt;&amp;quot;, options$wrap, &amp;quot;&amp;gt;&amp;quot;)} else {paste0(&amp;quot;&amp;lt;/&amp;quot;, options$wrap, &amp;quot;&amp;gt;&amp;quot;)}})knitr::opts_chunk$set(fig.</description>
-    </item>
-    
-    <item>
-      <title>Austrian Parliament: MPs transparency and conflict of interest report - Bundesrat</title>
-      <link>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report-bundesrat/</link>
-      <pubDate>Wed, 22 Jul 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report-bundesrat/</guid>
-      <description>ContextThis is a follow-up on my previous post on the transprancey report by Austria’s Parliament. While I limited
-Steps in RSetupCode: Load packages
-library(tidyverse)library(here)library(extrafont)loadfonts(device = &amp;quot;win&amp;quot;, quiet = T)library(hrbrthemes)hrbrthemes::update_geom_font_defaults(family = &amp;quot;Roboto Condensed&amp;quot;,size=3)library(scales)library(knitr)library(paletteer)library(ggtext)library(glue)library(gt)library(DT)library(pdftools)library(lemon)library(gender)library(ggiraph)library(rvest)Code: Define rmarkdown options</description>
-    </item>
-    
-    <item>
       <title>Austrian Parliament: MPs transparency and conflict of interest report</title>
-      <link>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report/</link>
+      <link>https://werk.statt.codes/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report/</link>
       <pubDate>Tue, 21 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report/</guid>
+      <guid>https://werk.statt.codes/post/austrian-parliament-mps-transparency-and-conflict-of-interest-report/</guid>
       <description>ContextRecently, at the end of June, the Austrian Parliament published its annual report on MPs’ additional sources of revenue and pertaining activities (see here). The publication is mandatory by law, and basically seeks to curtail potential conflicts of interest and to increase transparency as to MPs’ activities outside of parliament. While the list comes, unsurprisingly, with a number of caveats 1, and by itself can hardly constitute a watertight safeguard against the various ‘undemocratic temptations’, the report nevertheless seems to provide interesting data on MPs’ financial statuses and professional machinations.</description>
     </item>
     
     <item>
       <title>Update on Google mobility reports on Austria</title>
-      <link>/post/update-on-mobility-patterns/</link>
+      <link>https://werk.statt.codes/post/update-on-mobility-patterns/</link>
       <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/update-on-mobility-patterns/</guid>
+      <guid>https://werk.statt.codes/post/update-on-mobility-patterns/</guid>
       <description>ContextThis is a short update on my previous post dealing with Google’s mobility reports on Austria. Since the last post was published, the (at least preliminary) peak of the epidemic has passed, restrictions are lifted one after the other , and the country is gradually ‘re-booted’. Against this background, I thought it might be instructive to see how this is reflected in Google’s mobility reports.
 To recap, Google’s mobility reports present data on the change of numbers of individuals staying at particular types of places (e.</description>
     </item>
     
     <item>
       <title>Segregation in Vienna&#39;s primary schools?</title>
-      <link>/post/primary-schools-in-vienna/</link>
+      <link>https://werk.statt.codes/post/primary-schools-in-vienna/</link>
       <pubDate>Mon, 02 Mar 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/primary-schools-in-vienna/</guid>
+      <guid>https://werk.statt.codes/post/primary-schools-in-vienna/</guid>
       <description>ContextOur daughter will turn six this summer and in Austria this means that she will start attending school in autumn. While in most parts of Austria’s countryside it’s a rather foregone conclusion to which school a new pupil will go (since there is mostly only one school ‘in town’), choosing a school for your kid in a city like Vienna can become a somewhat protracted decision making process with numerous schools in the vicinity to select from.</description>
     </item>
     
     <item>
       <title>Austrian General Elections 2019: Preference votes</title>
-      <link>/post/vorzugsstimmen/</link>
+      <link>https://werk.statt.codes/post/vorzugsstimmen/</link>
       <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/vorzugsstimmen/</guid>
+      <guid>https://werk.statt.codes/post/vorzugsstimmen/</guid>
       <description>ContextOn 29 September, Austria held its general elections to the national assembly (Nationalrat). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (the government formation train is finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate.</description>
     </item>
     
     <item>
       <title>Women in parliament</title>
-      <link>/post/women-in-parliament/</link>
+      <link>https://werk.statt.codes/post/women-in-parliament/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/women-in-parliament/</guid>
+      <guid>https://werk.statt.codes/post/women-in-parliament/</guid>
       <description>ContextSo, Austria has a new parliament. Following the elections in September, the new lower house got constituted yesterday and as a few noted it is more diverse than previous ones. Here’s a nice visualization if you want to get a quick overview. Among others, it was the share of women in parliament which was particularly often noted. None of Austria’s previous lower houses had an as high share of women at the start of a new legislative period.</description>
     </item>
     
     <item>
       <title>European Parliament Elections 2019: Facebook ads of Austrian candidates</title>
-      <link>/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</link>
+      <link>https://werk.statt.codes/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</link>
       <pubDate>Thu, 25 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</guid>
+      <guid>https://werk.statt.codes/post/european-parliament-elections-2019-facebook-ads-of-austrian-candidates/</guid>
       <description>For the analysis of the use of political ads on facebook in the run-up to the European Parliament elections 2019 in Austria see here.</description>
     </item>
     

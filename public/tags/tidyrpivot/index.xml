@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>tidyr::pivot on werk.statt.codes</title>
-    <link>/tags/tidyrpivot/</link>
+    <link>https://werk.statt.codes/tags/tidyrpivot/</link>
     <description>Recent content in tidyr::pivot on werk.statt.codes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
     <lastBuildDate>Wed, 20 Nov 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/tidyrpivot/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://werk.statt.codes/tags/tidyrpivot/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Austrian General Elections 2019: Preference votes</title>
-      <link>/post/vorzugsstimmen/</link>
+      <link>https://werk.statt.codes/post/vorzugsstimmen/</link>
       <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/vorzugsstimmen/</guid>
+      <guid>https://werk.statt.codes/post/vorzugsstimmen/</guid>
       <description>ContextOn 29 September, Austria held its general elections to the national assembly (Nationalrat). By now a flurry of analyses and comments has been published and the caravan of political commentary has largely moved on, at least when it comes to the analysis of the results itself (the government formation train is finally also getting up to speed). One aspect, I personally have never looked into, and which seems to fall a bit under the radar, is the use of preference votes by Austria’s electorate.</description>
     </item>
     

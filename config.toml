@@ -8,6 +8,11 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_cache$", "\\.knit\\.md$", "\\.utf8\
 copyright = "© Roland Schmidt <a href='https://twitter.com/zoowalk' style='color:gray'>@zoowalk</a>"
 description = "Playground with R"
 
+[markup]
+  defaultMarkdownHandler = "goldmark"
+  [markup.goldmark.renderer]
+    unsafe = true  # Enable user to embed HTML snippets in Markdown content.
+
 [taxonomies]
   tag = "tags"
   #about = "about"

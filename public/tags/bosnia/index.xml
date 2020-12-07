@@ -2,44 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Bosnia on werk.statt.codes</title>
-    <link>/tags/bosnia/</link>
+    <link>https://werk.statt.codes/tags/bosnia/</link>
     <description>Recent content in Bosnia on werk.statt.codes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Wed, 01 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 07 Feb 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/bosnia/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://werk.statt.codes/tags/bosnia/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Bosnia: Voting behavior in the House of Peoples (2014-2018)</title>
-      <link>/post/bosnia-house-of-peoples/</link>
-      <pubDate>Wed, 01 Jul 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/post/bosnia-house-of-peoples/</guid>
-      <description>Site might be best viewed on a desktop computer, rather than mobile device.
-CONTEXTThis blog post has been lingering for a few months now in my draft folder and for no other tangible reason than the Covid19 mayhem, I have no excuse for not having posted it much earlier. In short, the blog is a continuation of the analysis of voting behavior in Bosnia’s parliament during the 2014 to 2018 legislative period.</description>
-    </item>
     
     <item>
       <title>Bosnia: Voting behavior of MPs in the House of Representatives</title>
-      <link>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</link>
+      <link>https://werk.statt.codes/post/bih-voting-behavior-of-mps-in-house-of-representatives/</link>
       <pubDate>Fri, 07 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/bih-voting-behavior-of-mps-in-house-of-representatives/</guid>
+      <guid>https://werk.statt.codes/post/bih-voting-behavior-of-mps-in-house-of-representatives/</guid>
       <description>CONTEXTA while ago I noticed that the website of Bosnia’s parliament also provides the voting records for each separate vote taken in both houses. These records also include the voting behavior for each individual MP. Here an example of one of these voting records:
 While the dominant role of the ethnic cleavage in Bosnian politics has been a constant theme and continuously emphasized for the last 25 years (to an extent which frequently blanks out other salient issues), I hadn’t seen any empirical record on MP’s individual voting behavior which could corroborate the cleavage’s prevalence in the legislative arena (one insightful exception is Birgit Bahtić-Kunrath’s 2011 paper).</description>
-    </item>
-    
-    <item>
-      <title>Bosnia: Voting behavior of MPs in the House of Representatives - part 2</title>
-      <link>/post/bih-voting-behavior-of-mps-in-house-of-representatives-part2/</link>
-      <pubDate>Mon, 13 Jan 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/post/bih-voting-behavior-of-mps-in-house-of-representatives-part2/</guid>
-      <description>Entity vetoArticle IV 3(d)
-‘All decisions in both chambers shall be by majority of those present and voting. The Delegates and Members shall make their best efforts to see that the majority includes at least one-third of the votes of Delegates or Members from the territory of each Entity. If a majority vote does not include one-third of the votes of Delegates or Members from the territory of each Entity, the Chair and Deputy Chairs shall meet as a commission and attempt to obtain approval within three days of the vote.</description>
     </item>
     
   </channel>

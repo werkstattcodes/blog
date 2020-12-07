@@ -2,184 +2,256 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on werk.statt.codes</title>
-    <link>/tags/</link>
+    <link>https://werk.statt.codes/tags/</link>
     <description>Recent content in Tags on werk.statt.codes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Sat, 10 Oct 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 05 Dec 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://werk.statt.codes/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Austria</title>
-      <link>/tags/austria/</link>
-      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      <link>https://werk.statt.codes/tags/austria/</link>
+      <pubDate>Sat, 05 Dec 2020 00:00:00 +0000</pubDate>
       
-      <guid>/tags/austria/</guid>
+      <guid>https://werk.statt.codes/tags/austria/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>elections</title>
-      <link>/tags/elections/</link>
-      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      <title>facebook</title>
+      <link>https://werk.statt.codes/tags/facebook/</link>
+      <pubDate>Sat, 05 Dec 2020 00:00:00 +0000</pubDate>
       
-      <guid>/tags/elections/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>gt</title>
-      <link>/tags/gt/</link>
-      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/gt/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>OCR</title>
-      <link>/tags/ocr/</link>
-      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/ocr/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>reactable</title>
-      <link>/tags/reactable/</link>
-      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/reactable/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>regex</title>
-      <link>/tags/regex/</link>
-      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/regex/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Corona virus</title>
-      <link>/tags/corona-virus/</link>
-      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/corona-virus/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>stringr</title>
-      <link>/tags/stringr/</link>
-      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/stringr/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>web scraping</title>
-      <link>/tags/web-scraping/</link>
-      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/web-scraping/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>human rights</title>
-      <link>/tags/human-rights/</link>
-      <pubDate>Sun, 16 Aug 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/human-rights/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Bosnia</title>
-      <link>/tags/bosnia/</link>
-      <pubDate>Wed, 01 Jul 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/bosnia/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>climate</title>
-      <link>/tags/climate/</link>
-      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/climate/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>shiny</title>
-      <link>/tags/shiny/</link>
-      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/shiny/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Google Trends</title>
-      <link>/tags/google-trends/</link>
-      <pubDate>Thu, 23 Apr 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/google-trends/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>plotly</title>
-      <link>/tags/plotly/</link>
-      <pubDate>Mon, 02 Mar 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/plotly/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>tidyr::pivot</title>
-      <link>/tags/tidyrpivot/</link>
-      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/tidyrpivot/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>ggplot</title>
-      <link>/tags/ggplot/</link>
-      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/ggplot/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>ggrepel</title>
-      <link>/tags/ggrepel/</link>
-      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/ggrepel/</guid>
+      <guid>https://werk.statt.codes/tags/facebook/</guid>
       <description></description>
     </item>
     
     <item>
       <title>social media</title>
-      <link>/tags/social-media/</link>
-      <pubDate>Thu, 25 Jul 2019 00:00:00 +0000</pubDate>
+      <link>https://werk.statt.codes/tags/social-media/</link>
+      <pubDate>Sat, 05 Dec 2020 00:00:00 +0000</pubDate>
       
-      <guid>/tags/social-media/</guid>
+      <guid>https://werk.statt.codes/tags/social-media/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>map</title>
+      <link>https://werk.statt.codes/tags/map/</link>
+      <pubDate>Wed, 25 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/map/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>mapbox</title>
+      <link>https://werk.statt.codes/tags/mapbox/</link>
+      <pubDate>Wed, 25 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/mapbox/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>maps</title>
+      <link>https://werk.statt.codes/tags/maps/</link>
+      <pubDate>Wed, 25 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/maps/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>sf</title>
+      <link>https://werk.statt.codes/tags/sf/</link>
+      <pubDate>Wed, 25 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/sf/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>snapbox</title>
+      <link>https://werk.statt.codes/tags/snapbox/</link>
+      <pubDate>Wed, 25 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/snapbox/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>geocoding</title>
+      <link>https://werk.statt.codes/tags/geocoding/</link>
+      <pubDate>Wed, 18 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/geocoding/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>patchwork</title>
+      <link>https://werk.statt.codes/tags/patchwork/</link>
+      <pubDate>Wed, 18 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/patchwork/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>USA</title>
+      <link>https://werk.statt.codes/tags/usa/</link>
+      <pubDate>Wed, 18 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/usa/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>elections</title>
+      <link>https://werk.statt.codes/tags/elections/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/elections/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>gt</title>
+      <link>https://werk.statt.codes/tags/gt/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/gt/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>OCR</title>
+      <link>https://werk.statt.codes/tags/ocr/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/ocr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>reactable</title>
+      <link>https://werk.statt.codes/tags/reactable/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/reactable/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>regex</title>
+      <link>https://werk.statt.codes/tags/regex/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/regex/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>web scraping</title>
+      <link>https://werk.statt.codes/tags/web-scraping/</link>
+      <pubDate>Tue, 21 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/web-scraping/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>climate</title>
+      <link>https://werk.statt.codes/tags/climate/</link>
+      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/climate/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Corona virus</title>
+      <link>https://werk.statt.codes/tags/corona-virus/</link>
+      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/corona-virus/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>shiny</title>
+      <link>https://werk.statt.codes/tags/shiny/</link>
+      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/shiny/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Google Trends</title>
+      <link>https://werk.statt.codes/tags/google-trends/</link>
+      <pubDate>Thu, 23 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/google-trends/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>plotly</title>
+      <link>https://werk.statt.codes/tags/plotly/</link>
+      <pubDate>Mon, 02 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/plotly/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Bosnia</title>
+      <link>https://werk.statt.codes/tags/bosnia/</link>
+      <pubDate>Fri, 07 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/bosnia/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>stringr</title>
+      <link>https://werk.statt.codes/tags/stringr/</link>
+      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/stringr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>tidyr::pivot</title>
+      <link>https://werk.statt.codes/tags/tidyrpivot/</link>
+      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/tidyrpivot/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ggplot</title>
+      <link>https://werk.statt.codes/tags/ggplot/</link>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/ggplot/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ggrepel</title>
+      <link>https://werk.statt.codes/tags/ggrepel/</link>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/tags/ggrepel/</guid>
       <description></description>
     </item>
     
