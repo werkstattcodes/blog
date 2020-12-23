@@ -1,7 +1,7 @@
 ---
 title: Submissions to Austria's amendment of epidemic law
 author: roland
-date: '2020-09-25'
+date: '2020-12-22'
 slug: submissions_epidemic_law
 categories: []
 draft: true
@@ -15,8 +15,11 @@ description: ''
 ---
 
 # Setup
-<details closed> 
-<summary>Code: Load packages</summary> 
+
+<details closed>
+
+<summary>Code: Load packages</summary>
+
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(here)
@@ -46,10 +49,13 @@ library(reactable)
 plan(multisession, workers = 3)
 
 ```
+
 </details>
 
-<details closed> 
-<summary>Code: Define rmarkdown options</summary> 
+<details closed>
+
+<summary>Code: Define rmarkdown options</summary>
+
 ```{r setup, echo = T}
 knit_hooks$set(wrap = function(before, options, envir) {
   if (before) {
@@ -70,10 +76,13 @@ knitr::opts_chunk$set(
 )
 options(width = 180, dplyr.width = 150)
 ```
+
 </details>
 
-<details closed> 
-<summary>Code: Define plot theme, party colors, caption</summary> 
+<details closed>
+
+<summary>Code: Define plot theme, party colors, caption</summary>
+
 ```{r echo=TRUE}
 
 plot_bg_color <- readr::read_file(file=here::here("themes", "hugo-theme-basic", "static", "css",
@@ -163,35 +172,38 @@ data_date <- format(Sys.Date(), "%d %b %Y")
 
 # Context
 
-Austria’s government recently tabled an amendment to the country’s epidemic law. The amendment was largely a reaction to the shortcomings of the law dating from 1950 when confronted with the current Covid crisis as well as a recent ruling of Austria’s Constitutional Court which declared several measures passed by the government as violating the constitution. Hence, the government proposed the amendment (a more detailed and thorough account is available e.g. here).
+Austria's government tabled about three months ago an amendment to the country's epidemic law. The amendment was largely a reaction to the shortcomings of the law dating from 1950 when confronted with the current Covid crisis as well as a recent ruling of Austria's Constitutional Court which declared several measures passed by the government as violating the constitution. Hence, the government proposed the amendment.
 
-While there would be a lot to say about the latent tension between civic rights and a state’s obligation to curtail an epidemic or the thin line between legitimate restrictions and excessive infringements, this post will deal with the public submissions to the government’s amendment bill. In short and crude terms, the legislative process in Austria provides the opportunity for citizens, NGOs, expert bodies etc to file submissions in which they can raise their concerns as to the (draft) version of the bill before it will be debated in parliament. So, at least in theory, it’s an avenue for the government to solicit input from the public at large. 
+While there would be a lot to say about the latent tension between civic rights and a state's obligation to curtail an epidemic or the thin line between legitimate restrictions and excessive infringements, this post will deal with the public submissions to the government's amendment bill. In short and crude terms, the legislative process in Austria provides the opportunity for citizens, NGOs, expert bodies etc to file submissions in which they can raise their concerns as to the (draft) version of the bill before it will be debated in parliament. So, at least in theory, it's an avenue for the government to solicit input from the public at large.
 
-What caught my eye, or better my ears, was a related radio news report which mentioned something along the lines that the submissions to the amendment reached a) a record number and b) that the texts of a considerable number of submissions were similar in their wording. 
+What caught my eye, or better my ears, was a related radio news report which mentioned something along the lines that the submissions to the amendment reached a) a record number and b) that a considerable number of submissions were similar in their wording.
 
-I guess the former is indicative for the fundamental issues which the amendment touches and the overall somewhat ‘edgy’, not to say polarized atmosphere when it comes to Corona. The latter point, though, the similarity of submissions' wording, puzzled me a bit. What the similarity of the wording effectively means is the use of some kind of template by those filing a submission. In this regard, the news report mentioned that there have been some pertaining calls on social media channels to oppose the bill, possibly also including the provision of a template text.  
+I guess the former is indicative for the fundamental issues which the amendment touches and the overall somewhat 'edgy', not to say polarized atmosphere when it comes to Corona. The latter point, though, the similarity of submissions' wording, puzzled me a bit. What the similarity of the wording effectively means is the use of some kind of template by those filing a submission. In this regard, the news report mentioned that there have been some pertaining calls on social media channels to oppose the bill, possibly also including the provision of a template text.
 
-It was this context which made me curious about the extent of the matter.At least curious enough to have an ‘empirical’ look at it with R.
+It was this context which made me curious about the extent of the matter. At least curious enough to have an 'empirical' look at it with R.
 
-So I went to the a) parliament’s website which provides a record of received submissions, b) extracted the weblinks to all those submissions of which the text is public, c) download the pertaining pdfs, d) extracted their content, and e) finally checked for their similarity. As for the last point, I can gladly report that I learned something here and my approach changed a bit as I moved along. Hence, the blog post somewhat mirrors this process. 
+So I went to the a) parliament's website which provides a record of received submissions, b) extracted the weblinks to all those submissions of which the text is public, c) download the pertaining pdfs, d) extracted their content, and e) finally checked for their similarity. As for the last point, I can gladly report that I learned something here and my approach changed a bit as I moved along. Hence, the blog post somewhat mirrors this process.
 
 ```{r include=FALSE}
-submission_pattern <- "Ich erhebe schärfste"
+submission_pattern <- "Tür und Tor"
 ```
 
-When it comes to similarity, my first attempt was to simply look at the the recurrence of a distinct phrase which I repeatedly noticed while randomly glancing through some of the submissions. The formulation is *`r submission_pattern`* which means something like ‘to open the floodgates for arbitrariness'. What is meant is that the law's amendment is feared to open the floodgates for arbitrary rule by the government’. To put it mildly, I guess it’s safe to assume that those submissions articulated severe misgivings about the amendment. 
+When it comes to similarity, my first attempt was to simply look at the the recurrence of a distinct phrase which I repeatedly noticed while randomly glancing through some of the submissions. The formulation is *`r submission_pattern`* which means something like '(to open) the (flood)gates'. I guess it's safe to assume that those submissions articulated severe misgivings about the amendment.
 
-As I'll show below, while this approach is already somewhat informative since it reveals a pervasive use of a rather distinct phrase and hence points towards the use of text template, it is rather inductive and likely to suffer from  omissions of other, possibly even more re-current phrases. Furthermore, by simply looking at one distinct phrase is likely to be a rather 'fragile' indicator. Only a minor, effectively non-substantive modification of the wording would result in missing out on similar submissions. 
+As I'll show below, while this approach is already somewhat informative since it reveals a pervasive use of a rather distinct phrase and hence points towards the use of text template, it is rather inductive and likely to suffer from omissions of other, possibly even more re-current phrases. Furthermore, simply looking at one distinct phrase is likely to be a rather 'fragile' indicator. Only a minor, effectively non-substantive modification of the wording would result in missing out on similar submissions.
 
-To make a long story short, this issue introduced me to the for me whole new world of quantitative text analysis as provided by the powerful `quanteda` package. Admittedly, I am only starting to scratch the surface here, but hopefully deep enough to legitimately include it in this post. So, enough of context and waffling. In media R(es).
+To make a long story short, this issue introduced me to the world of quantitative text analysis as provided by the powerful `quanteda` package. Admittedly, I am only starting to scratch the surface here, but hopefully deep enough to legitimately include it in this post. So, enough of context and waffling. In media R(es).
 
 # Get data
+
 ## Links to submission subpages
 
-The list of submissions filed for the amendment is provided [here](https://www.parlament.gv.at/PAKT/VHG/XXVII/ME/ME_00055/index.shtml#tab-Stellungnahmen){target="_blank"} at the Parliament's website. To extract the links to the sub-pages which include the links to individual texts, I make us of the provided RSS feed. From there I extract the relevant elements and combine them to one dataframe containing the name of the person/institution filing a submission, the submission's date, and the link to the sub-page. 
+The list of submissions filed for the amendment is provided [here](https://www.parlament.gv.at/PAKT/VHG/XXVII/ME/ME_00055/index.shtml#tab-Stellungnahmen){target="_blank"} at the Parliament's website. To extract the links to the sub-pages which include the links to individual texts, I make us of the provided RSS feed. From there I extract the relevant elements and combine them to one dataframe containing the name of the person/institution filing a submission, the submission's date, and the link to the sub-page.
 
-<details open> 
-<summary>Code: get links to submission sub-pages</summary> 
+<details open>
+
+<summary>Code: get links to submission sub-pages</summary>
+
 ```{r eval=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 link_rss_all_submissions <- "https://www.parlament.gv.at/PAKT/VHG/XXVII/ME/ME_00055/filter.psp?view=RSS&jsMode=&xdocumentUri=&filterJq=&view=&GP=XXVII&ITYP=ME&INR=55&SUCH=&listeId=142&FBEZ=FP_142"
 
@@ -235,6 +247,7 @@ df_submission <- bind_cols(
   ) %>% 
   select(-contains("id"))
 ```
+
 </details>
 
 ```{r eval=FALSE, include=FALSE}
@@ -275,8 +288,10 @@ reactable(df_submission,
 
 Notice that there are several submissions which state 'Keine öffentliche Stellungnahme' (no public statement) as a name. Hence, we will not be able to analyse the text of all submissions, but only of those which are made public. How many are there? Let's see:
 
-<details closed> 
-<summary>Code: identify public and non-public submissions</summary> 
+<details closed>
+
+<summary>Code: identify public and non-public submissions</summary>
+
 ```{r message=FALSE, warning=FALSE}
 df_submission <- df_submission %>% 
   mutate(public=case_when(str_detect(name, regex("Keine öffentliche Stellungnahme",
@@ -285,6 +300,7 @@ df_submission <- df_submission %>%
 
 table(df_submission$public)
 ```
+
 </details>
 
 ```{r echo=FALSE}
@@ -294,14 +310,17 @@ table(df_submission$public)
 Out of `r nrow(df_submission) %>% scales::comma()` submissions, the text of `r df_submission %>% filter(public=="public") %>% nrow() %>% scales::comma()` is publicly available (no idea why some are published and others not, probably it's up to the submitter to decide). While the high number of non-public submissions is obviously quite a caveat for the further analysis, we still have the text of more than 50 % of all submissions to look into.
 
 ## Links to pdfs
-Now let's use the links to the submissions' sub-pages and search on each sub-page for a link which leads to the actual pdf document of the submission. By using the browser's developer tools (F12 key), we can see the html code behind the page. Clicking on the link of one submission reveals that the link contains the word 'imfname'. I use this string to identify the link to the submission's pdf and neglect all other links and pdfs which are also on the site. 
+
+Now let's use the links to the submissions' sub-pages and search in each sub-page for a link which leads to the actual pdf document of the submission. By using the browser's developer tools (F12 key), we can see the html code behind the page. Clicking on the link of one submission reveals that the link contains the word 'imfname'. I use this string to identify the links to the submissions' pdfs and neglect all other links and pdfs which are also on the site.
 
 ![](/post/2020-09-25-submissions-epidemic-law_files/identify_link.gif)
 
-To do so, below the function which is applied to all (!) links leading to the sub-pages with the individual submissions. It reads the html code, extracts the links (href), converts the results into a dataframe, and subsequently filters out the links which include 'imfname'. I then complement the extracted link with the missing part of the web address (www.parlament....). Since there are several submission (sub-pages) which state that the text is not public, and don't include a link to a pdf, I insert in these cases a 'missing' instead of the link.
+To do so, below the function which is applied to all (!) links leading to the sub-pages with the individual submissions. It reads the html code, extracts the links (href), converts the results into a dataframe, and subsequently filters out the links which include 'imfname'. I then complement the extracted link with the missing part of the web address (www.parlament....). Since there are several submission (sub-pages) which state that the text is not public, and don't include a link to a pdf, I insert in these cases a 'missing' instead of the link. To accelerate the process I apply the function in parallel by using \`furrr::future\_map\`\`.
 
-<details open> 
-<summary>Code: read html of sub-pages, extract pdf-link</summary> 
+<details open>
+
+<summary>Code: read html of sub-pages, extract pdf-link</summary>
+
 ```{r eval=FALSE, include=TRUE}
 # function to identify pdf link
 fn_get_doc_links <- function(x){ 
@@ -326,8 +345,8 @@ df_submission <- df_submission %>%
                                    otherwise="missing"),
                             .progress = T))
 ```
-</details>
 
+</details>
 
 ```{r eval=FALSE, include=FALSE}
 #check
@@ -341,15 +360,17 @@ df_submission %>%
 
 ## Download submissions
 
-Now with all pdf links available we can start to download them. To do so, I use the `walk2` function of the `purrr` package. Note that I also use `magrittr`'s  `%$%`operator to expose/pipe into the the `walk2` function.
+Now with all pdf links available we can start to download them. To do so, I use the `walk2` function of the `purrr` package. Note that I also use `magrittr`'s `%$%`operator to expose/pipe into the the `walk2` function.
 
 ```{r include=FALSE}
 # load saved links to pdf_files
 df_submission <- readr::read_csv2(file=here::here("blog_data", "epidemic_law_submissions", "df_submission.csv"))
 ```
 
-<details open> 
-<summary>Code: download files</summary> 
+<details open>
+
+<summary>Code: download files</summary>
+
 ```{r eval=FALSE, include=TRUE}
 #define pdf's file name and download destination
 df_submission<- df_submission %>% 
@@ -367,15 +388,19 @@ df_submission %>%
     download.file, 
     mode = "wb")
 ```
+
 </details>
 
-After the steps above we now have the all the available submission files at our disposal. Finally time to look into the actual texts.
+After the steps above we now have the all the available submission files at our disposal. Finally time to start working on the actual texts.
 
 ## Extract text from pdfs
-When it comes to extracting text by means of OCR, `pdftools` is the package of choice. In preparation, we need to get the German language data. Extracting text from pdfs can be quite a time consuming matter. Going through the more than 3700 submissions initially took me more than 7 hours. Reducing the dpi value from 300 to 150 accelerated the procedure quite considerably, down to approx. 60 minutes, and I didn't notice any relevant decrease of the output's quality.
 
-<details open> 
-<summary>Code: extract text from pdfs</summary> 
+When it comes to extracting text by means of OCR, `pdftools` by Jeroen Ooms is the package of choice. In preparation, we need to get the German language data. Extracting text from pdfs can be quite a time consuming matter. Going through the more than 3700 submissions initially took me more than 7 hours. Reducing the dpi value from 300 to 150 accelerated the procedure quite considerably, down to approx. 60 minutes, and I didn't notice any relevant decrease of the output's quality.
+
+<details open>
+
+<summary>Code: extract text from pdfs</summary>
+
 ```{r eval=FALSE, include=TRUE}
 tesseract::tesseract_download(lang = "deu")
 tesseract_info()
@@ -383,21 +408,23 @@ tesseract_info()
 df_submission <- df_submission %>% 
    mutate(doc_text=map(pdf_destination, possibly(~pdftools::pdf_ocr_text(.,
                                                                       language = "deu",
-                                                                      dpi=72),
+                                                                      dpi=150),
                                               otherwise="missing")))
 ```
+
 </details>
 
-
 ```{r include=FALSE}
-df_submission <- readr::read_rds(path=here::here("blog_data", "epidemic_law_submissions", "df_submission_150.rds")) 
+df_submission <- readr::read_rds(file=here::here("blog_data", "epidemic_law_submissions", "df_submission_150.rds"))
 
 ```
 
 Let's clean up the imported text, i.e. collapse multi-page submissions into one single string text, remove leading and trailing white space etc.
 
-<details open> 
-<summary>Code: clean text</summary> 
+<details open>
+
+<summary>Code: clean text</summary>
+
 ```{r}
 df_submission <- df_submission %>% 
   mutate(date=date %>% 
@@ -409,23 +436,24 @@ df_submission <- df_submission %>%
   mutate(name_first=str_extract(name, regex("(?<=,\\s)[:alpha:]*(?=($|[^:alpha:]|\\s))")), 
          .after="name") 
 ```
+
 </details>
 
-Let's pause for a moment and take stock: There are `r nrow(df_submission) %>% scales::comma()` submissions, out of which `r df_submission %>% filter(public=="public") %>% nrow() %>% scales::comma()` are public. From the latter we were able to extract `r df_submission %>% filter(doc_text!="missing") %>% nrow() %>% scales::comma()`. Hence, `r df_submission %>% filter(public=="public") %>% nrow() - df_submission %>% filter(doc_text!="missing") %>% nrow()` texts could not be retrieved. 
+Let's pause for a moment and take stock: There are `r nrow(df_submission) %>% scales::comma()` submissions, out of which `r df_submission %>% filter(public=="public") %>% nrow() %>% scales::comma()` are public. From the latter we were able to extract `r df_submission %>% filter(doc_text!="missing") %>% nrow() %>% scales::comma()`. Hence, `r df_submission %>% filter(public=="public") %>% nrow() - df_submission %>% filter(doc_text!="missing") %>% nrow()` texts could not be retrieved.
 
 # Analysis
+
 ## Identify submissions with key formulation
 
-Now with submissions' texts cleaned etc, let's identify those which contain the formulation which appeared quite frequently when randomly browsing through some of the texts: *`r submission_pattern`*.  
+Now with submissions' texts cleaned etc, let's identify those which contain the formulation which appeared quite frequently when randomly browsing through some of the texts: *`r submission_pattern`*.
 
-<details open> 
-<summary>Code: identify submission containing key phrase</summary> 
+<details open>
+
+<summary>Code: identify submission containing key phrase</summary>
 
 ```{r include=T, eval=F}
-#submission_pattern <- "Willkür Tür und Tor"
-submission_pattern <- "Ich erhebe schärfste"
+submission_pattern <- "Tür und Tor"
 ```
-
 
 ```{r}
 df_submission <- df_submission %>% 
@@ -440,10 +468,13 @@ df_submission <- df_submission %>%
       TRUE ~ as.character("other"))) %>% 
   mutate(doc_length=nchar(doc_text))
 ```
+
 </details>
 
-<details closed> 
-<summary>Code: table with identified texts</summary> 
+<details closed>
+
+<summary>Code: table with identified texts</summary>
+
 ```{r}
 tb_text <- reactable(df_submission %>%
             filter(pattern_indicator==TRUE) %>% 
@@ -465,16 +496,19 @@ tb_text <- reactable(df_submission %>%
           )
 
 ```
-</details>
 
+</details>
 
 ```{r echo=FALSE}
 tb_text
 ```
 
 ## Frequency of key formulation
-<details closed> 
-<summary>Code: table</summary> 
+
+<details closed>
+
+<summary>Code: table</summary>
+
 ```{r message=FALSE, warning=FALSE}
 # table -------------------------------------------------------------------
 df_tb_submission_1 <- df_submission %>% 
@@ -513,7 +547,7 @@ tb_submission <- df_tb_submission %>%
   gt() %>% 
   tab_header(
     title = md("**Stellungnahmen zur Novelle des Epidemiegesetzes**"),
-    subtitle = md(glue::glue(md(" Bei {df_tb_submission %>% filter(str_detect(indicator_tbl, 'Formulierung')) %>% pull(n_abs) %>% scales::comma()} Stellungnahmen von denen der Text öffentlich ist enthalten rund {df_tb_submission %>% filter(str_detect(indicator_tbl, 'Formulierung')) %>% pull(n_rel) %>% scales::percent()} die Formulierung *'{submission_pattern}'*.")))) %>% 
+    subtitle = md(glue::glue(md(" Von den {df_tb_submission %>% filter(!str_detect(indicator_tbl, 'Keine')) %>% summarise(n_abs=sum(n_abs)) %>% pull(n_abs) %>% scales::comma()} Stellungnahmen von denen der Text öffentlich ist enthalten rund {df_tb_submission %>% filter(str_detect(indicator_tbl, 'Formulierung')) %>% pull(n_rel_public) %>% scales::percent()} die Formulierung *'{submission_pattern}'*.")))) %>% 
   tab_options(heading.align = "left",
               row_group.font.weight = "bold",
               table.background.color=plot_bg_color) %>% 
@@ -554,22 +588,24 @@ tb_submission <- df_tb_submission %>%
   tab_source_note(source_note = md("data: www.parlament.gv.at, 'Ministerialentwurf betreffend Bundesgesetz, mit dem das Epidemiegesetz 1950, das Tuberkulosegesetz und das COVID-19-Maßnahmengesetz geändert werden.'<br>analysis: Roland Schmidt | @zoowalk | https://werk.statt.codes"))
 
 ```
+
 </details>
 
-As the table below shows, in `r df_tb_submission %>% filter(str_detect(indicator_tbl, "Formulierung")) %>% pull(n_abs) %>% scales::comma()` submissions the formulation '*`r submission_pattern`*'  appears. *This number amounts to  `r df_tb_submission %>% filter(str_detect(indicator_tbl, "Formulierung")) %>% pull(n_rel) %>% scales::percent()` of all submissions, and to `r (df_tb_submission %>% filter(str_detect(indicator_tbl, "Formulierung")) %>% pull(n_abs)/(df_tb_submission %>% filter(str_detect(indicator_tbl, "Formulierung")) %>% pull(n_abs)+df_tb_submission %>% filter(str_detect(indicator_tbl, "andere")) %>% pull(n_abs))) %>% scales::percent()` of all submissions for which we can access the text.* I think that's quite remarkable.
-
+As the table below shows, in `r df_tb_submission %>% filter(str_detect(indicator_tbl, "Formulierung")) %>% pull(n_abs) %>% scales::comma()` submissions the formulation '*`r submission_pattern`*' appears. *This number amounts to `r df_tb_submission %>% filter(str_detect(indicator_tbl, "Formulierung")) %>% pull(n_rel) %>% scales::percent()` of all submissions, and to `r (df_tb_submission %>% filter(str_detect(indicator_tbl, "Formulierung")) %>% pull(n_abs)/(df_tb_submission %>% filter(str_detect(indicator_tbl, "Formulierung")) %>% pull(n_abs)+df_tb_submission %>% filter(str_detect(indicator_tbl, "andere")) %>% pull(n_abs))) %>% scales::percent()` of all submissions for which we can access the text.* I think that's quite remarkable in the sense that it is suggest for quite pervasive use of a submission template.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 tb_submission
 
 ```
 
-
 ## Distribution of length
+
 Let's approach the similarity of submissions from another angle now: The length of the text. The graph below shows the distribution of submissions' length in terms of number of characters. One density curve shows the distribution for submissions which include the key phrase '`r str_trunc(submission_pattern, 20)`', the other one shows the distribution of those which don't include it (and for which the text is available).
 
-<details closed> 
-<summary>Code: distribution of length</summary> 
+<details closed>
+
+<summary>Code: distribution of length</summary>
+
 ```{r message=FALSE, warning=FALSE}
 
 # distribution of length --------------------------------------------------
@@ -585,7 +621,7 @@ pl_length <- df_submission %>%
              color=pattern_indicator)
          )+
   labs(title=paste("BEGUTACHTUNGSVERFAHREN EPIDEMIEGESETZ-NOVELLE:<br>","Verteilung der Länge von Stellungnahmen mit u. ohne Formulierung ","'",str_trunc(submission_pattern, 20),"'"),
-       subtitle="Zur besseren Sichtbarkeit wurden Stellungnahmen mit mehr als 1000 Zeichen wurden ausgeschlossen.",
+       subtitle="Zur besseren Sichtbarkeit wurden Stellungnahmen mit mehr als 1000 Zeichen ausgeschlossen.",
        x="Länge Stellungnahme in Zeichen",
        caption=my_caption)+
   ggridges::geom_density_ridges(scale=5)+
@@ -615,19 +651,23 @@ pl_length <- df_submission %>%
          color=guide_legend(reverse=T))
   
 ```
+
 </details>
 
 ```{r echo=FALSE, dev='svg'}
 pl_length
 ```
 
-What the graph shows is that the length of submissions which contain the formulation '`r str_trunc(submission_pattern, 25)`' is concentrated around 350 characters, while the length of other submissions is more dispersed. So, when it comes to the length of documents, those containing the distinct formulation are also pretty similar in term of their length. I take this as another indicator for the similarity of the submissions with our search phrase. As for the density curve of those not containing the search phrase, note that there is still a little 'bump' around 300. This could potentially reflect that we are missing out on some submissions which may originate from the same submission template.
+What the graph shows is that the length of submissions which contain the formulation '`r str_trunc(submission_pattern, 25)`' is concentrated at around 350 characters, while the length of other submissions is more dispersed. Hence, when it comes to the length of documents, those containing the distinct formulation are also pretty similar in term of their length. I take this as another indicator for the similarity of the submissions with our search phrase. As for the density curve of those not containing the search phrase, note that there is still a little 'bump' around 350. This could potentially reflect that we are missing out on some submissions which may originate from the same submission template, but do not include the exact wording of our search phrase.
 
 ## Submissions over time
+
 I was also wondering whether there is any 'temporal' pattern as to the date of the submission. If the submissions were the result of a social media campaign, are the timings of their submissions clustered? This could be read as a reaction to e.g. a social media post providing a template and asking to submit it.
 
-<details closed> 
-<summary>Code: submissions per day</summary> 
+<details closed>
+
+<summary>Code: submissions per day</summary>
+
 ```{r message=FALSE, warning=FALSE}
 # bar graph ---------------------------------------------------------------
 
@@ -640,7 +680,7 @@ df_submission_pattern <- df_submission %>%
 
 levels(df_submission_pattern$overall_indicator)
 
-labe_submission_pattern <- as.character(glue::glue("{str_trunc(submission_pattern,15)}"))
+label_submission_pattern <- as.character(glue::glue("Enthält '{str_trunc(submission_pattern,15)}'"))
 
 colors_indicators=c("grey70", "orange", "darkolivegreen4")
 names(colors_indicators) <- c("not public", str_trunc(submission_pattern, 15), "other")
@@ -666,7 +706,7 @@ pl_submission_pattern <- df_submission_pattern %>%
                      labels = scales::label_comma())+
   scale_fill_manual(values=colors_indicators,
                     labels=c("not public"="keine öffentliche Stellungnahme",
-                             label_submission_pattern=glue::glue("enthält Formulierung {str_trunc(submission_pattern, 30)}"),
+                             submission_pattern=label_submission_pattern,
                                   "other"="andere öffentliche Stellungnahmen"))+
   theme_post()+
   theme(
@@ -686,24 +726,27 @@ pl_submission_pattern <- df_submission_pattern %>%
   )+
   guides(fill=guide_legend(size=15))
 ```
-</details>
 
+</details>
 
 ```{r echo=FALSE, dev='svg'}
 pl_submission_pattern
 ```
 
-I think the bar chart above doesn't suggest any temporal clustering of submissions including '`r submission_pattern`'. But considering that the speed with which the amendment was introduced and the very short period to submissions doesn't really allow for much clustering. 
-
+I think the bar chart above doesn't suggest any temporal clustering of submissions including '`r submission_pattern`'. But considering that the speed with which the amendment was introduced and the very short period to file submissions doesn't really allow for much clustering.
 
 # Analysis with 'quanteda'
-As already indicated in the introduction, the above analysis - while informative to some extent - has its limitations. Limiting the search to '`r submission_pattern`' is prone to miss out on other wordings which might be even more prevalent in some of the submissions. Furthermore, only marginal changes to the wording could result in the omission of submissions which are otherwise very similar.
+
+As already indicated in the introduction, the above analysis - while informative to some extent - has its limitations. Limiting the search to the presence/absence of the key phrase '`r submission_pattern`' is prone to miss out on other wordings which might be even more prevalent in some of the submissions. Furthermore, only marginal changes to the wording could result in the omission of submissions which are otherwise very similar.
 
 To overcome these limitations and approach the issue of text similarity in a methodologically more rigors manner, let's now take up some of the features of the `quanteda` package. I never worked with the package before but from what I can tell it provides a very comprehensive and powerful set of tools for quantitative text analysis (for an overview see [here](https://quanteda.io/articles/pkgdown/comparison.html){target="_blank"}). 
-To be able to use the offered tools, we have to convert our collection of submission texts into a 'corpus'. Before doing so, I further clean  the extracted texts so that we only have the actual text of the submission and not any header, footer, or meta-data. Then let's create a `corpus`.
 
-<details open> 
-<summary>Code: Clean text, create corpus</summary> 
+To be able to use the offered tools, we have to convert our collection of submission texts into a 'corpus'. Before doing so, I further clean the extracted texts so that we only have the actual text of the submission and not any header, footer, or meta-data. Then let's create a `corpus`.
+
+<details open>
+
+<summary>Code: Clean text, create corpus</summary>
+
 ```{r}
 library(quanteda)
 df_submission_quanteda <- df_submission %>% 
@@ -722,18 +765,23 @@ vec_submission <- df_submission_quanteda %>%
 #create corpus
 corp_submission <- corpus(vec_submission, docvars=data.frame(submission=names(vec_submission)))
 ```
-</details> 
 
-The corpus is essentially a named vector.
+</details>
+
+The corpus is essentially a named vector with the names of the sumbission files the names of the vector's elements.
+
 ```{r echo=FALSE}
 head(corp_submission)
 ```
 
 ## Collocations
-With this as the basis, we can now identify all collocations e.g. which comprise `r stringi::stri_count_words(submission_pattern)-1` to `r stringi::stri_count_words(submission_pattern)` words as e.g. in `r submission_pattern`). The `textstat_collocation` function provides us with  the frequencies for all (!) collocations of the requested length (For speed reasons I limited the results to those collocations which appear in more than 500 hits). For a detailed description of the function see [here](https://quanteda.io/reference/textstat_collocations.html){target="_blank"}.
 
-<details open> 
-<summary>Code: Get collocations </summary> 
+With this as the basis, we can now identify all collocations e.g. which comprise `r stringi::stri_count_words(submission_pattern)` words as e.g. in '`r submission_pattern`'. The `textstat_collocation` function provides us with the frequencies for all (!) collocations of the requested length. For performance reasons I limited the results to those collocations which result in more than 500 hits. For a detailed description of the function see [here](https://quanteda.io/reference/textstat_collocations.html){target="_blank"}.
+
+<details open>
+
+<summary>Code: Get collocations </summary>
+
 ```{r}
 #collocations
 
@@ -743,7 +791,7 @@ n_words
 collocs <- textstat_collocations(
   corp_submission,
   method = "lambda",
-  size = (n_words-1):n_words,
+  size = n_words,
   min_count = 500,
   smoothing = 0.5,
   tolower = T) %>% 
@@ -753,9 +801,12 @@ df_collocs <- collocs %>%
   as_tibble()
 
 ```
-</details> 
 
-And as it turns out, our used `r submission_pattern` is close to the most frequent one. The collocation `r df_collocs %>% slice_head(n=1) %>% pull(collocation)` appears `r df_collocs %>% slice_head(n=1) %>% pull(count) %>% scales::comma()`.^[Note that the frequency of `r submission_pattern` quanteda result is different than the frequency I detected earlier. I am not entirely sure why this is, but I assume it's due to different approaches. While our result above is the actual]
+</details>
+
+And as it turns out, our used inductively selected key phrase '`r submission_pattern`' is close to the most frequent one. The collocation '`r df_collocs %>% slice_head(n=1) %>% pull(collocation)`' appears `r df_collocs %>% slice_head(n=1) %>% pull(count) %>% scales::comma()`.[^1]
+
+[^1]: Note that the frequency of `r submission_pattern` quanteda result is different than the frequency I detected earlier. I am not entirely sure why this is, but I assume it's due to different approaches. While our result above is the actual
 
 ```{r echo=FALSE}
 reactable(df_collocs,
@@ -772,13 +823,31 @@ reactable(df_collocs,
 
 ## Cosine similarity
 
-In order to control for different document length when it comes to check for similarity, we have to create a weighted document feature matrix which accounts for the relative frequency of words (see [here](https://quanteda.io/reference/dfm_weight.html?q=dfm%20_%20weight){target="_blank"}.
+Quantitative text analysis offers also the concept of **cosine similarity** when it comes to evaluating the similarity of two or more documents. I won't dig into the details here, but want to refer you to the video below which provides in my view a clear and accessible overview.
 
-<details open> 
-<summary>Code: create document feature matrix (dfm) </summary> 
+```{r echo=FALSE, fig.height=7, fig.width=6}
+blogdown::shortcode('youtube', '5lvS8078ykA')
+```
+<br>
+
+One of the convenient properties of the concept is that it allows us to compare documents of any lengths along a scale of 0 (not similar at all) to 1 (identical).
+
+In order to control for different document length when it comes to check for similarity, we have to create a weighted document feature matrix which accounts for the relative frequency of words (see [here](https://quanteda.io/reference/dfm_weight.html?q=dfm%20_%20weight){target="_blank"}).
+
+
+<details open>
+
+<summary>Code: create document feature matrix (dfm) </summary>
+
 ```{r}
 #create document-feature matrix
-dfmat_submission <- dfm(corp_submission, 
+
+vec_submission_wo_pattern <- map_chr(vec_submission, ~str_remove_all(., submission_pattern))
+
+corp_submission_wo_term <- corpus(vec_submission_wo_pattern, docvars=data.frame(submission=names(vec_submission_wo_pattern)))
+
+
+dfmat_submission <- dfm(corp_submission_wo_term, 
                         remove = stopwords("de"),
                         stem = TRUE, 
                         remove_punct = TRUE)
@@ -786,13 +855,15 @@ dfmat_submission <- dfm(corp_submission,
 dfmat_prop_submission <- dfm_weight(dfmat_submission,
                                     scheme="prop")
 ```
+
 </details>
 
+With this we can calculate the cosine similarity of texts.
 
-With this we can calculate the cosine similarity of texts. 
+<details open>
 
-<details open> 
-<summary>Code: create similarity matrix (dfm) </summary> 
+<summary>Code: create similarity matrix (dfm) </summary>
+
 ```{r}
 #create similarity matrix
 mat_similarity <- textstat_simil(dfmat_prop_submission, dfmat_prop_submission, 
@@ -805,13 +876,22 @@ df_similarity <- mat_similarity %>%
                 upper=FALSE,
                 diag=FALSE,
   ) %>% 
-  mutate(sim_interval=cut(cosine, c(seq(0,1,.1))))
+  mutate(sim_interval=cut(cosine, c(seq(0,1,.1)),
+                          right=F,
+                          include.lowest=T))
 ```
+
 </details>
 
+### Document pairwise comparison
+
+What we obtain now is a comparison of all submission pairs (!) as to their cosine similarity. Overall, these are `r df_similarity %>% nrow() %>% scales::comma()` pairs (duplicates removed, i.e. document 1 vs document 2 = document 2 vs document 1). Seems like text analysis can quickly get a bit large. To keep the table manageable I only show the first thousand.
 
 ```{r echo=FALSE}
 reactable(head(df_similarity, n = 10^3),
+          columns=list(
+            cosine=colDef(format=colFormat(digits=4),
+                          align="left")),
           bordered=TRUE,
           compact = TRUE,
           style = list(fontSize = "10px"),
@@ -824,57 +904,203 @@ reactable(head(df_similarity, n = 10^3),
 
 ```
 
-What we have obtained now is a comparison of all document pairs as to their cosine similarity. Overall, these are `r df_similarity %>% nrow() %>% scales::comma()` pairs. Seems like text analysis can quickly get a bit large. To keep the table manageable I only show the first thousand).
+To be able to group these pairs according to their similarity, I cut their cosine similarity values into 10 intervals (`sim_interval`). We can now count the number of submission pairs per interval. The barplot below presents the relative result, i.e. the share of submission pairs  from the total number of pairs.
 
-Note that the numbers do not represent e.g. % of similar words, but are 
 
-A rather intuitive explanation of how similarity is conceptualized and measured under this approach have a look at [this video](https://youtu.be/7cwBhWYHgsA?t=193){target="_blank"}. 
+<details closed>
 
-To be able to group these pairs according to their similarity, I cut their cosine values into 10 intervals (`sim_interval`). We can now count the number of document pairs per interval. The barplot below presents the result.
+<summary>Code: Frequency of pairs per cosine interval </summary>
 
-<details open> 
-<summary>Code: Frequency of pairs per cosine interval </summary> 
 ```{r}
+df_similarity <- df_similarity %>% 
+  left_join(., df_submission %>% 
+              select(file_name, pattern_indicator),
+            by=c("document1"="file_name")) %>% 
+  rename(document1_indicator=pattern_indicator) %>% 
+  left_join(., df_submission %>% 
+              select(file_name, pattern_indicator),
+            by=c("document2"="file_name")) %>% 
+  rename(document2_indicator=pattern_indicator) %>% 
+  mutate(indicator=case_when(document1_indicator==T & document2_indicator==T ~ "both submissions with key phrase",
+                             document1_indicator==F & 
+                               document2_indicator==F ~ "both submissions without key phrase",
+                             TRUE ~ as.character("one submission without key phrase")))
+
+vec_color_submissions <- c("#FFC125", "#104E8B", "grey50")
+names(vec_color_submissions) <- c("both submissions with key phrase",
+"one submission without key phrase",
+"both submissions without key phrase")
+
 #barplot
 df_bar_sim <- df_similarity %>% 
-  group_by(sim_interval) %>% 
+  group_by(sim_interval, indicator) %>% 
   summarise(interval_n=n()) %>% 
+  ungroup() %>% 
   mutate(interval_rel=interval_n/sum(interval_n)) %>% 
   ungroup() %>% 
-  mutate(law="EpidemieG")
+  mutate(law="EpidemieG") %>% 
+  mutate(indicator=fct_relevel(indicator, names(vec_color_submissions)))
+
 
 pl_bar_sim <- df_bar_sim %>% 
   ggplot() +
   labs(
-    title="Similarity of submissions",
+    title="PUBLIC CONSULTATION PROCEDURE ON EPIDEMIC LAW:<br>
+    Distribution of all submission pairs' cosine similarity",
     subtitle="",
-    y="% of all document pairs",
+    y="% of all submission pairs",
     x="cosine similarity",
     caption=my_caption)+
   geom_bar(aes(x=sim_interval,
-               y=interval_rel),
-           fill="#374E55",
+               y=interval_rel,
+               fill=indicator),
+           position=position_stack(),
            stat="identity")+
-    scale_y_continuous(labels=scales::label_percent())+
+  geom_text(
+    # data=. %>%
+    #           filter(sim_interval %in% c("[0.7,0.8)", "[0.8,0.9)", "[0.9,1]")) %>%
+    #                    filter(str_detect(indicator, "both submissions with key phrase")),
+data=. %>%  mutate(interval_rel_label=case_when(
+                                                indicator=="both submissions without key phrase" ~ NA_real_,
+  interval_rel>0.05 ~ interval_rel,
+                                                TRUE ~ NA_real_)),
+    aes(x=sim_interval,
+    y=interval_rel,
+    label=interval_rel_label %>% scales::percent(., accuracy = 0.01),
+    group=indicator),
+position=position_stack(vjust=0.5, reverse = F),
+color="white")+
+  # stat_summary(fun.y = sum, 
+  #              aes(x=sim_interval,
+  #                  y=interval_rel+.1,
+  #                  label = ..y.. %>% scales::percent(., accuracy = 0.01), 
+  #                  group = sim_interval), 
+  #              # position=position_stack(),
+  #              # vjust=2,
+  #              geom = "text")+
+  geom_text(
+    aes(x=sim_interval,
+        y=interval_rel,
+        label = ..y.. %>% scales::percent(., accuracy = 0.01),
+        group = sim_interval), 
+    stat = 'summary', 
+    fun = sum, 
+    vjust = -1
+  )+
+  scale_y_continuous(labels=scales::label_percent(accuracy = 1),
+                     expand=expansion(mult=c(0, 0.1)))+
+  scale_fill_manual(values=vec_color_submissions)+
   theme_post()+
   theme(axis.title.y = element_text(angle = 90,
                                     size=9,
                                     color="grey50",
-                                    hjust=1))
+                                    hjust=1),
+        legend.direction = "horizontal",
+        legend.position="top",
+        plot.subtitle = element_blank(),
+        plot.title=element_markdown(margin=unit(0.5, "cm")),
+        legend.title=element_blank(),
+        legend.text = element_text(size=9))
 
 ```
+
 </details>
 
 ```{r echo=FALSE, dev='svg'}
 pl_bar_sim
 ```
+<br>
+If we take 0.7 as a cut-off point, we can conclude that `r scales::percent(df_similarity %>% filter(cosine>=.7) %>% nrow()/nrow(df_similarity), accuracy=0.01)` of all submission pairs (!) were very similar. Note that among these submission pairs, there is no pair in which not at least one document contains our key phrase *'`r submission_pattern`'*. On the other end of the scale, we see that the largest junk of non-similar pairs (`r df_bar_sim %>% filter(sim_interval=="[0,0.1)" & str_detect(indicator, "one submission without")) %>% pull(interval_rel) %>% scales::percent(accuracy=0.01)` in the interval [0, 0.1)) consists of pairs of one document with the key phrase and the other document without it. 
 
-What we see here is that `r df_bar_sim %>% slice_max(sim_interval, n=2) %>% pull(interval_rel) %>% sum() %>% scales::percent()` all document pairs fall into a cosine similarity above 0.8, and are hence rather similar. 
+Note that I removed the key phrase before calculating the cosine similarity. Hence, the high degree of similarity of submission pairs containing the key phrase does not originate from the key phrase, but from the rest of the texts! 
+
+<details closed>
+<summary>Code: Plot composition per cosine interval </summary>
+```{r}
+df_bar_sim %>% 
+  group_by(sim_interval, indicator) %>% 
+              summarise(sum_interval=sum(interval_rel, na.rm=T)) %>% 
+              mutate(sum_indidicator_rel=sum_interval/sum(sum_interval))
+```
+
+Another way to approach the issue is to look into the composition of each interval. The plot below provides the pertaining overview. As it becomes quite clear, the the share of submission pairs with both documents containing our search phrase becomes higher the more similar the documents are. Again, let's note that the detected similarity does not originate from both documents containing '`r submission_pattern`' since I removed these words before calculating pairs' similarity. I take plot below as another indication of the use of a submission template. 
+
+```{r message=FALSE, warning=FALSE}
+pl_bar_sim_fill <- df_bar_sim %>% 
+  ggplot() +
+  labs(
+    title="PUBLIC CONSULTATION PROCEDURE ON EPIDEMIC LAW:<br>
+    Composition of submission pairs' cosine similarity intervals",
+    # subtitle="",
+    y="% of all submission pairs",
+    x="cosine similarity",
+    caption=my_caption)+
+  geom_bar(aes(x=sim_interval,
+               y=interval_rel,
+               fill=indicator),
+           position="fill",
+           stat="identity")+
+  # geom_text(aes(x=sim_interval,
+  #               y=interval_rel,
+  #               group=indicator,
+  #               label=interval_rel %>% scales::percent(., accuracy = 0.01)),
+  #           position=position_fill(reverse=FALSE, vjust=0.5),
+  #           color="white")+
+  geom_text(data=. %>% 
+              group_by(sim_interval, indicator) %>% 
+              summarise(sum_interval=sum(interval_rel, na.rm=T)) %>% 
+              mutate(sum_indidicator_rel=sum_interval/sum(sum_interval)) %>% 
+              mutate(sum_indidicator_rel=case_when(sum_indidicator_rel<0.05 ~ NA_real_,
+                                                   TRUE ~ as.numeric(sum_indidicator_rel))),
+            aes(x=sim_interval,
+                y=sum_indidicator_rel,
+                group=indicator,
+                label=sum_indidicator_rel %>% scales::percent(., accuracy=0.1)),
+            color="white",
+            position=position_fill(vjust=0.5))+
+  geom_text(data=df_similarity %>% 
+              group_by(sim_interval) %>% 
+              summarise(n_obs=n()),
+            aes(x=sim_interval,
+                y=1.1,
+                label=n_obs %>% scales::comma()),
+            color="grey40",
+            stat="identity")+
+  geom_text(label="number of pairs:",
+            x=.5,
+            y=1.17,
+            color="grey40",
+            hjust=0,
+            check_overlap = T)+
+  scale_y_continuous(labels=scales::label_percent(accuracy=1),
+                     expand=expansion(mult=c(0, 0.1)),
+                     breaks=seq(0,1,.25))+
+  scale_fill_manual(values=vec_color_submissions)+
+  theme_post()+
+  theme(axis.title.y = element_text(angle = 90,
+                                    size=9,
+                                    color="grey50",
+                                    hjust=1),
+        legend.position="top",
+        legend.direction = "horizontal",
+        legend.text=element_text(size=9),
+        plot.subtitle = element_blank(),
+        plot.title=element_markdown(margin=unit(0.5, "cm")),
+        legend.title=element_blank())
+```
+</details>
+
+
+```{r echo=FALSE, dev='svg'}
+pl_bar_sim_fill
+```
 
 ### Groupwise comparison
-The plot, however, does not provide any information on whether the submissions with the phrase '`r submission_pattern`' were indeed overall more similar to each other than to other submissions. To check for this I add indicators to the pairwise comparison, showing whether both, only one, or none of the two compared documents were including the key phrase. Subsequently, we can contrast the distribution of the cosine values between those three groups.
 
+Finally, to further highlight the similarity of documents with `r submission_pattern` in contrast to other submission pairs, let's contrast the distribution of of the cosine similarity values per group with a violin plot.
 
+<details closed>
+<summary>Code: Groupwise comparison </summary>
 ```{r}
 #create indicator for each document
 df_submission <- df_submission %>%
@@ -907,63 +1133,77 @@ df_similarity <- df_similarity %>%
     document1_term==TRUE & document2_term==FALSE ~ "one",
     document1_term==FALSE & document2_term==TRUE ~ "one",
     TRUE ~ as.character("missing")))
-
-pl_sim_groups <- df_similarity %>% 
-  ggplot()+
-  labs(
-    title="Similarity of ",
-    subtitle=glue::glue("Grouped by presence/absence of {submission_pattern}"),
-    y="cosine similarity",
-       caption=my_caption)+
-  geom_boxplot(aes(x=group_id,
-                   y=cosine,
-                   color=group_id),
-               fill=NA)+
-  # geom_jitter(aes(x=group_id,
-  #                 y=cosine,
-  #                 color=group_id))+
-  theme_post()+
-  theme(legend.position = "none")+
-  scale_color_paletteer_d("ggsci::default_jama")
-    
-
 ```
 
-```{r, dev='CairoPNG', dpi=300, echo=FALSE}
+```{r}
+pl_sim_groups <- df_similarity %>% 
+  mutate(indicator=fct_relevel(indicator, names(vec_color_submissions))) %>% 
+  ggplot()+
+  labs(
+    title="PUBLIC CONSULTATION PROCEDURE ON EPIDEMIC LAW:<br>Cosine similarity of submission pairs per group",
+    subtitle=str_wrap(glue::glue("Grouped by presence/absence of key phrase '{submission_pattern}'. Key phrase was removed before calculating cosine similarity."),110),
+    y="cosine similarity",
+       caption=my_caption)+
+  geom_violin(aes(x=indicator,
+                   y=cosine,
+                  fill=indicator),
+              color=NA)+
+  theme_post()+
+  theme(legend.position = "none",
+        axis.title.x = element_blank())+
+  scale_fill_manual(values=vec_color_submissions)
+
+```
+</details>
+
+
+```{r echo=FALSE, dev='svg'}
 pl_sim_groups
 ```
 
-I think the result shows quite clearly that those submissions which include the  key phrase are much more similar to each other than all other groups of document pairs. Clearly, the highlighted similarity goes beyond the mere presence of the the three words of '`r submission_pattern`'. The graph also shows that those submission which do not contain the wording are hardly similar to each other.  
+I think the result shows quite clearly that those submissions which include the key phrase are much more similar to each other than all other groups of submission pairs even after having removed the key phrase. The graph also shows that those submission which do not contain the wording are hardly similar to each other.
 
-## Comparision
-But how does this result contrast with e.g. submissions to other bills. To put the results for the epidemic bill into context, I repeated the analysis from above for another bill, the 2018/19 Fundamental Law on Social Welfare ('[Sozialhilfegrundgesetz](https://www.parlament.gv.at/PAKT/VHG/XXVI/ME/ME_00104/index.shtml#tab-Stellungnahmen){target="_blank"}').^[I don't reproduce the code for the analysis here, but it is available on my github.]
+## Comparision with other bills
+
+But how does this result contrast with e.g. submissions to other bills. To put the results for the epidemic bill into context, I repeated the analysis from above for another bill, the 2018/19 Fundamental Law on Social Welfare ('[Sozialhilfegrundgesetz](https://www.parlament.gv.at/PAKT/VHG/XXVI/ME/ME_00104/index.shtml#tab-Stellungnahmen){target="_blank"}').[^2] The plot below contrasts the distribution of cosine similarities between submission pairs. 
+
+[^2]: I don't reproduce the code for the analysis here, but it is available on my github.
 
 ```{r echo=FALSE}
 df_sozial_sim <- readr::read_csv2(file=here::here("blog_data", "epidemic_law_submissions", "df_bar_sim_sozial.csv")) %>% 
   mutate(law="Sozialhilfegrundgesetz")
 
-df_sim_comb <- bind_rows(df_sozial_sim, df_bar_sim)
+df_sim_comb <- bind_rows(df_sozial_sim, df_bar_sim) %>% 
+  group_by(law, sim_interval) %>% 
+  summarise(interval_rel=sum(interval_rel, na.rm=T))
 
 pl_sim <- df_sim_comb %>% 
+  ungroup() %>% 
   ggplot() +
-  labs(title="Epidemiegesetz Übungen <span style=color:'red'>Cosine</span> Similarity von Stellungnahmen",
+  labs(title="PUBLIC CONSULTATION PROCEDURE:<br>Cosine similarity of submissions to 
+        <span style=color:#FFC125>Epidemic Law</span> vs 
+       <span style=color:firebrick '>Law on Social Welfare</span>",
+       subtitle="Epidemic law = Epidemiegesetz; Law on Social Welfare = Sozialhilfegrundgesetz.",
     y="% of all submission pairs",
     x="cosine similarity",
-    caption=my_caption)+
+    caption=glue::glue(str_wrap("data: www.parlament.gv.at; Stellungnahmen zum 'Ministerialentwurf betreffend Bundesgesetz, mit dem das Epidemiegesetz 1950, das Tuberkulosegesetz 
+und das COVID-19-Maßnahmengesetz geändert werden' und 'Ministerialentwurf betreffend Bundesgesetze, mit dem ein Bundesgesetz betreffend Grundsätze für die Sozialhilfe (Sozialhilfe-Grundsatzgesetz) und ein Bundesgesetz über die bundesweite Gesamtstatistik über Leistungen der Sozialhilfe (Sozialhilfe-Statistikgesetz) erlassen werden.'", 140), "\n\nanalysis: Roland Schmidt | @zoowalk | https://werk.statt.codes")) +
   geom_bar(aes(x=sim_interval,
                fill=law,
                y=interval_rel),
            position=position_dodge2(),
            stat="identity")+
-  scale_y_continuous(labels=scales::label_percent())+
-  scale_fill_paletteer_d("ggsci::default_jama")  +
+  scale_y_continuous(labels=scales::label_percent(),
+                     expand=expansion(mult=c(0, 0.1)))+
+  # scale_fill_paletteer_d("ggsci::default_jama")[2:3]  +
+  scale_fill_manual(values=c("#FFC125", "firebrick"))+
   theme_post()+
   theme(axis.title.y = element_text(angle = 90,
                                     size=9,
                                     color="grey50",
                                     hjust=1),
         plot.title.position = "panel",
-        legend.position = "top",
+        legend.position = "none",
         legend.direction = "horizontal",
         legend.title = element_blank())
 ```
@@ -971,10 +1211,10 @@ pl_sim <- df_sim_comb %>%
 ```{r echo=FALSE, dev='svg'}
 pl_sim
 ```
+<br>
+I think the result is quite telling. In contrast to  epidemic law, the values pertaining to the Law on Social Welfare are almost normally distributed and centered on the [0.3, 0.4) interval. In other words, there almost no submissions which are particularly similar or dissimilar. I would think that this is a distribution typical for submissions without the (prevalent) presence of a text template. 
+
 
 # Wrap up
-So that's it (for now). Again, this got more lengthy than initially intended. A next step could be to see whether the similarity to submissions grew since the ability to file submissions via email. After all, copying a template, modifying it a bit before submission is not too difficult. Maybe as a final word, this is not to say that copy-and-paste submissions are of some sort of diminished democratic value. 
 
-
-
-
+So that's it (for now). Again, this got more lengthy than initially intended. A next step could be to see whether the similarity to submissions grew since the ability to file submissions via email. After all, copying a template, modifying it a bit before submission is not too difficult. Maybe as a final word, this is not to say that copy-and-paste submissions are of some sort of diminished democratic value. As always, if you have any comment or question regarding the post, feel free to contact me via DM on [twitter.](https://twitter.com/zoowalk){target="_blank"}.
