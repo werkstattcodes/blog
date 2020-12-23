@@ -1,5 +1,5 @@
 ---
-title: Submissions to Austria's amendment of epidemic law
+title: Similarity of public submissions to Austria's amendment of epidemic law
 author: roland
 date: '2020-12-22'
 slug: submissions_epidemic_law
