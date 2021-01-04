@@ -1,0 +1,143 @@
+---
+title: 'Number of Submissions: Covid Amendment 2021'
+author: rs
+date: '2021-01-04'
+slug: []
+categories: []
+tags:
+  - Corona virus
+  - Austria
+description: ''
+---
+
+Only very briefly and more a quick sketch: Again a bill seeking to amend Austria's epidemic law. This time concerned parties etc had only three days to file submissions as part of the consultation process. However, the number of submissions reached a record, at least for this legislative period. Note that numbers are based on those published on the parliaments website. 
+
+Next step - how prevalent was the use of a submission template....
+
+<details open>
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(tidyRSS)
+library(xml2)
+library(rvest)
+
+rss_feed <- "https://www.parlament.gv.at/PAKT/MESN/filter.psp?view=RSS&jsMode=&xdocumentUri=&filterJq=&view=&GP=XXVII&MESN=ME&R_MESN=ME&MIN=ALLE&SUCH=&listeId=102&FBEZ=FP_002"
+# df_rss <- tidyRSS::tidyfeed(rss_feed)
+df_rss <- xml2::read_xml(rss_feed)
+data <- xml_child(df_rss, 1)
+
+df_bill_pages_link <- data %>% 
+  xml2::xml_find_all("//link") %>% 
+  html_text() %>% 
+  enframe(., 
+          name="id",
+          value="link_single_bill_page") %>% 
+  mutate(link_single_bill_page=str_squish(link_single_bill_page)) %>% 
+  filter(id>2) #removes first two rows which don't include data on bills
+
+#get title
+df_bill_pages_name <- data %>% 
+  xml2::xml_find_all("//title") %>% 
+  html_text() %>% 
+  enframe(., 
+          name="id",
+          value="title") %>% 
+  # mutate(name=str_extract(title, regex("(?<=\\>).*(?=\\<)"))) %>% 
+  mutate(title=str_trim(title)) %>% 
+  filter(id>2) 
+
+#get publication date
+df_bill_pages_pub_date <- data %>% 
+  xml2::xml_find_all("//pubDate") %>% 
+  html_text() %>% 
+  enframe(., 
+          name="id",
+          value="date") %>% 
+  mutate(date=date %>% str_squish() %>% lubridate::dmy_hms(., tz="Europe/Vienna"))
+
+#combine to one dataframe
+df_bill <- bind_cols(
+  df_bill_pages_name,
+  df_bill_pages_pub_date,
+  df_bill_pages_link,
+) %>% 
+  select(-contains("id"))
+
+df_bill <- df_bill %>% 
+  mutate(indicator_me=str_extract(link_single_bill_page, regex("(?<=_)\\d*"))) %>% 
+  mutate(rss_link_submissions=glue::glue("https://www.parlament.gv.at/PAKT/VHG/XXVII/ME/ME_{indicator_me}/filter.psp?view=RSS&jsMode=&xdocumentUri=&filterJq=&view=&GP=XXVII&ITYP=ME&INR={as.numeric(indicator_me)}&SUCH=&listeId=142&FBEZ=FP_142
+"))
+
+
+fn_get_submissions <- function(rss_link) {
+
+  df_rss <- xml2::read_xml(rss_link)
+  data <- xml_child(df_rss, 1)
+  
+  df_submission_pages_link <- data %>% 
+    xml2::xml_find_all("//link") %>% 
+    html_text() %>% 
+    enframe(., 
+            name="id",
+            value="link_single_submission_page") %>% 
+    mutate(link_single_submission_page=str_squish(link_single_submission_page)) %>% 
+    filter(id>2) #removes first two rows which don't include data on submissions
+  
+  #get title
+  df_submission_pages_name <- data %>% 
+    xml2::xml_find_all("//title") %>% 
+    html_text() %>% 
+    enframe(., 
+            name="id",
+            value="title") %>% 
+    mutate(name=str_extract(title, regex("(?<=\\>).*(?=\\<)"))) %>% 
+    filter(id>2) %>% 
+    select(-title)
+  
+  #get publication date
+  df_submission_pages_pub_date <- data %>% 
+    xml2::xml_find_all("//pubDate") %>% 
+    html_text() %>% 
+    enframe(., 
+            name="id",
+            value="date") %>% 
+    mutate(date=date %>% str_squish() %>% lubridate::dmy_hms(., tz="Europe/Vienna"))
+  
+  #combine to one dataframe
+  bind_cols(
+    df_submission_pages_name,
+    df_submission_pages_pub_date,
+    df_submission_pages_link,
+  ) %>% 
+    select(-contains("id"))
+
+}
+
+tbl_missing <- tibble(name=NA_character_, date=NA, link_single_submission_page=NA_character_)
+
+df_bill_submission <- df_bill$rss_link_submissions %>% 
+  set_names() %>% 
+  map_dfr(., purrr::possibly(fn_get_submissions, otherwise = tbl_missing), .id="bill")
+
+
+df_bill_submission <- df_bill_submission %>% left_join(.,
+                                df_bill %>% select(title, rss_link_submissions, date_pub=date),
+                                by=c("bill"="rss_link_submissions"))
+
+submission_count <- df_bill_submission %>% 
+  group_by(title, date_pub) %>% 
+  summarise(n_obs=n()) %>% 
+  ungroup() %>% 
+  arrange(desc(n_obs))
+
+
+```
+
+</details>
+
+```{r message=FALSE, warning=FALSE}
+reactable::reactable(submission_count)
+
+```
+

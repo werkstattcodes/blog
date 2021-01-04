@@ -7,17 +7,17 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Sat, 05 Dec 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 07 Dec 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://werk.statt.codes/tags/social-media/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Vienna Elections 2020: Facebook Ads</title>
-      <link>https://werk.statt.codes/post/viennaelections_facebook/</link>
-      <pubDate>Sat, 05 Dec 2020 00:00:00 +0000</pubDate>
+      <title>Vienna Elections 2020: Analysis of parties&#39; ads on facebook</title>
+      <link>https://werk.statt.codes/post/viennaelections2020_facebook/</link>
+      <pubDate>Mon, 07 Dec 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://werk.statt.codes/post/viennaelections_facebook/</guid>
+      <guid>https://werk.statt.codes/post/viennaelections2020_facebook/</guid>
       <description>SetupCode: Load packages
 # load packages -----------------------------------------------------------library(tidyverse)library(tictoc)library(lubridate)library(scales)library(ggiraph)library(tidytext)library(ragg)library(extrafont)#extrafont::font_import()loadfonts(device = &amp;quot;win&amp;quot;, quiet = T)library(hrbrthemes)hrbrthemes::update_geom_font_defaults(family = &amp;quot;Roboto Condensed&amp;quot;,size = 3.5,color = &amp;quot;grey50&amp;quot;)library(ggtext)library(gt)library(reactable)library(readxl)library(htmltools)library(paletteer)library(lemon)library(plotly)options(scipen = 999)library(kableExtra)Code: themes, color codes 
 # DEFINITIONS -------------------------------------------------------------# blog theme --------------------------------------------------------------theme_post &amp;lt;- function() {hrbrthemes::theme_ipsum_rc() +theme(plot.</description>

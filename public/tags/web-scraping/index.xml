@@ -7,10 +7,21 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Roland Schmidt &lt;a href=&#39;https://twitter.com/zoowalk&#39; style=&#39;color:gray&#39;&gt;@zoowalk&lt;/a&gt;</copyright>
-    <lastBuildDate>Tue, 21 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 22 Dec 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://werk.statt.codes/tags/web-scraping/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Similarity of public submissions to Austria&#39;s amendment of epidemic law</title>
+      <link>https://werk.statt.codes/post/submissions_epidemic_law/</link>
+      <pubDate>Tue, 22 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://werk.statt.codes/post/submissions_epidemic_law/</guid>
+      <description>SetupCode: Load packages
+library(tidyverse)library(here)library(extrafont)loadfonts(device = &amp;quot;win&amp;quot;, quiet = T)library(hrbrthemes)hrbrthemes::update_geom_font_defaults(family = &amp;quot;Roboto Condensed&amp;quot;,size = 3.5,color = &amp;quot;grey50&amp;quot;)library(scales)library(knitr)library(paletteer)library(ggtext)library(glue)library(pdftools)library(rvest)library(janitor)library(patchwork)library(svglite)library(countrycode)library(tictoc)library(furrr)library(gt)library(reactable)plan(multisession, workers = 3)Code: Define rmarkdown options
+knit_hooks$set(wrap = function(before, options, envir) {if (before) {paste0(&amp;quot;&amp;lt;&amp;quot;, options$wrap, &amp;quot;&amp;gt;&amp;quot;)} else {paste0(&amp;quot;&amp;lt;/&amp;quot;, options$wrap, &amp;quot;&amp;gt;&amp;quot;)}})knitr::opts_chunk$set(fig.</description>
+    </item>
     
     <item>
       <title>Austrian Parliament: MPs transparency and conflict of interest report</title>

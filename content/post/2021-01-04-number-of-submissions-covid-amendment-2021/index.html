@@ -1,0 +1,141 @@
+---
+title: 'Number of Submissions: Covid Amendment 2021'
+author: rs
+date: '2021-01-04'
+slug: []
+categories: []
+tags:
+  - Corona virus
+  - Austria
+description: ''
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+<script src="index_files/core-js/shim.min.js"></script>
+<script src="index_files/react/react.min.js"></script>
+<script src="index_files/react/react-dom.min.js"></script>
+<script src="index_files/reactwidget/react-tools.js"></script>
+<script src="index_files/htmlwidgets/htmlwidgets.js"></script>
+<script src="index_files/reactable-binding/reactable.js"></script>
+
+
+<p>Only very briefly and more a quick sketch: Again a bill seeking to amend Austria’s epidemic law. This time concerned parties etc had only three days to file submissions as part of the consultation process. However, the number of submissions reached a record, at least for this legislative period. Note that numbers are based on those published on the parliaments website.</p>
+<p>Next step - how prevalent was the use of a submission template….</p>
+<details open>
+<pre class="r"><code>library(tidyverse)
+library(tidyRSS)
+library(xml2)
+library(rvest)
+
+rss_feed &lt;- &quot;https://www.parlament.gv.at/PAKT/MESN/filter.psp?view=RSS&amp;jsMode=&amp;xdocumentUri=&amp;filterJq=&amp;view=&amp;GP=XXVII&amp;MESN=ME&amp;R_MESN=ME&amp;MIN=ALLE&amp;SUCH=&amp;listeId=102&amp;FBEZ=FP_002&quot;
+# df_rss &lt;- tidyRSS::tidyfeed(rss_feed)
+df_rss &lt;- xml2::read_xml(rss_feed)
+data &lt;- xml_child(df_rss, 1)
+
+df_bill_pages_link &lt;- data %&gt;% 
+  xml2::xml_find_all(&quot;//link&quot;) %&gt;% 
+  html_text() %&gt;% 
+  enframe(., 
+          name=&quot;id&quot;,
+          value=&quot;link_single_bill_page&quot;) %&gt;% 
+  mutate(link_single_bill_page=str_squish(link_single_bill_page)) %&gt;% 
+  filter(id&gt;2) #removes first two rows which don&#39;t include data on bills
+
+#get title
+df_bill_pages_name &lt;- data %&gt;% 
+  xml2::xml_find_all(&quot;//title&quot;) %&gt;% 
+  html_text() %&gt;% 
+  enframe(., 
+          name=&quot;id&quot;,
+          value=&quot;title&quot;) %&gt;% 
+  # mutate(name=str_extract(title, regex(&quot;(?&lt;=\\&gt;).*(?=\\&lt;)&quot;))) %&gt;% 
+  mutate(title=str_trim(title)) %&gt;% 
+  filter(id&gt;2) 
+
+#get publication date
+df_bill_pages_pub_date &lt;- data %&gt;% 
+  xml2::xml_find_all(&quot;//pubDate&quot;) %&gt;% 
+  html_text() %&gt;% 
+  enframe(., 
+          name=&quot;id&quot;,
+          value=&quot;date&quot;) %&gt;% 
+  mutate(date=date %&gt;% str_squish() %&gt;% lubridate::dmy_hms(., tz=&quot;Europe/Vienna&quot;))
+
+#combine to one dataframe
+df_bill &lt;- bind_cols(
+  df_bill_pages_name,
+  df_bill_pages_pub_date,
+  df_bill_pages_link,
+) %&gt;% 
+  select(-contains(&quot;id&quot;))
+
+df_bill &lt;- df_bill %&gt;% 
+  mutate(indicator_me=str_extract(link_single_bill_page, regex(&quot;(?&lt;=_)\\d*&quot;))) %&gt;% 
+  mutate(rss_link_submissions=glue::glue(&quot;https://www.parlament.gv.at/PAKT/VHG/XXVII/ME/ME_{indicator_me}/filter.psp?view=RSS&amp;jsMode=&amp;xdocumentUri=&amp;filterJq=&amp;view=&amp;GP=XXVII&amp;ITYP=ME&amp;INR={as.numeric(indicator_me)}&amp;SUCH=&amp;listeId=142&amp;FBEZ=FP_142
+&quot;))
+
+
+fn_get_submissions &lt;- function(rss_link) {
+
+  df_rss &lt;- xml2::read_xml(rss_link)
+  data &lt;- xml_child(df_rss, 1)
+  
+  df_submission_pages_link &lt;- data %&gt;% 
+    xml2::xml_find_all(&quot;//link&quot;) %&gt;% 
+    html_text() %&gt;% 
+    enframe(., 
+            name=&quot;id&quot;,
+            value=&quot;link_single_submission_page&quot;) %&gt;% 
+    mutate(link_single_submission_page=str_squish(link_single_submission_page)) %&gt;% 
+    filter(id&gt;2) #removes first two rows which don&#39;t include data on submissions
+  
+  #get title
+  df_submission_pages_name &lt;- data %&gt;% 
+    xml2::xml_find_all(&quot;//title&quot;) %&gt;% 
+    html_text() %&gt;% 
+    enframe(., 
+            name=&quot;id&quot;,
+            value=&quot;title&quot;) %&gt;% 
+    mutate(name=str_extract(title, regex(&quot;(?&lt;=\\&gt;).*(?=\\&lt;)&quot;))) %&gt;% 
+    filter(id&gt;2) %&gt;% 
+    select(-title)
+  
+  #get publication date
+  df_submission_pages_pub_date &lt;- data %&gt;% 
+    xml2::xml_find_all(&quot;//pubDate&quot;) %&gt;% 
+    html_text() %&gt;% 
+    enframe(., 
+            name=&quot;id&quot;,
+            value=&quot;date&quot;) %&gt;% 
+    mutate(date=date %&gt;% str_squish() %&gt;% lubridate::dmy_hms(., tz=&quot;Europe/Vienna&quot;))
+  
+  #combine to one dataframe
+  bind_cols(
+    df_submission_pages_name,
+    df_submission_pages_pub_date,
+    df_submission_pages_link,
+  ) %&gt;% 
+    select(-contains(&quot;id&quot;))
+
+}
+
+tbl_missing &lt;- tibble(name=NA_character_, date=NA, link_single_submission_page=NA_character_)
+
+df_bill_submission &lt;- df_bill$rss_link_submissions %&gt;% 
+  set_names() %&gt;% 
+  map_dfr(., purrr::possibly(fn_get_submissions, otherwise = tbl_missing), .id=&quot;bill&quot;)
+
+
+df_bill_submission &lt;- df_bill_submission %&gt;% left_join(.,
+                                df_bill %&gt;% select(title, rss_link_submissions, date_pub=date),
+                                by=c(&quot;bill&quot;=&quot;rss_link_submissions&quot;))
+
+submission_count &lt;- df_bill_submission %&gt;% 
+  group_by(title, date_pub) %&gt;% 
+  summarise(n_obs=n()) %&gt;% 
+  ungroup() %&gt;% 
+  arrange(desc(n_obs))</code></pre>
+</details>
+<pre class="r"><code>reactable::reactable(submission_count)</code></pre>
+<div id="htmlwidget-1" class="reactable html-widget" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"title":["Epidemiegesetz 1950 und COVID-19-Maßnahmengesetz","Epidemiegesetz, Tuberkulosegesetz u.a., Änderung","Epidemiegesetz, Tuberkulosegesetz u.a., Änderung","Schusswaffenkennzeichnungsgesetz – SchKG; EU-Polizeikooperationsgesetz, Änderung","Erneuerbaren-Ausbau-Gesetz – EAG; Erneuerbaren-Ausbau-Gesetzespaket – EAG-Paket","Bundesgesetz, mit dem straf- und medienrechtliche Maßnahmen zur Bekämpfung von Hass im Netz getroffen werden","Bundesgesetz über Privathochschulen; Hochschul-Qualitätssicherungsgesetz, Fachhochschul-Studiengesetz u.a., Änderung","Bundesgesetz über Maßnahmen zum Schutz der Nutzer auf Kommunikationsplattformen","Hass-im-Netz-Bekämpfungs-Gesetz – HiNBG","Schulorganisationsgesetz, Land- und forstwirtschaftliche Bundesschulgesetz, Änderung","Schulorganisationsgesetz, Schulunterrichtsgesetz u.a., Änderung","Audiovisuelle Mediendienste-Gesetz, KommAustria-Gesetz u.a., Änderung","Bildungsdokumentationsgesetz; Schulpflichtgesetz, Pflichtschulabschluss-Prüfungs-Gesetz u.a., Änderung","Konjunkturstärkungsgesetz – KonStG","Gesundheitstelematikgesetz 2012, Bundesgesetz BGBl. I Nr. 37/2018, Änderung","Eisenbahngesetz, Unfalluntersuchungsgesetz, Änderung","Investitionsprämiengesetz – InvPrG","E-Government-Gesetz, Passgesetz, Änderung","Strafgesetzbuch zur Umsetzung der Richtlinie über die strafrechtliche Bekämpfung der Geldwäsche, Änderung","Investitionskontrollgesetz; Außenwirtschaftsgesetz, Änderung","Forstgesetz, Änderung","Schulorganisationsgesetz, Schulunterrichtsgesetz u.a., Änderung","Dienstrechts-Novelle 2020","Gesundheitsberuferegister-Gesetz, Gesundheits- und Krankenpflegegesetz u.a., Änderung (GBRG-Novelle 2020)","Arbeitslosenversicherungsgesetz, Arbeitsmarktservicegesetz u.a., Änderung","Tierärztegesetz; Tierärztekammergesetz, Änderung","Ziviltechnikergesetz, Änderung","Niederlassungs- und Aufenthaltsgesetz, Änderung","Universitätsgesetz, Hochschul-Qualitätssicherungsgesetz u.a., Änderung","Heizkostenabrechnungsgesetz – HeizKG","Kontenregister- und Konteneinschaugesetz, Finanzmarkt-Geldwäschegesetz u.a., Änderung","Finanzierung der Digitalisierung des österreichischen Schulwesens (DigiSchG)","Verbraucherbehörden-Kooperationsgesetz, Telekommunikationsgesetz u.a., Änderung","Landarbeitsgesetz 2021 – LAG; Behinderten-Einstellungsgesetz, Arbeitsplatz-Sicherungsgesetz, Änderung","Gewerbeordnung, Änderung (Geldwäschenovelle 2019)","Kraftfahrgesetz, Änderung (39. KFG-Novelle)","Anti-Doping-Bundesgesetz; Bundes-Sportförderungsgesetz, Änderung","Bankwesengesetz, Börsegesetz u.a., Änderung","Chemikaliengesetz, Bundeskriminalamt-Gesetz u.a., Änderung","2. Finanz-Organisationsreformgesetz – 2. FORG","Düngemittelgesetz 2020 – DMG 2020","Kinderbetreuungsgeldgesetz, Änderung","Polizeiliches Staatsschutzgesetz, Änderung","Tierversuchsgesetz, Änderung","Amtssitzgesetz; Ausländerbeschäftigungsgesetz, Fremdenpolizeigesetz u.a., Änderung","Depotgesetz, Änderung","Mineralrohstoffgesetz, Änderung (MinroG-Novelle 2020)","Suchtmittelgesetz, Änderung","Gesamtreform des Exekutionsrechts – GREx","Alternative Investmentfonds Manager-Gesetz, Immobilieninvestmentfondsgesetz u.a., Änderung","Ausbildungspflichtgesetz, Änderung","Bilanzbuchhaltungsgesetz, Änderung","Emissionsschutzgesetz für Kesselanlagen – EG K 2013","Fundrechts-Novelle 2021 – FundR-Nov 2021","Gewerbeordnung, Änderung","Patentanwaltsgesetz, Änderung","Verhältnismäßigkeitsprüfungs-Gesetz – VPG","Wirtschaftstreuhandberufsgesetz, Änderung","Allgemeines Sozialversicherungsgesetz, Gewerbliches Sozialversicherungsgesetz u.a., Änderung","Arbeitsverfassungsgesetz, Post-Betriebsverfassungsgesetz, Änderung","Biozidproduktegesetz, Änderung","Bundesgesetz über die Absicherung des österreichisch-jüdischen Kulturerbes (ÖJKG)","Island-Norwegen-Übergabegesetz – INÜG; EU-JZG-ÄndG 2019","Studienförderungsgesetz, Änderung","Umweltförderungsgesetz, Änderung","Verbraucherkreditgesetz, Hypothekar- und Immobilienkreditgesetz, Änderung","Erdölbevorratungsgesetz, Änderung","Futtermittelgesetz, Änderung","Luftfahrtgesetz, Änderung","Maß- und Eichgesetz, Änderung","Berufsanerkennungsgesetz Gesundheit 2020","IFI-Beitragsgesetz; Bundesschatzscheingesetz, Änderung","Versicherungsaufsichtsgesetz, Änderung","Bundesgesetz über die Neuen Kreditvereinbarungen mit dem Internationalen Währungsfonds","Maß- und Eichgesetz, Änderung","Pflanzenschutzmittelgesetz, Änderung","Rechtsanwaltsordnung, EIRAG, Änderung","Bundesgesetz über den Auslandsösterreicher-Fonds (AÖF-G), Änderung","Heeresgebührengesetz, Heeresdisziplinargesetz, Änderung","Staatsbürgerschaftsgesetz, Symbole-Gesetz, Änderung","Terror-Bekämpfungs-Gesetz – TeBG","Telekommunikationsgesetz; KommAustria-Gesetz, Strafprozeßordnung u.a., Änderung","Bundesgesetz über die Rechtspersönlichkeit von religiösen Bekenntnisgemeinschaften, Bundesgesetz über die äußeren Rechtsverhältnisse islamischer Religionsgesellschaften, Änderung","Führerscheingesetz, Änderung (20. FSG-Novelle)"],"date_pub":["2021-01-04T00:00:00","2020-10-06T00:00:00","2020-12-21T00:00:00","2020-09-16T00:00:00","2020-12-16T00:00:00","2020-11-24T00:00:00","2020-06-18T00:00:00","2020-11-18T00:00:00","2020-11-18T00:00:00","2020-07-29T00:00:00","2020-11-05T00:00:00","2020-11-18T00:00:00","2020-11-18T00:00:00","2020-07-15T00:00:00","2020-06-16T00:00:00","2020-11-18T00:00:00","2020-09-03T00:00:00","2020-11-18T00:00:00","2020-10-28T00:00:00","2020-06-23T00:00:00","2020-06-17T00:00:00","2020-06-16T00:00:00","2020-11-11T00:00:00","2020-10-05T00:00:00","2020-09-09T00:00:00","2020-09-15T00:00:00","2020-09-15T00:00:00","2020-09-09T00:00:00","2021-01-01T00:00:00","2020-11-20T00:00:00","2020-11-18T00:00:00","2020-12-04T00:00:00","2020-10-14T00:00:00","2020-08-27T00:00:00","2020-03-18T00:00:00","2020-10-14T00:00:00","2020-11-18T00:00:00","2020-11-17T00:00:00","2020-11-18T00:00:00","2020-04-07T00:00:00","2020-09-28T00:00:00","2020-11-18T00:00:00","2020-06-30T00:00:00","2020-06-30T00:00:00","2020-12-17T00:00:00","2020-10-22T00:00:00","2020-11-18T00:00:00","2020-11-25T00:00:00","2020-12-30T00:00:00","2020-11-18T00:00:00","2020-11-24T00:00:00","2020-03-18T00:00:00","2020-08-27T00:00:00","2020-11-09T00:00:00","2020-03-18T00:00:00","2020-10-27T00:00:00","2020-10-05T00:00:00","2020-03-18T00:00:00","2020-07-15T00:00:00","2020-09-30T00:00:00","2020-04-02T00:00:00","2020-12-15T00:00:00","2020-02-26T00:00:00","2020-06-04T00:00:00","2020-07-28T00:00:00","2020-11-18T00:00:00","2020-02-26T00:00:00","2020-06-16T00:00:00","2020-03-24T00:00:00","2020-06-25T00:00:00","2020-06-04T00:00:00","2020-11-10T00:00:00","2020-03-18T00:00:00","2020-11-18T00:00:00","2020-12-04T00:00:00","2020-06-16T00:00:00","2020-11-20T00:00:00","2020-06-10T00:00:00","2020-12-29T00:00:00","2021-01-01T00:00:00","2020-12-28T00:00:00","2020-12-21T00:00:00","2020-12-28T00:00:00","2020-12-28T00:00:00"],"n_obs":[8875,8282,6687,265,129,89,73,66,66,54,50,48,40,40,37,31,31,30,29,28,27,27,26,26,25,24,24,23,23,22,22,21,21,20,18,18,17,17,17,15,15,15,15,15,14,14,14,14,13,12,12,12,12,12,12,12,12,12,11,11,11,11,11,11,11,11,10,10,9,9,8,8,8,7,7,7,7,6,5,5,4,2,1,1]},"columns":[{"accessor":"title","name":"title","type":"character"},{"accessor":"date_pub","name":"date_pub","type":"Date"},{"accessor":"n_obs","name":"n_obs","type":"numeric"}],"defaultPageSize":10,"paginationType":"numbers","showPageInfo":true,"minRows":1,"dataKey":"27d739f059ab503a080bcc0c63ded9d4","key":"27d739f059ab503a080bcc0c63ded9d4"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
