@@ -10,7 +10,7 @@ tags:
 description: ''
 ---
 
-Only very briefly and more a quick sketch: Again a bill seeking to amend Austria's epidemic law. This time concerned parties etc had only three days to file submissions as part of the consultation process. However, the number of submissions reached a record, at least for this legislative period. Note that numbers are based on those published on the parliaments website. 
+Only very briefly and more a quick sketch: Again a bill seeking to amend Austria's epidemic law. This time concerned parties etc had only three days to file submissions as part of the consultation process. However, the number of submissions reached a record, at least for this legislative period. Note that numbers are based on those published on the parliaments website as of `r Sys.Date()`. 
 
 Next step - how prevalent was the use of a submission template....
 
@@ -21,6 +21,7 @@ library(tidyverse)
 library(tidyRSS)
 library(xml2)
 library(rvest)
+library(reactable)
 
 rss_feed <- "https://www.parlament.gv.at/PAKT/MESN/filter.psp?view=RSS&jsMode=&xdocumentUri=&filterJq=&view=&GP=XXVII&MESN=ME&R_MESN=ME&MIN=ALLE&SUCH=&listeId=102&FBEZ=FP_002"
 # df_rss <- tidyRSS::tidyfeed(rss_feed)
@@ -136,7 +137,7 @@ submission_count <- df_bill_submission %>%
 
 </details>
 
-```{r message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 reactable::reactable(submission_count)
 
 ```
